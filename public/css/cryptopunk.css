@@ -1,0 +1,337 @@
+.punk-title-underline {
+    border-bottom: 1px solid #BBB;
+}
+
+.punk-overlay-class {
+    background-color: #FFFFFF;
+    opacity: 0.8;
+    border-radius: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.pixelated {
+    image-rendering: -moz-crisp-edges;
+    image-rendering: pixelated;
+}
+
+.pinklink {
+    color: #ff04b4;
+}
+
+.btn {
+    border-radius: 0;
+    background: #ff04b4;
+    font-size: 15px;
+    line-height: 15px;
+    padding: 12px 15px;
+    width: 60%;
+    text-shadow: none;
+    box-shadow: none;
+    border: 0;
+    margin-top: 10px;
+    text-align: left;
+    transition: all .5s;
+}
+
+.btn-nominwidth {
+    width: auto;
+}
+
+.btn-search {
+    border-radius: 0;
+    background: #ff04b4;
+    font-size: 15px;
+    line-height: normal;
+    padding: 15px 15px 16px;
+    /* width: 60%; */
+    /* text-shadow: none; */
+    box-shadow: none;
+    border: 0;
+    /* margin-top: 10px; */
+    /* text-align: left; */
+    transition: all .5s;
+}
+
+small {
+    color: #272727 !important;
+}
+
+p.subhead {
+    line-height: 1em;
+}
+
+.tight-line {
+    line-height: 1.3em;
+}
+
+.punk-stat {
+    line-height: 1.3em;
+}
+
+.punk-stat-line {
+    margin-top: 20px;
+}
+
+.btn:hover {
+    background: #000;
+}
+
+.w-100 {
+    width: 100%;
+}
+
+.row-equal-height {
+    display: flex;
+    display: -webkit-flex;
+    flex-wrap: wrap;
+}
+
+.punk-image-container-dense {
+    margin-top: 10px;
+    min-height: 100px;
+    padding-right: 0px;
+    text-align: left;
+}
+
+.punk-image-container-dense-notext {
+    padding-right: 0px;
+    text-align: left;
+}
+
+.punk-image-text-dense {
+    margin-top: 5px;
+    padding-right: 0px;
+    line-height: 1em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 14px;
+}
+
+div.modal button.btn:before,
+#ethereum a#buttonWithdraw:before,
+.btn:before {
+    font-family: "FontAwesome";
+    padding-right: 6px;
+}
+
+.btn#buttonBuy:before {
+    content: "\f07a";
+}
+
+.btn#buttonTicket:before {
+    content: "\f145";
+}
+
+.btn#buttonTransfer:before {
+    content: "\f1d8";
+}
+
+div.modal button.btn:before,
+.btn#buttonRemoveFromSale:before {
+    content: "\f05e";
+}
+
+.btn#buttonBid:before,
+.btn#buttonOffer:before {
+    content: "\f02b";
+}
+
+div.modal button.btn:last-child:before,
+.btn#buttonAcceptBid:before {
+    content: "\f00c";
+}
+
+.btn#buttonWithdrawBid:before {
+    content: "\f00d";
+}
+
+.btn#buttonTopOwners:before {
+    content: "\f0cb";
+}
+
+.btn#buttonAllAttributes:before {
+    content: "\f1b3";
+}
+
+.btn#buttonLogout:before {
+    content: "\f08b";
+}
+
+.btn#buttonChangePassword:before {
+    content: "\f084";
+}
+
+.btn#buttonWatchAccount:before {
+    content: "\f06e";
+}
+
+.btn#buttonUnwatchAccount:before {
+    content: "\f070";
+}
+
+@media screen and (max-width: 992px) {
+    .btn {
+        width: 100%;
+    }
+}
+
+p#ethereumAccount a {
+    font-size: 20px;
+}
+
+.ethereumpanel {}
+
+.ethereumpanel-loggedin {
+    /*display: none;*/
+    position: fixed !important;
+    top: 200px !important;
+    right: 0 !important;
+    border-right: 0;
+}
+
+.ethereumpanel-loggedin .panel.panel-default {
+    box-shadow: 15px 5px 30px 5px rgba(0, 0, 0, 0.05);
+    padding: 30px 40px !important;
+    background: #fcfcfc;
+}
+
+.ethereumpanel-loggedout {
+    /*display: none;*/
+    position: absolute !important;
+    top: 200px !important;
+    right: 0 !important;
+    border-right: 0;
+}
+
+.ethereumpanel-loggedout .panel.panel-default {
+    max-width: 350px;
+    box-shadow: 15px 5px 30px 5px rgba(0, 0, 0, 0.05);
+    padding: 30px 40px !important;
+    background: #fcfcfc;
+}
+
+#ethereum a#buttonWithdraw {
+    transition: all .5s;
+    border-radius: 0;
+    margin-left: 0;
+    width: 100%;
+    text-transform: capitalize;
+    font-size: 15px;
+    padding: 0 15px
+}
+
+#ethereum a#buttonWithdraw:before {
+    content: "\f063"
+}
+
+.modal button.btn {
+    width: 49%;
+    margin: 0;
+    margin-right: 2%;
+    float: left;
+}
+
+.modal button.btn:last-child {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.modal button.close {
+    font-size: 40px;
+}
+
+.modal .modal-dialog .modal-content {
+    border-radius: 0;
+    display: block;
+    vertical-align: middle;
+    width: 100%;
+    margin: auto;
+    max-width: 600px;
+}
+
+.modal {
+    /*display: table;*/
+    height: 100%;
+    width: 100%;
+}
+
+.modal .modal-dialog {
+    /*display: table-cell;*/
+    height: 370px;
+    /*width: 600px;*/
+    vertical-align: middle;
+}
+
+.modal h4.modal-title {
+    line-height: 40px;
+}
+
+.modal .modal-header {
+    background: #f3f3f3;
+    padding: 15px 30px;
+}
+
+.modal .modal-body,
+.modal-footer {
+    padding: 0 30px 30px;
+    border: 0;
+}
+
+.modal .modal-body {
+    margin-top: 30px;
+}
+
+@media screen and (max-width: 992px) {
+    .btn {
+        width: 100%;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .modal button.btn {
+        width: 100%;
+    }
+
+    .modal button.btn:last-child {
+        margin-top: 10px
+    }
+
+    .punk-stat {
+        line-height: 1.3em;
+        margin-top: 20px;
+    }
+
+    .punk-stat-line {
+        margin-top: 0px;
+    }
+
+}
+
+[v-cloak] {
+    display: none;
+}
+
+.punk-history-row-bid {
+    background: #b8a7ce;
+}
+
+.punk-history-row-sold {
+    background: #adc9d6;
+}
+
+.punk-history-row-offer {
+    background: #d6adad;
+}
+
+.punk-history-row-transfer {
+    background: #add6b8;
+}
+
+.punk-history-row-claim {
+    background: #add6b8;
+}
+
+table.table tr.attribute-row td {
+    vertical-align: middle;
+}

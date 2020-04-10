@@ -1,0 +1,87 @@
+doctype html
+html(lang="en")
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv=X-UA-Compatible content="IE=11">
+    <link rel="shortcut icon" type="image/png" href="/images/favicon.ico">
+    <title>CryptoPunks</title>
+    <meta name="description" content="10,000 unique collectible characters with proof of ownership stored on the NFT Substrate blockchain." />
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat:400,700">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <!-- production -->
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/style1.css">
+
+    </head>
+<body>
+
+<link rel="stylesheet" type="text/css" href="/css/cryptopunk.css" charset="utf-8" ></link>
+
+<div class="main_content project">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 col-xs-12">
+                <ol class="breadcrumb">
+                    <li><a href="/cryptopunks">Cryptopunks</a></li>
+                    <li class="active">#{punkId}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    <div class="container item_header image_block" style="margin-bottom: 24px;">
+        <div class="row" style=' margin-left: 0px; margin-right: 0px;'>
+            <div class="col-md-12 col-xs-12" style="background-color: #638596;">
+                <img src="/punks/#{punkId}" style='max-height: 312px; max-width: 312px; margin-top: 50px;' class="img-responsive pixelated center-block"/>
+            </div>
+        </div>
+    </div>
+    <div id="punkDetails" class='container text_block'>
+        <div class='row'>
+            <div class="col-md-4 col-xs-12 text-center" style='display: none'>
+                <p><a href="/">SubstraPunks Overview</a></p>
+                <img src="/punks/#{punkId}" style="background-color: #95554f" class="img-responsive pixelated"/>
+                p.
+                    <a href="/details/#{punkId}"><< ##{punkId}</a> -
+                    <a href="/">All</a>
+                    - <a href="/details/#{punkId}">##{punkId} >></a>
+            </div>
+            <div class="col-md-10 col-md-offset-1 col-xs-12" style='margin-top: 20px;'>
+                <!-- CMS category -->
+                                <!-- CMS title -->
+                <h1 style="margin-top: 0px; margin-bottom: 5px;">CryptoPunk #{punkId}</h1>
+                <h4 style="margin-top: 0px;"><b>#{gender}</b> punk</h4>
+                <div class="col-md-2 hidden-sm hidden-xs spacer_block">
+                </div>
+            </div>
+        </div>
+        <div class='row detail-row'>
+            <div class='col-md-10 col-md-offset-1'>
+                h3 Accessories
+                <div class='row'>
+                    each acc in accessories
+                        <div class='col-md-4'>
+                            p #{acc}
+                        </div>
+                </div>
+                <div class="col-md-2 hidden-sm hidden-xs spacer_block">
+                </div>
+            </div>
+            <div class='col-md-10 col-md-offset-1'>
+                if owned
+                    h3 Owner
+                    p #{ownerAddress}
+                else
+                    h3 This punk is Free, claim #{pronoun}!
+                    button(onclick='window.location="/claim/' + punkId + '"') Claim
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>

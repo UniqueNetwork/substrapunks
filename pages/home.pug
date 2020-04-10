@@ -1,0 +1,232 @@
+doctype html
+html(lang="en")
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv=X-UA-Compatible content="IE=11">
+    <link rel="shortcut icon" type="image/png" href="/images/favicon.ico">
+    <title>CryptoPunks</title>
+    <meta name="description" content="10,000 unique collectible characters with proof of ownership stored on the NFT Substrate blockchain." />
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat:400,700">
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <!-- production -->
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/style1.css">
+
+    </head>
+<body>
+
+<link rel="stylesheet" type="text/css" href="/css/cryptopunk.css" charset="utf-8" ></link>
+
+<div class="main_content project">
+    <div class="container item_header header_block">
+        <div class="row">
+            <div class="col-md-10 col-xs-12">
+                <!-- CMS category -->
+                <a href="https://usetech.com/blockchain" class="category_btn">blockchain</a>
+                <!-- CMS title -->
+                <h1>SubstraPunks</h1>
+                <!-- CMS excerpt -->
+                p.
+                    10,000 unique collectible characters with proof of ownership stored on the NFT Substrate blockchain, remake of CryptoPunks. Original project is inspired the modern CryptoArt movement. Featured in <a href="https://mashable.com/2017/06/16/cryptopunks-ethereum-art-collectibles/">Mashable</a>, <a href="https://www.ft.com/content/f9c1422a-47c9-11e8-8c77-ff51caedcde6">The Financial Times</a>, <a href="https://www.theparisreview.org/blog/2018/01/23/much-pepe-scenes-first-rare-digital-art-auction/">The Paris Review</a>, <a href="https://www.salon.com/2018/01/07/the-world-of-cryptocollectibles-like-cryptokitties-looks-like-the-internets-early-days/">Salon</a>, <a href="https://theoutline.com/post/5055/puttin-art-on-the-dang-blockchain">The Outline</a>, <a href="https://breakermag.com/how-cryptopunks-creators-charmed-the-art-world-and-paved-the-way-for-blockchain-art/">BreakerMag</a>, <a href='https://christies.com/exhibitions/2018/art-and-tech-summit-exploring-blockchain'>Christie's of London</a>, <a href="https://www.artbasel.com/events/detail/7953/Conversations-Art-Market-Talk-Which-Art-Problems-can-Blockchain-Solve">Art|Basel</a>, <a href="https://www.pbs.org/newshour/show/how-blockchain-technology-could-revolutionize-the-art-market">The PBS NewsHour</a> and <a href="https://www.nytimes.com/2018/01/13/arts/cryptocurrency-art-market.html">The New York Times</a>. Currently showing at the <a href="https://zkm.de/en">ZKM Center for Art and Media</a> in Karlsruhe, Germany as part of the <a href="https://zkm.de/en/exhibition/2017/10/open-codes">Open Codes Exhibition</a>. The first "Non-Fungible Token," and inspiration for the Ethereum <a href="https://eips.ethereum.org/EIPS/eip-721">ERC-721 standard</a> that powers most digital art and collectibles.
+            </div>
+
+            <div class="col-md-12 text_block">
+                h3(class="m-t-50") Random Punks
+                <div class="row">
+                each punk in randomPunks
+                    <div class="col-md-2 col-sm-3 col-xs-6" style='line-height: 1.2em; margin-top: 20px; min-height: 240px'>
+                        <div><a title="Punk ##{punk}" href="/details/#{punk}" ><img src="/punks/#{punk}" width="144" height="144" alt="Punk #{punk}" class="pixelated" style="background: #95554f"></a></div>
+                        <div style='margin-top: 10px;'><a href="/details/#{punk}">##{punk}</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+            
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 text_block">
+                p.
+                    The CryptoPunks are 10,000 uniquely generated characters.
+                    No two are exactly alike, and each one of them can be officially owned by a single person on the <a href="https://en.wikipedia.org/wiki/Ethereum">Ethereum</a> blockchain.
+                    Originally, they could be claimed for free by anybody with an Ethereum wallet, but all 10,000 were quickly claimed.
+                    Now they must be purchased from someone via the marketplace that's also embedded in the blockchain.
+                    Via this market you can buy, bid on, and offer punks for sale.
+                    The zoomable image above is connected to the Ethereum network and has been colored to show you the status of every Punk in the market.
+                    Punks with a <span style="background-color: #adc9d6; padding-left: 2px; padding-right: 2px;">blue background</span> have been claimed.
+                    Punks with a <span style="background-color: #d6adad; padding-left: 2px; padding-right: 2px;">red background</span> are available for sale by their owner.
+                    Finally, punks with a <span style="background-color: #b8a7ce; padding-left: 2px; padding-right: 2px;">purple background</span> have an active bid on them.
+                    You can click to zoom in on a Punk and reveal its details.
+                p.
+                    See the <a href="#getapunk">marketplace instructions</a> below to acquire your very own punk. You should also join the <a href="https://discord.gg/tQp4pSE">Discord Chat</a>, which includes a bot that announces all bids, offers and sales in realtime.
+
+            </div>
+        </div>
+    </div>
+
+    <div class="container_full hidden-xs">
+        <div class="row">
+            <div class="col-md-12 image_block">
+                <div id="openseadragon" style="width: 100%;" class="cryptopunk-map"></div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 text_block">
+                <h3>
+                    Overall Stats
+                </h3>
+
+                <div class='row'>
+                    <div class='col-md-4 punk-stat'>
+                        Estimated Market Cap
+                        <br>
+                        <b>3.36K&Xi; ($552,182)</b>
+                    </div>
+                    <div class='col-md-4 punk-stat'>
+                        Total Value of All Sales
+                        <br>
+                        <b>2.01K&Xi; ($330,423)</b>
+                    </div>
+                    <div class='col-md-4 punk-stat'>
+                        Average Sale Price
+                        <br>
+                        <b>0.54&Xi; ($88)</b>
+                    </div>
+                </div>
+
+                <div class="row m-t-50">
+                    <div class="col-md-10">
+                        <h3>
+                            News
+                        </h3>
+
+                        <div class='row'>
+                            <div class='col-md-12 punk-stat'>
+                                We were featured on the PBS NewsHour as part of their segment:<br>
+                                <a href="https://www.pbs.org/newshour/show/how-blockchain-technology-could-revolutionize-the-art-market">"How blockchain technology could revolutionize the art market"</a>
+                                <br>
+                                <b>Sept 11, 2019</b>
+                            </div>
+                        </div>
+                        <div class='row m-t-30'>
+                            <div class='col-md-12 punk-stat'>
+                                Shown at the <a href="https://zkm.de/en">ZKM Center for Art and Media</a> in Karlsruhe, Germany as part of the <a href="https://zkm.de/en/exhibition/2017/10/open-codes">Open Codes Exhibition</a>
+                                <br>
+                                <b>February to July, 2019</b>
+                            </div>
+                        </div>
+                        <div class="row m-t-30">
+                            <div class='col-md-12 punk-stat'>
+                                Read the in-depth profile of the CryptoPunks in BreakerMag:<br>
+                                <a href="https://breakermag.com/how-cryptopunks-creators-charmed-the-art-world-and-paved-the-way-for-blockchain-art/">"How CryptoPunks’ Creators Charmed the Art World and Paved the Way for Blockchain Art."</a>
+                                <br>
+                                <b>Jan 23, 2019</b>
+                            </div>
+                        </div>
+                        <div class="row m-t-30">
+                            <div class='col-md-12 punk-stat'>
+                                Shown alongside artists such as <a href="http://www.aiweiwei.com/">Ai Weiwei</a> and
+                                <a href="https://www.kevinabosch.com/">Kevin Abosch</a> in the exhibition:<br>
+                                <a href="https://www.katevassgalerie.com/news/perfect-amp-priceless-value-systems-on-the-blockchain">{ PERFECT & PRICELESS } - VALUE SYSTEMS ON THE BLOCKCHAIN</a>
+                                <br>
+                                <b>Nov 16, 2018 - Feb 28, 2019</b>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2 hidden-sm hidden-xs spacer_block">
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 text_block">
+                <h3>What is a CryptoPunk?</h3>
+                <p>
+                    The CryptoPunks are 24x24 pixel art images, generated algorithmically.
+                    Most are punky-looking guys and girls, but there are a few rarer types mixed in: Apes, Zombies and even the odd Alien.
+                    Every punk has their own profile page that shows their attributes as well as their ownership/for-sale status (<a href="/cryptopunks/details/4553">here's</a> an example).
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+    <div class="row">
+        <div class="col-md-12 text_block">
+            <h3>What exactly is going on here?</h3>
+            <p>
+                <a href="https://en.wikipedia.org/wiki/Cryptocurrency">CryptoCoins</a> were made famous by <a href="https://en.wikipedia.org/wiki/Bitcoin">Bitcoin</a>, but Bitcoin is designed just to transact and store ownership of Bitcoin itself.
+                We are using a successor to Bitcoin called <a href="https://en.wikipedia.org/wiki/Ethereum">Ethereum</a> which allows for arbitrary computer code to be executed on the blockchain and the results of the execution to be stored forever.
+                This is pretty cool! Normally code is run on a server somewhere and you basically need to trust the person running the server.
+                Ethereum lets everyone execute the code, show each other what result they got, and agree that the code was executed properly and fairly.
+                </p>
+                <p>
+                    We have written code that lives on the blockchain that anyone can use to buy and sell Punks with anyone else in the world.
+                    An interesting aspect of this system is that we no longer have any control over the code running CryptoPunks!
+                    Once we released it onto the blockchain it became permanently embedded there and can no longer be modified by anyone.
+                    This is scary for us as developers because we worry about bugs, but it is also a very powerful feature of the system.
+                    It allows a user verify that there are indeed only 10,000 punks, check that we can't steal them from you, and basically make sure that everything we told you about the code is true.
+                </p>
+            </div>
+        </div>
+    </div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12 text_block">
+            <h3>Nerdy details</h3>
+            <p>
+            <ul>
+            <li>
+                The actual images of the punks are too large to store on the blockchain, so we took a hash of the <a href="/punks/s.png">composite image</a> of all the punks and <a href="https://github.com/larvalabs/cryptopunks/blob/master/contracts/CryptoPunksMarket.sol#L5">embeded it into the contract</a>. You can verify that the punks being managed by the Ethereum contract are the True Official Genuine CryptoPunks™ by calculating an SHA256 hash on the cryptopunks image and comparing it to the hash stored in the contract.
+            </li>
+            <li>
+                CryptoPunks are <i>almost</i> an <a href="https://theethereum.wiki/w/index.php/ERC20_Token_Standard">ERC20 token</a>. We support the methods that provide your balance so you can watch CryptoPunks as a token in your wallet and see how many you own. None of the other methods are the same since you're not transferring a simple balance, but need to reference which specific Punk you want to work with.
+            </li>
+            <li>
+                The contract source and more technical details are available <a href="https://github.com/larvalabs/cryptopunks">on Github</a>.
+            </li>
+            </ul>
+            </p>
+        </div>
+    </div>
+
+</div>
+
+    </div>
+
+    <script src="/public/openseadragon/openseadragon.js"></script>
+    <script src="/public/openseadragon/openseadragon-canvas-overlay.js"></script>
+    <script src="/public/openseadragon/openseadragon-viewerinputhook.js"></script>
+
+<div id="ethereum_no_account" class="ethereumpanel-loggedout hidden-xs" v-if="state.accountQueried && state.web3ready && !state.web3UsingInfura && !state.accountUnlocked" v-cloak>
+    <div class="panel panel-default">
+        <h5>Ethereum Available</h5>
+        <p><a href="" onclick='Cryptopunks.requestMetamaskAccess();'>Allow access to MetaMask</a></p>
+    </div>
+</div>
+
+<div id="ethereum_no_web3" class="ethereumpanel-loggedout hidden-xs" v-if="state.web3UsingInfura" v-cloak>
+    <div class="panel panel-default">
+        To buy, sell and trade CryptoPunks right from this site, download the <a href="https://metamask.io/">MetaMask</a> Chrome plugin.
+    </div>
+</div><script type="text/javascript" language="javascript"  src="/public/javascripts/cryptopunks.js"></script>
+
+<script src="/public/javascripts/script.js"></script>
+<script src="/public/components/lazysizes.min.js"></script>
+<script src="/public/components/ls.attrchange.min.js"></script>
+
+</body>
