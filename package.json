@@ -7,6 +7,7 @@
     "test": "test"
   },
   "devDependencies": {
+    "browserify": "^16.5.1",
     "got": "^10.7.0",
     "web3": "^1.2.6"
   },
@@ -24,7 +25,9 @@
     "fs": "^0.0.1-security",
     "path": "^0.12.7",
     "png-crop": "^0.0.2",
-    "pug": "^2.0.4"
+    "@polkadot/api": "^0.92.0",
+    "pug": "^2.0.4",
+    "sprintf-js": "^1.1.2"
   },
   "standard": {
     "globals": [

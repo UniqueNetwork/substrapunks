@@ -10,15 +10,17 @@ html(lang="en")
     <meta name="description" content="10,000 unique collectible characters with proof of ownership stored on the NFT Substrate blockchain." />
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/bootstrap-theme.min.css">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat:400,700">
     <link rel="stylesheet" href="/css/font-awesome.min.css">
     <!-- production -->
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="/css/style1.css">
 
+    <script src="/js/polkadot.js"></script>
+    <script src="/js/main.js"></script>
     </head>
-<body>
+
+<body onload='getPunkInfo("#{endpoint}", #{collectionId}, #{punkId}, "#{adminAddr}");'>
 
 <link rel="stylesheet" type="text/css" href="/css/cryptopunk.css" charset="utf-8" ></link>
 
@@ -51,33 +53,28 @@ html(lang="en")
                     - <a href="/details/#{punkId}">##{punkId} >></a>
             </div>
             <div class="col-md-10 col-md-offset-1 col-xs-12" style='margin-top: 20px;'>
-                <!-- CMS category -->
-                                <!-- CMS title -->
                 <h1 style="margin-top: 0px; margin-bottom: 5px;">CryptoPunk #{punkId}</h1>
-                <h4 style="margin-top: 0px;"><b>#{gender}</b> punk</h4>
-                <div class="col-md-2 hidden-sm hidden-xs spacer_block">
-                </div>
+                <h4 style="margin-top: 0px;"><b><span id='gender'>???</span></b> punk</h4>
+                <br>
             </div>
         </div>
         <div class='row detail-row'>
             <div class='col-md-10 col-md-offset-1'>
                 h3 Accessories
-                <div class='row'>
-                    each acc in accessories
-                        <div class='col-md-4'>
-                            p #{acc}
-                        </div>
-                </div>
-                <div class="col-md-2 hidden-sm hidden-xs spacer_block">
-                </div>
+                <div class='row' id='accessories'></div>
+                <br>
             </div>
             <div class='col-md-10 col-md-offset-1'>
-                if owned
-                    h3 Owner
-                    p #{ownerAddress}
-                else
-                    h3 This punk is Free, claim #{pronoun}!
-                    button(onclick='window.location="/claim/' + punkId + '"') Claim
+                h3 Ownership
+                <div id='ownership'>
+                </div>
+            </div>
+            <div class='col-md-10 col-md-offset-1' id='claim' style='display:none;'>
+              <p>What is your Polkadot-NFT address?</p>
+              <input id='newowner'></input><button onclick="claimtx(#{punkId});">Claim</button>
+            </div>
+            <div class='col-md-10 col-md-offset-1' id='claimprogress' style='display:none;'>
+              p Mining claim transaction...
             </div>
         </div>
     </div>

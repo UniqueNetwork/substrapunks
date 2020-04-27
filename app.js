@@ -4,6 +4,8 @@ const fs = require('fs');
 const pngcrop = require('png-crop');
 const pug = require('pug');
 const session = require('express-session')
+const config = require('./config');
+const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
 
 const port = 3001;
 const templatesFolder = "pages";
@@ -52,7 +54,7 @@ app.get('/', function (req, res) {
 
 	let rp = [];
 	for (let i=0; i<12; i++) {
-		rp.push(getRandomInt(10000));
+		rp.push(getRandomInt(1000));
 	}
 
 	res.send(pug.compileFile(`${templatesFolder}/home.pug`)(
@@ -64,26 +66,72 @@ app.get('/', function (req, res) {
 
 app.get('/details/:punkId', function (req, res) {
 	const id = parseInt(req.params.punkId);
-	const gender = "Gender unknown";
-	const pronoun = "her";
-	let accessories = ["Tassle Hat", "Hot Lipstick", "Earring"];
-	const ownerAddress = "ASDLKJHFADLKJSALKJH";
 
 	res.send(pug.compileFile(`${templatesFolder}/details.pug`)(
 		{
 			punkId: id,
-			gender: gender, 
-			accessories: accessories,
-			ownerAddress: ownerAddress,
-			pronoun: pronoun,
-			owned: false
+			endpoint: config.wsEndpoint,
+			collectionId: config.collectionId,
+			adminAddr: config.adminAddress,
 		}
 	));
-
 });
 
-app.get('/claim/:punkId', function (req, res) {
-	
+function transferAsync(punkId, newOwner) {
+	return new Promise(async function(resolve, reject) {
+
+	  try {
+		// Initialise the provider to connect to the node
+		const wsProvider = new WsProvider(config.wsEndpoint);
+		
+		// Create the API and wait until ready
+		const api = await ApiPromise.create({ 
+			provider: wsProvider,
+			types: {
+			CollectionType : {
+				owner: 'AccountId',
+				next_item_id: 'u64',
+				custom_data_size: 'u32'
+			},
+			NftItemType : {
+			}
+			}
+		});
+
+		// Import admin account from mnemonic phrase in config file
+		const keyring = new Keyring({ type: 'sr25519' });
+		const admin = keyring.addFromUri(config.adminAccountPhrase);
+		
+		// Need to use punkId+1 to map between original punk IDs and NDT module punk IDs, which start from 1.
+		const unsub = await api.tx.nft
+			.transfer(config.collectionId, punkId+1, newOwner)
+			.signAndSend(admin, (result) => {
+			console.log(`Current tx status is ${result.status}`);
+		
+			if (result.status.isInBlock) {
+				console.log(`Transaction included at blockHash ${result.status.asInBlock}`);
+			} else if (result.status.isFinalized) {
+				console.log(`Transaction finalized at blockHash ${result.status.asFinalized}`);
+				resolve();
+				unsub();
+			}
+			});
+	  } catch (e) {
+		  reject();
+	  }
+
+	});
+  }
+  
+app.get('/claim/:punkId/:newOwner', async function (req, res) {
+	console.log(`${req.params.newOwner} is claiming punk ${req.params.punkId}`);
+
+	try {
+		await transferAsync(parseInt(req.params.punkId), req.params.newOwner);
+		res.send("OK");
+	} catch (e) {
+		res.status(500).send('error');
+	}
 });
 
 app.listen(port, () => console.log(`App listening on port ${port}!`));
