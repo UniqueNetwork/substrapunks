@@ -54,7 +54,7 @@ app.get('/', function (req, res) {
 
 	let rp = [];
 	for (let i=0; i<12; i++) {
-		rp.push(getRandomInt(1000));
+		rp.push(getRandomInt(config.punksToImport));
 	}
 
 	res.send(pug.compileFile(`${templatesFolder}/home.pug`)(
@@ -88,15 +88,21 @@ function transferAsync(punkId, newOwner) {
 		const api = await ApiPromise.create({ 
 			provider: wsProvider,
 			types: {
-			CollectionType : {
-				owner: 'AccountId',
-				next_item_id: 'u64',
-				custom_data_size: 'u32'
-			},
-			NftItemType : {
-			}
-			}
-		});
+				NftItemType: {
+				  Collection: "u64",
+				  Owner: "AccountId",
+				  Data: "Vec<u8>"
+				},
+				CollectionType: {
+				  Owner: "AccountId",
+				  NextItemId: "u64",
+				  CustomDataSize: "u32"
+				},
+				Address: "AccountId",
+				LookupSource: "AccountId",
+				Weight: "u32"
+			  }
+		  });
 
 		// Import admin account from mnemonic phrase in config file
 		const keyring = new Keyring({ type: 'sr25519' });

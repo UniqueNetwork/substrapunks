@@ -77,7 +77,7 @@ async function main() {
   console.log("Admin balance: ", adminBal.data.free.toString());
 
   const amount = (new BigNumber('1000000')).times(1e12);
-  if (adminBal.data.free.gt(amount.dividedBy(4))) {
+  if (adminBal.data.free.lt(amount.dividedBy(4))) {
     await transferBalanceAsync(api, alice, config.adminAddress, amount.toString());
   }
   else {
