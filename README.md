@@ -63,7 +63,7 @@ punks_1  | Current tx status is Ready
 punks_1  | App listening on port 3001!
 ```
 
-5. Open game in your browser: (https://localhost:3001)[https://localhost:3001]
+5. Open game in your browser: [https://localhost:3001](https://localhost:3001)
 
 ## Claiming Punks
 
