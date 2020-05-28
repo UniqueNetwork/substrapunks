@@ -16,7 +16,7 @@ function checkOwner(owner) {
 function mintAsync(api, admin,properties) {
   return new Promise(async function(resolve, reject) {
     const unsub = await api.tx.nft
-      .createItem(collectionId, config.adminAddress, properties)
+      .createItem(collectionId, properties)
       .signAndSend(admin, (result) => {
         console.log(`Current tx status is ${result.status}`);
     
@@ -39,14 +39,19 @@ async function main() {
   const api = await ApiPromise.create({ 
     provider: wsProvider,
     types: {
-      CollectionType : {
-        owner: 'AccountId',
-        next_item_id: 'u64',
-        custom_data_size: 'u32'
+      NftItemType: {
+        Collection: "u64",
+        Owner: "AccountId",
+        Data: "Vec<u8>"
       },
-      NftItemType : {
-
-      }
+      CollectionType: {
+        Owner: "AccountId",
+        NextItemId: "u64",
+        CustomDataSize: "u32"
+      },
+      Address: "AccountId",
+      LookupSource: "AccountId",
+      Weight: "u32"
     }
   });
 
@@ -64,16 +69,19 @@ async function main() {
   console.log(`Next collection ID: ${id}`);
   console.log(`Collection: ${collection}`);
 
-  if (checkOwner(collection.owner.toString())) {
+  if (checkOwner(collection.Owner.toString())) {
     // Import admin account from mnemonic phrase in config file
     const keyring = new Keyring({ type: 'sr25519' });
     const admin = keyring.addFromUri(config.adminAccountPhrase);
 
-    const bal = await api.query.nft.balance(config.collectionId, admin);
+    const bal = await api.query.nft.balance([config.collectionId, admin.address]);
     console.log(bal.toString());
+    const startWith = parseInt(bal.toString());
+    console.log(`${startWith} of ${config.punksToImport} punks are already imported`);
 
     // Admin: Create Tokens
-    for (let i=0; i<1000; i++) {
+    for (let i=startWith; i<config.punksToImport; i++) {
+      console.log(`=== Importing Punk ${i+1} of ${config.punksToImport} ===`);
       // Format properties
       // bytes 0-1: Original ID
       // byte    2: Sex

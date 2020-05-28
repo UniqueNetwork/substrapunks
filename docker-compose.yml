@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  punks:
+    image: substrapunks
+    ports:
+      - 3001:3001
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    network_mode: "host"
