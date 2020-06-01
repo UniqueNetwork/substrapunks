@@ -77,13 +77,12 @@ async function main() {
   console.log("Admin balance: ", adminBal.data.free.toString());
 
   const amount = (new BigNumber('1000000')).times(1e12);
-  if (adminBal.data.free.lt(amount.dividedBy(4))) {
+  if (adminBal.data.free < (amount.dividedBy(4))) {
     await transferBalanceAsync(api, alice, config.adminAddress, amount.toString());
   }
   else {
     console.log("Admin balance is sufficient. Not transferring.");
   }
-
 
   // Create collection as Alice
   console.log("=== Create collection ===");
@@ -102,7 +101,6 @@ async function main() {
   } else {
     await setCollectionAdminAsync(api, alice);
   }
-
 }
 
 main().catch(console.error).finally(() => process.exit());
