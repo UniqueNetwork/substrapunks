@@ -71,3 +71,27 @@ Navigate to a Punk that has no owner set and click "Claim" button on its page. E
 
 For test, you can enter Bob's address: 5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty
 
+## Hacking
+
+### Pre-requisites
+
+In order to run substrapunks for local development, you will need NodeJS 12 and a running [NFT Chain node](https://github.com/usetech-llc/nft_parachain). 
+
+### Starting punks locally
+
+Here is the game initialization process. 
+
+`punk_collection.js` creates NFT collection and sets the admin address. 
+`punk_importer.js` imports punks on-chain. 
+`app.js` starts NodeJS Express application on port 3002.
+
+```
+npm install
+
+cd scripts
+node punk_collection.js
+node punk_importer.js
+
+cd ..
+node app.js
+```
