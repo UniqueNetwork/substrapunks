@@ -1,5 +1,5 @@
 const config = {
-  wsEndpoint : 'ws://127.0.0.1:9944',
+  wsEndpoint : process.env.wsEndpoint || 'ws://127.0.0.1:9944',
   //wsEndpoint : 'wss://wsnft.usetech.com',
   collectionId : 1,
   collectionDataSize: 10,

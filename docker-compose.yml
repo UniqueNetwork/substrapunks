@@ -1,4 +1,4 @@
-version: "3"
+version: "3.5"
 
 services:
   punks:
@@ -8,4 +8,12 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-    network_mode: "host"
+    environment:
+      - wsEndpoint=ws://node:9944
+    networks: 
+      - substrate_network
+
+networks: 
+  substrate_network:
+    driver: bridge
+    name: substrate_network
