@@ -70,7 +70,7 @@ app.get('/details/:punkId', function (req, res) {
 	res.send(pug.compileFile(`${templatesFolder}/details.pug`)(
 		{
 			punkId: id,
-			endpoint: config.wsEndpoint,
+			endpoint: config.wsEndpointBrowser,
 			collectionId: config.collectionId,
 			adminAddr: config.adminAddress,
 		}
