@@ -2,15 +2,16 @@
 // Blockchain setup
 
 // Production
-// const network = "wss://unique.usetech.com";
-// const collectionId = 1;
-// const adminAddr = "5FnQg75ZNedZGbmYLYJatFATieGLu4XsAZ1CrbLd7H4xGLBZ";
+const network = "wss://unique.usetech.com";
+const collectionId = 1;
+const adminAddr = "5ELxbXMMqMM25hbLVMVh6UqN9MiqFXFCBWAxbmtJBLvZxADo";
+const contractAddr = "5DWLt51Js2fRxEkgyzN85EGVkHcP7YUujVeRYj65zTV1tR8G";
 
 // Local
-const network = "ws://127.0.0.1:9944";
-const collectionId = 1;
-const adminAddr = "5EX7TXyGRD5z2gLVc2yRAFY6pym2HHhMVCb3Zj3ai3x6BUnd";
-const contractAddr = "5CJNwaKqQoi8D1VLvP59VwEfdWiTYF1QLXsRwW6A5uGEPrh2";
+// const network = "ws://127.0.0.1:9944";
+// const collectionId = 1;
+// const adminAddr = "5EX7TXyGRD5z2gLVc2yRAFY6pym2HHhMVCb3Zj3ai3x6BUnd";
+// const contractAddr = "5CJNwaKqQoi8D1VLvP59VwEfdWiTYF1QLXsRwW6A5uGEPrh2";
 
 //////////////////////////////////////////////////
 
