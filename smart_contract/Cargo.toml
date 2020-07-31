@@ -1,0 +1,54 @@
+[package]
+name = "ink_types_node_runtime"
+version = "0.1.0"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2018"
+
+license = "GPL-3.0"
+readme = "README.md"
+
+repository = "https://github.com/usetech-llc/ink"
+homepage = "https://www.parity.io/"
+
+description = "[ink!] Rust based eDSL for writing smart contracts for Substrate"
+keywords = ["wasm", "parity", "webassembly", "blockchain", "edsl"]
+categories = ["no-std", "embedded"]
+
+include = ["/Cargo.toml", "src/**/*.rs", "/README.md", "/LICENSE"]
+
+[dependencies]
+ink_core = { version = "2", git = "https://github.com/usetech-llc/ink", tag = "latest-v2", package = "ink_core", default-features = false }
+ink_prelude = { version = "2", git = "https://github.com/usetech-llc/ink", tag = "latest-v2", package = "ink_prelude", default-features = false }
+frame-system = { git = "https://github.com/usetech-llc/substrate/", branch = "rc4_ext_dispatch_reenabled", package = "frame-system", default-features = false }
+pallet-indices = { git = "https://github.com/usetech-llc/substrate/", branch = "rc4_ext_dispatch_reenabled", package = "pallet-indices", default-features = false }
+sp-core = { git = "https://github.com/usetech-llc/substrate/", branch = "rc4_ext_dispatch_reenabled", package = "sp-core", default-features = false }
+sp-io = { git = "https://github.com/usetech-llc/substrate/", branch = "rc4_ext_dispatch_reenabled", package = "sp-io", default-features = false, features = ["disable_panic_handler", "disable_oom", "disable_allocator"] }
+sp-runtime = { git = "https://github.com/usetech-llc/substrate/", branch = "rc4_ext_dispatch_reenabled", package = "sp-runtime", default-features = false }
+scale = { package = "parity-scale-codec", version = "1.3", default-features = false, features = ["derive"] }
+
+[dependencies.type-metadata]
+git = "https://github.com/type-metadata/type-metadata.git"
+rev = "02eae9f35c40c943b56af5b60616219f2b72b47d"
+default-features = false
+features = ["derive"]
+optional = true
+
+
+[dev-dependencies]
+node-runtime = { git = "https://github.com/usetech-llc/nft_parachain/", package = "nft", features = ["std"] }
+
+[features]
+default = ["std"]
+std = [
+    "ink_core/std",
+    "frame-system/std",
+    "pallet-indices/std",
+    "sp-core/std",
+    "sp-io/std",
+    "sp-runtime/std",
+]
+ink-generate-abi = [
+    "std",
+    "type-metadata",
+    "ink_core/ink-generate-abi",
+]

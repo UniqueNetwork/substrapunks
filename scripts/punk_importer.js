@@ -1,7 +1,8 @@
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
 const punks = require("./punks").punks;
-const config = require('../config');
+const config = require('./config');
 const sprintf = require('sprintf-js').sprintf;
+const fs = require('fs');
 
 const collectionId = 1;
 
@@ -13,15 +14,17 @@ function checkOwner(owner) {
   return false;
 }
 
-function mintAsync(api, admin,properties) {
+function mintAsync(api, admin, properties, recipient) {
   return new Promise(async function(resolve, reject) {
     const unsub = await api.tx.nft
-      .createItem(collectionId, properties)
+      .createItem(collectionId, properties, recipient)
       .signAndSend(admin, (result) => {
         console.log(`Current tx status is ${result.status}`);
     
         if (result.status.isInBlock) {
           console.log(`Transaction included at blockHash ${result.status.asInBlock}`);
+          resolve();
+          unsub();
         } else if (result.status.isFinalized) {
           console.log(`Transaction finalized at blockHash ${result.status.asFinalized}`);
           resolve();
@@ -34,27 +37,13 @@ function mintAsync(api, admin,properties) {
 async function main() {
   // Initialise the provider to connect to the node
   const wsProvider = new WsProvider(config.wsEndpoint);
+  const rtt = JSON.parse(fs.readFileSync("runtime_types.json"));
 
   // Create the API and wait until ready
   const api = await ApiPromise.create({ 
     provider: wsProvider,
-    types: {
-      NftItemType: {
-        Collection: "u64",
-        Owner: "AccountId",
-        Data: "Vec<u8>"
-      },
-      CollectionType: {
-        Owner: "AccountId",
-        NextItemId: "u64",
-        CustomDataSize: "u32"
-      },
-      Address: "AccountId",
-      LookupSource: "AccountId",
-      Weight: "u32"
-    }
+    types: rtt
   });
-
 
   // Retrieve the chain & node information information via rpc calls
   const [chain, nodeName, nodeVersion, id, collection] = await Promise.all([
@@ -74,7 +63,7 @@ async function main() {
     const keyring = new Keyring({ type: 'sr25519' });
     const admin = keyring.addFromUri(config.adminAccountPhrase);
 
-    const bal = await api.query.nft.balance([config.collectionId, admin.address]);
+    const bal = await api.query.nft.balance(config.collectionId, admin.address);
     console.log(bal.toString());
     const startWith = parseInt(bal.toString());
     console.log(`${startWith} of ${config.punksToImport} punks are already imported`);
@@ -97,7 +86,7 @@ async function main() {
       }
 
       // Mint
-      await mintAsync(api, admin, props);
+      await mintAsync(api, admin, props, admin.address);
     }
 
   }

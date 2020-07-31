@@ -1,7 +1,7 @@
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
-const config = require('../config');
-var BigNumber = require('bignumber.js');
-BigNumber.config({ DECIMAL_PLACES: 18, ROUNDING_MODE: BigNumber.ROUND_DOWN });
+const config = require('./config');
+var BigNumber = require('bn.js');
+const fs = require('fs');
 
 function submitTransaction(sender, transaction) {
   return new Promise(async function(resolve, reject) {
@@ -12,6 +12,8 @@ function submitTransaction(sender, transaction) {
     
         if (result.status.isInBlock) {
           console.log(`Transaction included at blockHash ${result.status.asInBlock}`);
+          resolve();
+          unsub();
         } else if (result.status.isFinalized) {
           console.log(`Transaction finalized at blockHash ${result.status.asFinalized}`);
           resolve();
@@ -31,7 +33,18 @@ async function transferBalanceAsync(api, sender, recipient, amount) {
 }
 
 async function createCollectionAsync(api, alice) {
-  const tx = api.tx.nft.createCollection(config.collectionDataSize);
+  // Substrapunks
+  const name = [0x53, 0x75, 0x62, 0x73, 0x74, 0x72, 0x61, 0x70, 0x75, 0x6e, 0x6b, 0x73];
+  // Remake of classic CryptoPunks game
+  const description = [0x52, 0x65, 0x6d, 0x61, 0x6b, 0x65, 0x20, 0x6f, 0x66, 0x20, 0x63, 0x6c, 0x61, 0x73, 0x73, 0x69, 0x63, 0x20, 0x43, 0x72, 0x79, 0x70, 0x74, 0x6f, 0x50, 0x75, 0x6e, 0x6b, 0x73, 0x20, 0x67, 0x61, 0x6d, 0x65];
+  // PNK
+  const tokenPrefix = [0x50, 0x4e, 0x4b];
+  // Mode: NFT
+  const mode = 1;
+  // Decimal points = 0 for NFT
+  const decimals = 0;
+
+  const tx = api.tx.nft.createCollection(name, description, tokenPrefix, mode, decimals, config.collectionDataSize);
   await submitTransaction(alice, tx);
 }
 
@@ -43,54 +56,44 @@ async function setCollectionAdminAsync(api, alice) {
 async function main() {
   // Initialise the provider to connect to the node
   const wsProvider = new WsProvider(config.wsEndpoint);
+  const rtt = JSON.parse(fs.readFileSync("runtime_types.json"));
 
   // Create the API and wait until ready
   const api = await ApiPromise.create({ 
     provider: wsProvider,
-    types: {
-      NftItemType: {
-        Collection: "u64",
-        Owner: "AccountId",
-        Data: "Vec<u8>"
-      },
-      CollectionType: {
-        Owner: "AccountId",
-        NextItemId: "u64",
-        CustomDataSize: "u32"
-      },
-      Address: "AccountId",
-      LookupSource: "AccountId",
-      Weight: "u32"
-    }
+    types: rtt
   });
 
-  // Alice's keypair
+  // Owners's keypair
   const keyring = new Keyring({ type: 'sr25519' });
-  const alice = keyring.addFromUri(config.aliceSeed);
-  console.log("Alice address: ", alice.address);  
+  const owner = keyring.addFromUri(config.ownerSeed);
+  console.log("Collection owner address: ", owner.address);  
 
   // Send some balance to admin
   console.log("=== Transfer balance to admin ===");
-  const bal = await api.query.system.account(alice.address);
-  console.log("Alice balance: ", bal.data.free.toString());
+  const bal = await api.query.system.account(owner.address);
+  console.log("Owner balance: ", bal.data.free.toString());
   const adminBal = await api.query.system.account(config.adminAddress);
   console.log("Admin balance: ", adminBal.data.free.toString());
 
-  const amount = (new BigNumber('1000000')).times(1e12);
-  if (adminBal.data.free < (amount.dividedBy(4))) {
-    await transferBalanceAsync(api, alice, config.adminAddress, amount.toString());
+  const amount = new BigNumber(1e15);
+  const sufficient = amount.divn(4);
+  console.log("compare to: ", sufficient.toString());
+  if (adminBal.data.free.lt(sufficient)) {
+    // console.log("Less than");
+    await transferBalanceAsync(api, owner, config.adminAddress, amount.toString());
   }
   else {
-    console.log("Admin balance is sufficient. Not transferring.");
+    console.log(`Admin balance ${adminBal.data.free.toString()} is sufficient (greater than ${sufficient.toString()}). Not transferring.`);
   }
 
-  // Create collection as Alice
+  // Create collection as owner
   console.log("=== Create collection ===");
   const nextId = await api.query.nft.nextCollectionID();
   if (nextId.eq(1)) {
     console.log("Collection already exists. Not creating.");
   } else {
-    await createCollectionAsync(api, alice);
+    await createCollectionAsync(api, owner);
   }
 
   // Give the admin admin rights
@@ -99,7 +102,7 @@ async function main() {
   if (admins.length > 0) {
     console.log("Admin already exists. Not setting.");
   } else {
-    await setCollectionAdminAsync(api, alice);
+    await setCollectionAdminAsync(api, owner);
   }
 }
 
