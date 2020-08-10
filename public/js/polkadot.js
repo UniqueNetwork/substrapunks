@@ -1,31 +1,71 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-const attributes = ["Alien", "Ape", "Zombie", "Beanie", "Choker", "Pilot Helmet", "Tiara", "Orange Side", "Buck Teeth", "Welding Goggles", "Pigtails", "Pink With Hat", "Top Hat", "Spots", "Rosy Cheeks", "Blonde Short", "Wild White Hair", "Cowboy Hat", "Straight Hair Blonde", "Wild Blonde", "Big Beard", "Red Mohawk", "Blonde Bob", "Vampire Hair", "Half Shaved", "Clown Hair Green", "Straight Hair Dark", "Straight Hair", "Silver Chain", "Dark Hair", "Purple Hair", "Gold Chain", "Medical Mask", "Tassle Hat", "Fedora", "Police Cap", "Clown Nose", "Smile", "Cap Forward", "Hoodie", "Front Beard Dark", "Frown", "Purple Eye Shadow", "Handlebars", "Blue Eye Shadow", "Green Eye Shadow", "Vape", "Front Beard", "Chinstrap", "Luxurious Beard", "3D Glasses", "Mustache", "Normal Beard Black", "Normal Beard", "Eye Mask", "Goat", "Shaved Head", "Do-rag", "Peak Spike", "Muttonchops", "Pipe", "VR", "Cap", "Small Shades", "Clown Eyes Green", "Clown Eyes Blue", "Headband", "Crazy Hair", "Knitted Cap", "Mohawk Dark", "Mohawk Thin", "Mohawk", "Frumpy Hair", "Wild Hair", "Messy Hair", "Eye Patch", "Stringy Hair", "Bandana", "Classic Shades", "Shadow Beard", "Regular Shades", "Big Shades", "Horned Rim Glasses", "Nerd Glasses", "Black Lipstick", "Mole", "Purple Lipstick", "Hot Lipstick", "Cigarette", "Earring", "Female", "Male"];
+/**
+
+Attribute frequencies:  {
+  'Black Lipstick': 985,
+  'Red Lipstick': 986,
+  Smile: 2509,
+  'Teeth Smile': 2128,
+  'Purple Lipstick': 954,
+  'Nose Ring': 5096,
+  'Asian Eyes': 2001,
+  'Sun Glasses': 2022,
+  'Red Glasses': 2082,
+  'Round Eyes': 1952,
+  'Left Earring': 2475,
+  'Right Earring': 2440,
+  'Two Earrings': 2451,
+  'Brown Beard': 738,
+  'Mustache-Beard': 747,
+  Mustache: 715,
+  'Regular Beard': 729,
+  'Up Hair': 856,
+  'Down Hair': 1304,
+  Mahawk: 1337,
+  'Red Mahawk': 1341,
+  'Orange Hair': 1306,
+  'Bubble Hair': 561,
+  'Emo Hair': 887,
+  'Thin Hair': 572,
+  Bald: 569,
+  'Blonde Hair': 118,
+  'Caret Hair': 570,
+  'Pony Tails': 579,
+  Cigar: 3993,
+  Pipe: 2065
+}
+
+ */
+
+const attributes = ["Black Lipstick","Red Lipstick","Smile","Teeth Smile","Purple Lipstick","Nose Ring","Asian Eyes","Sun Glasses","Red Glasses","Round Eyes","Left Earring","Right Earring","Two Earrings","Brown Beard","Mustache-Beard","Mustache","Regular Beard","Up Hair","Down Hair","Mahawk","Red Mahawk","Orange Hair","Bubble Hair","Emo Hair","Thin Hair","Bald","Blonde Hair","Caret Hair","Pony Tails","Cigar","Pipe"];
 
 module.exports.attributes = attributes;
+
+
 },{}],2:[function(require,module,exports){
 // Local
-const config = {
-  wsEndpoint : 'ws://127.0.0.1:9944',
-  collectionId : 1,
-  collectionDataSize: 10,
-  punksToImport: 10,
+// const config = {
+//   wsEndpoint : 'ws://127.0.0.1:9944',
+//   collectionId : 1,
+//   collectionDataSize: 20,
+//   punksToImport: 100,
 
-  ownerSeed : '//Alice',
-  contractAddress: "5FAVnMK3cWzEgbE2KcNg2irqEogu8LHsDdzojsVc3pceAo2W",
-  offchainSchema: "https://ipfs-gateway.usetech.com/ipfs/QmVdFFZjnq6i3fNDjm6FQe2tfAtUDnqMNkBh8e4sYWUmbH/images/image{id}.png"
-};
+//   ownerSeed : '//Alice',
+//   contractAddress: "5FAVnMK3cWzEgbE2KcNg2irqEogu8LHsDdzojsVc3pceAo2W",
+//   offchainSchema: "https://ipfs-gateway.usetech.com/ipfs/QmVdFFZjnq6i3fNDjm6FQe2tfAtUDnqMNkBh8e4sYWUmbH/images/image{id}.png"
+// };
 
 // Production
-// const config = {
-//   wsEndpoint : 'wss://unique.usetech.com',
-//   collectionId : 1,
-//   collectionDataSize: 10,
-//   punksToImport: 10000,
+const config = {
+  wsEndpoint : 'wss://unique.usetech.com',
+  collectionId : 3,
+  collectionDataSize: 20,
+  punksToImport: 10001,
 
-//   ownerSeed : 'narrow transfer list promote outer ahead canal purchase jazz vapor blame office',
-//   contractAddress: "",
-//   offchainSchema: ""
-// };
+  ownerSeed : 'tunnel hair company air cage velvet egg crunch height fetch resource estate',
+  contractAddress: "5GdNqKMv4Sszq3SRd3TkXNa6a9ct4D3nXvtTWTFR7rTyccVJ",
+  offchainSchema: ""
+};
 
 module.exports = config;
 },{}],3:[function(require,module,exports){

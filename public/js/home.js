@@ -19,7 +19,7 @@ window.onload = async function() {
   
     let html = `
       <div class="col-md-2 col-sm-3 col-xs-6" style='line-height: 1.2em; margin-top: 20px; min-height: 240px'>
-        <div><a title="Punk #${id}" href="details.html?id=${id}" ><img src="images/punks/punk${id}.png" width="144" height="144" alt="Punk ${id}" class="pixelated" style="background: #${backgroundColor}"></a></div>
+        <div><a title="Punk #${id}" href="details.html?id=${id}" ><img src="images/punks/image${id}.png" width="144" height="144" alt="Punk ${id}" class="pixelated" style="background: #${backgroundColor}"></a></div>
         <div style='margin-top: 10px;'><a href="details.html?id=${id}">#${id}</a></div>
       </div>
     `;

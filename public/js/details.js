@@ -59,7 +59,7 @@ async function claimtx() {
 
 function setPunkImage() {
   let img = document.getElementById("punkImg");
-  img.src = `images/punks/punk${punkId}.png`
+  img.src = `images/punks/image${punkId}.png`
 }
 function setTitle() {
   let title = document.getElementById("title");
