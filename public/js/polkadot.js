@@ -58,13 +58,13 @@ module.exports.attributes = attributes;
 // Production
 const config = {
   wsEndpoint : 'wss://unique.usetech.com',
-  collectionId : 3,
+  collectionId : 4,
   collectionDataSize: 20,
-  punksToImport: 10001,
+  punksToImport: 10000,
 
   ownerSeed : 'tunnel hair company air cage velvet egg crunch height fetch resource estate',
   contractAddress: "5GdNqKMv4Sszq3SRd3TkXNa6a9ct4D3nXvtTWTFR7rTyccVJ",
-  offchainSchema: ""
+  offchainSchema: "https://ipfs-gateway.usetech.com/ipfs/QmfRCmKnbiUizDkicATU6BDAprZkP1opspCZLEJJoEop3T/images/punks/image{id}.png"
 };
 
 module.exports = config;
@@ -527,7 +527,6 @@ class nft {
         const injector = await web3FromAddress(claimerAddress);
         api.setSigner(injector.signer);
       
-        // Need to use punkId+1 to map between original punk IDs and NDT module punk IDs, which start from 1.
         const unsub = await api.tx.contracts
           .call(config.contractAddress, value, maxgas, abi.messages.claim(config.collectionId, punkId, claimerAddress))
           .signAndSend(claimerAddress, (result) => {

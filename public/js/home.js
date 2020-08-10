@@ -9,10 +9,10 @@ window.onload = async function() {
   let randompunks = document.getElementById('randompunks');
   let randompunksHtml = "";
   for (let i=0; i<12; i++) {
-    let id = getRandomInt(n.getPunkCount());
+    let id = getRandomInt(n.getPunkCount()) + 1;
 
     let backgroundColor = 'd6adad';
-    const punk = await n.loadPunkFromChain(id+1);
+    const punk = await n.loadPunkFromChain(id);
     if (punk.isOwned) {
       backgroundColor = 'adc9d6';
     }

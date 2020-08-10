@@ -99,7 +99,6 @@ class nft {
         const injector = await web3FromAddress(claimerAddress);
         api.setSigner(injector.signer);
       
-        // Need to use punkId+1 to map between original punk IDs and NDT module punk IDs, which start from 1.
         const unsub = await api.tx.contracts
           .call(config.contractAddress, value, maxgas, abi.messages.claim(config.collectionId, punkId, claimerAddress))
           .signAndSend(claimerAddress, (result) => {

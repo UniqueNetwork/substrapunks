@@ -2,9 +2,8 @@ let punkId = 0;
 let addrList = []; // List of extension addresses
 
 async function getPunkInfo(punkId) {
-  // Need to use punkId+1 here to map between original punk IDs and NDT module punk 
   // IDs, which start from 1.
-  const punk = await new nft().loadPunkFromChain(punkId+1);
+  const punk = await new nft().loadPunkFromChain(punkId);
   console.log(punk);
 
   let gender = document.getElementById('gender');
