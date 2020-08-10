@@ -14,11 +14,11 @@ function checkOwner(owner) {
   return false;
 }
 
-function mintAsync(api, admin, properties, recipient) {
+function mintAsync(api, owner, properties, recipient) {
   return new Promise(async function(resolve, reject) {
     const unsub = await api.tx.nft
       .createItem(collectionId, properties, recipient)
-      .signAndSend(admin, (result) => {
+      .signAndSend(owner, (result) => {
         console.log(`Current tx status is ${result.status}`);
     
         if (result.status.isInBlock) {
@@ -59,22 +59,21 @@ async function main() {
   console.log(`Collection: ${collection}`);
 
   if (checkOwner(collection.Owner.toString())) {
-    // Import admin account from mnemonic phrase in config file
+    // Import owner account from mnemonic phrase in config file
     const keyring = new Keyring({ type: 'sr25519' });
-    const admin = keyring.addFromUri(config.adminAccountPhrase);
+    const owner = keyring.addFromUri(config.ownerSeed);
 
-    const bal = await api.query.nft.balance(config.collectionId, admin.address);
-    console.log(bal.toString());
-    const startWith = parseInt(bal.toString());
+    const startWith = parseInt(await api.query.nft.itemListIndex(config.collectionId));
     console.log(`${startWith} of ${config.punksToImport} punks are already imported`);
 
-    // Admin: Create Tokens
+    // Create Tokens
     for (let i=startWith; i<config.punksToImport; i++) {
       console.log(`=== Importing Punk ${i+1} of ${config.punksToImport} ===`);
       // Format properties
-      // bytes 0-1: Original ID
-      // byte    2: Sex
-      // bytes 3-9: Attribute IDs (if not present, FF)
+      // bytes 0-1:   Original ID
+      // byte    2:   Sex
+      // bytes 3-9:   Attribute IDs (if not present, FF)
+      // bytes 10-19: Reserved (FF)
       let props = sprintf("0x%04X%02X", punks[i].id, (punks[i].gender == "Male" ? 0 : 1));
       let j=0;
       for (; j<punks[i].accessories.length; j++) {
@@ -86,7 +85,7 @@ async function main() {
       }
 
       // Mint
-      await mintAsync(api, admin, props, admin.address);
+      await mintAsync(api, owner, props, config.contractAddress);
     }
 
   }

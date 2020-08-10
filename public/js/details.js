@@ -1,31 +1,10 @@
-//////////////////////////////////////////////////
-// Blockchain setup
-
-// Production
-const network = "wss://unique.usetech.com";
-const collectionId = 1;
-const adminAddr = "5ELxbXMMqMM25hbLVMVh6UqN9MiqFXFCBWAxbmtJBLvZxADo";
-const contractAddr = "5DWLt51Js2fRxEkgyzN85EGVkHcP7YUujVeRYj65zTV1tR8G";
-
-// Local
-// const network = "ws://127.0.0.1:9944";
-// const collectionId = 1;
-// const adminAddr = "5EX7TXyGRD5z2gLVc2yRAFY6pym2HHhMVCb3Zj3ai3x6BUnd";
-// const contractAddr = "5CJNwaKqQoi8D1VLvP59VwEfdWiTYF1QLXsRwW6A5uGEPrh2";
-
-//////////////////////////////////////////////////
-
 let punkId = 0;
 let addrList = []; // List of extension addresses
 
-function isOwned(punk) {
-  return (adminAddr != punk.owner);
-}
-
-async function getPunkInfo(endpoint, collectionId, punkId) {
+async function getPunkInfo(punkId) {
   // Need to use punkId+1 here to map between original punk IDs and NDT module punk 
   // IDs, which start from 1.
-  const punk = await new nft().loadPunkFromChain(endpoint, collectionId, punkId+1);
+  const punk = await new nft().loadPunkFromChain(punkId+1);
   console.log(punk);
 
   let gender = document.getElementById('gender');
@@ -38,7 +17,7 @@ async function getPunkInfo(endpoint, collectionId, punkId) {
   document.getElementById('accessories').innerHTML = accHtml;
 
   let ownershipHtml = '';
-  if (isOwned(punk)) {
+  if (punk.isOwned) {
     let isYou = false;
     for(let i=0; i<addrList.length; i++)
     {
@@ -70,13 +49,12 @@ async function claimtx() {
   let newOwner = document.getElementById("newowner").value;
 
   try {
-    await new nft().claimAsync(network, contractAddr, collectionId, punkId+1, newOwner);
+    await new nft().claimAsync(punkId+1, newOwner);
+    window.location=`details.html?id=${punkId}`;
   }
   catch (err) {
     alert('There was an error:', err);
   }
-
-  window.location=`details.html?id=${punkId}`;
 }
 
 function setPunkImage() {
@@ -121,7 +99,7 @@ window.onload = async function() {
     }    
 
     // Show punk info
-    await getPunkInfo(network, collectionId, punkId);
+    await getPunkInfo(punkId);
   }
 
 

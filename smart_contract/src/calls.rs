@@ -17,6 +17,17 @@ impl From<Nft<NodeRuntimeTypes>> for Call {
     }
 }
 
+#[derive(Encode, Decode, Debug, Eq, Clone, PartialEq)]
+pub enum CollectionMode {
+    Invalid,
+    // custom data size
+    NFT(u32),
+    // decimal points
+    Fungible(u32),
+    // custom data size and decimal points
+	ReFungible(u32, u32),
+}
+
 /// Generic Balance Call, could be used with other runtimes
 #[derive(Encode, Decode, Clone, PartialEq, Eq)]
 pub enum Nft<T>
@@ -25,19 +36,19 @@ where
     T::AccountId: Member + Codec,
 {
     #[allow(non_camel_case_types)]
-    create_collection(Vec<u16>, Vec<u16>, Vec<u8>, u8, u32, u32),
+    create_collection(Vec<u16>, Vec<u16>, Vec<u8>, CollectionMode),
 
     #[allow(non_camel_case_types)]
     destroy_collection(u64),
-
-    #[allow(non_camel_case_types)]
-    change_collection_owner(u64, T::AccountId),
 
     #[allow(non_camel_case_types)]
     add_collection_admin(u64, T::AccountId),
 
     #[allow(non_camel_case_types)]
     remove_collection_admin(u64, T::AccountId),
+
+    #[allow(non_camel_case_types)]
+    change_collection_owner(u64, T::AccountId),
 
     #[allow(non_camel_case_types)]
     set_collection_sponsor(u64, T::AccountId),
@@ -58,13 +69,16 @@ where
     transfer(T::AccountId, u64, u64, u64),
 
     #[allow(non_camel_case_types)]
-    approve(T::AccountId, u64, u64),
+    nft_approve(T::AccountId, u64, u64),
 
     #[allow(non_camel_case_types)]
-    transfer_from(u64, u64, T::AccountId),
+    nft_transfer_from(T::AccountId, u64, u64, u64),
 
     #[allow(non_camel_case_types)]
-    safe_transfer_from(u64, u64, T::AccountId),
+    nft_safe_transfer(u64, u64, T::AccountId),
+
+    #[allow(non_camel_case_types)]
+    set_offchain_schema(u64, Vec<u8>),
 }
 
 pub fn transfer(collection_id: u64, item_id: u64, new_owner: AccountId) -> Call {

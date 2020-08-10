@@ -1,39 +1,19 @@
-//////////////////////////////////////////////////
-// Blockchain setup
-
-// Production
-const network = "wss://unique.usetech.com";
-const collectionId = 1;
-const adminAddr = "5ELxbXMMqMM25hbLVMVh6UqN9MiqFXFCBWAxbmtJBLvZxADo";
-const contractAddr = "5DWLt51Js2fRxEkgyzN85EGVkHcP7YUujVeRYj65zTV1tR8G";
-
-// Local
-// const network = "ws://127.0.0.1:9944";
-// const collectionId = 1;
-// const adminAddr = "5EX7TXyGRD5z2gLVc2yRAFY6pym2HHhMVCb3Zj3ai3x6BUnd";
-// const contractAddr = "5CJNwaKqQoi8D1VLvP59VwEfdWiTYF1QLXsRwW6A5uGEPrh2";
-
-//////////////////////////////////////////////////
-
-
 function getRandomInt(max) {
   return Math.floor(Math.random() * Math.floor(max));
 }
 
-function isOwned(punk) {
-  return (adminAddr != punk.owner);
-}
-
 window.onload = async function() {
+  let n = new nft();
+
   // Fill random punks
   let randompunks = document.getElementById('randompunks');
   let randompunksHtml = "";
   for (let i=0; i<12; i++) {
-    let id = getRandomInt(1000);
+    let id = getRandomInt(n.getPunkCount());
 
     let backgroundColor = 'd6adad';
-    const punk = await new nft().loadPunkFromChain(network, collectionId, id+1);
-    if (isOwned(punk)) {
+    const punk = await n.loadPunkFromChain(id+1);
+    if (punk.isOwned) {
       backgroundColor = 'adc9d6';
     }
   
