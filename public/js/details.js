@@ -48,7 +48,7 @@ async function claimtx() {
   let newOwner = document.getElementById("newowner").value;
 
   try {
-    await new nft().claimAsync(punkId+1, newOwner);
+    await new nft().claimAsync(punkId, newOwner);
     window.location=`details.html?id=${punkId}`;
   }
   catch (err) {
