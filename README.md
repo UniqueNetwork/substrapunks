@@ -95,3 +95,7 @@ node punk_importer.js
 cd ..
 node app.js
 ```
+
+### Legal Notice
+
+Art and images included in this repository are the property of UseTech Professional.
