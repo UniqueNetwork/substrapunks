@@ -1,6 +1,5 @@
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
 const config = require('./config');
-var BigNumber = require('bn.js');
 const fs = require('fs');
 
 function submitTransaction(sender, transaction) {

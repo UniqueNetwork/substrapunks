@@ -1,11 +1,10 @@
 const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
-const punks = require("./punks").punks;
+const punks = require("./characters.json");
 const config = require('./config');
 const sprintf = require('sprintf-js').sprintf;
 const fs = require('fs');
 
-const collectionId = 1;
-
+const collectionId = config.collectionId;
 
 function checkOwner(owner) {
   for (let i=0; i<32; i++) {
@@ -76,11 +75,11 @@ async function main() {
       // bytes 10-19: Reserved (FF)
       let props = sprintf("0x%04X%02X", punks[i].id, (punks[i].gender == "Male" ? 0 : 1));
       let j=0;
-      for (; j<punks[i].accessories.length; j++) {
-        const acc = sprintf("%02X", punks[i].accessories[j]);
+      for (; j<punks[i].attributes.length; j++) {
+        const acc = sprintf("%02X", punks[i].attributes[j]);
         props += acc;
       }
-      for (; j<7; j++) {
+      for (; j<17; j++) {
         props += "FF";
       }
 
