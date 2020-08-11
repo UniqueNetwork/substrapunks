@@ -64,7 +64,7 @@ const config = {
 
   ownerSeed : 'tunnel hair company air cage velvet egg crunch height fetch resource estate',
   contractAddress: "5GdNqKMv4Sszq3SRd3TkXNa6a9ct4D3nXvtTWTFR7rTyccVJ",
-  offchainSchema: "https://ipfs-gateway.usetech.com/ipfs/QmfRCmKnbiUizDkicATU6BDAprZkP1opspCZLEJJoEop3T/images/punks/image{id}.png"
+  offchainSchema: "https://ipfs-gateway.usetech.com/ipfs/QmRVBEk1o1Tyoc925FtRMQDJhubsKJjoayRRL5Dww2RTJZ/images/punks/image{id}.png"
 };
 
 module.exports = config;
