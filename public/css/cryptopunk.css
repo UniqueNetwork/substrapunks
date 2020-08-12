@@ -32,6 +32,8 @@
     margin-top: 10px;
     text-align: left;
     transition: all .5s;
+    max-width:100px;
+    text-align: center;
 }
 
 .btn-nominwidth {

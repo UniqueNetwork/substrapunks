@@ -247,20 +247,8 @@ blockquote:before {
   border: 2px solid #f5f5f5;
 }
 .category_btn {
-  background-color: #ff04b4;
-  -webkit-border-radius: 2em;
-  border-radius: 2em;
-  color: #fff;
-  display: inline-block;
-  font-size: 11px;
-  letter-spacing: 1px;
-  line-height: 2.2em;
-  padding: 0 1.5em;
-  text-transform: uppercase;
-}
-.category_btn:hover {
-  background-color: #272727;
-  color: #fff;
+  max-width: 200px;
+  cursor: pointer;
 }
 .btn_small {
   margin-left: 1.4em;
@@ -277,6 +265,7 @@ blockquote:before {
 
 .btn-default {
   text-shadow: none;
+  border: 0px;
 }
 
 .form-control {

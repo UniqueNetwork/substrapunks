@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv=X-UA-Compatible content="IE=11">
     <link rel="shortcut icon" type="image/png" href="images/favicon.png">
-    <title>CryptoPunks</title>
+    <title>SubstraPunks</title>
     <meta name="description" content="10,000 unique collectible characters with proof of ownership stored on the NFT Substrate blockchain." />
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/bootstrap-theme.min.css">
@@ -33,7 +33,7 @@
     <div id="punkDetails" class='container text_block'>
         <div class='row'>
             <div class="col-md-10 col-md-offset-1 col-xs-12" style='margin-top: 20px;'>
-                <h1 id="title" style="margin-top: 0px; margin-bottom: 5px;">CryptoPunk #</h1>
+                <h1 id="title" style="margin-top: 0px; margin-bottom: 5px;">SubstraPunk #</h1>
                 <h4 style="margin-top: 0px;"><b><span id='gender'>???</span></b> punk</h4>
                 <br>
             </div>
@@ -46,15 +46,17 @@
             </div>
             <div class='col-md-10 col-md-offset-1'>
                 <h3>Ownership</h3>
+                <div id='error'>
+                </div>
                 <div id='ownership'>
                 </div>
             </div>
             <div class='col-md-10 col-md-offset-1' id='claim' style='display:none;'>
               <p>What is your Polkadot-NFT address?</p>
-              <select id='newowner'></select>
+              <select id='newowner' class='btn' style='background-color: white; color: #ff04b4; max-width: 600px; border: 1px solid; border-radius: 3px;'></select>
               <br/>
               <br/>
-              <button onclick='claimtx();'>Claim</button>
+              <button onclick='claimtx();' class="btn">Claim</button>
             </div>
             <div class='col-md-10 col-md-offset-1' id='claimprogress' style='display:none;'>
               <p>Mining claim transaction...</p>

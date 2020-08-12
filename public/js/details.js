@@ -6,35 +6,41 @@ async function getPunkInfo(punkId) {
   const punk = await new nft().loadPunkFromChain(punkId);
   console.log(punk);
 
-  let gender = document.getElementById('gender');
-  gender.innerHTML = punk.sex;
-
-  let accHtml = '';
-  for (let i=0; i<punk.attributes.length; i++) {
-    accHtml += `<div class='col-md-4'><p>${punk.attributes[i]}</p></div>`;
-  }
-  document.getElementById('accessories').innerHTML = accHtml;
-
-  let ownershipHtml = '';
-  if (punk.isOwned) {
-    let isYou = false;
-    for(let i=0; i<addrList.length; i++)
-    {
-      let addr = addrList[i].address;
-      if (addr == punk.owner)
-        isYou = true;
+  if (!isNaN(punk.originalId)) {
+    let gender = document.getElementById('gender');
+    gender.innerHTML = punk.sex;
+  
+    let accHtml = '';
+    for (let i=0; i<punk.attributes.length; i++) {
+      accHtml += `<div class='col-md-4'><p>${punk.attributes[i]}</p></div>`;
     }
-
-    if (isYou)
-      ownershipHtml += `<h4>Owner - You own it! (address ${punk.owner})</h4>`;
-    else 
-      ownershipHtml += `<h4>Owner - someone else: ${punk.owner}</h4>`;
-  } else {
-    ownershipHtml += `<h4>This punk is Free, claim ${(punk.sex == "Female") ? "her":"him"}!</h4>`;
-    ownershipHtml += `<button onclick='claim();'>Claim</button>`;
+    document.getElementById('accessories').innerHTML = accHtml;
+  
+    let ownershipHtml = '';
+    if (punk.isOwned) {
+      let isYou = false;
+      for(let i=0; i<addrList.length; i++)
+      {
+        let addr = addrList[i].address;
+        if (addr == punk.owner)
+          isYou = true;
+      }
+  
+      if (isYou)
+        ownershipHtml += `<h4>Owner - You own it! (address ${punk.owner})</h4>`;
+      else 
+        ownershipHtml += `<h4>Owner - someone else: ${punk.owner}</h4>`;
+    } else {
+      ownershipHtml += `<h4>This punk is Free, claim ${(punk.sex == "Female") ? "her":"him"}!</h4>`;
+      ownershipHtml += `<button onclick='claim();' class='btn'>Claim</button>`;
+    }
+  
+    document.getElementById('ownership').innerHTML = ownershipHtml;
   }
-
-  document.getElementById('ownership').innerHTML = ownershipHtml;
+  else {
+    let title = document.getElementById("title");
+    title.innerHTML = `Punk ${punkId} does not exist :(`;
+  }
 }
 
 function claim() {
@@ -47,13 +53,22 @@ async function claimtx() {
   document.getElementById('claimprogress').style.display = "block";
   let newOwner = document.getElementById("newowner").value;
 
+  let errMsg = "";
   try {
-    await new nft().claimAsync(punkId, newOwner);
-    window.location=`details.html?id=${punkId}`;
+    let n = new nft();
+    if (await n.getBalance(newOwner) == "0") throw "You need some Unique token balance in order to run a transaction. Please use a Faucet or contact us at our Telegram channel in order to get some";
+
+    await n.claimAsync(punkId, newOwner);
   }
   catch (err) {
-    alert('There was an error:', err);
+    errMsg = `<p style='color:red;'>Something went wrong: ${err}. You may want to try again.</p>`;
   }
+
+  await getPunkInfo(punkId);
+  document.getElementById('error').innerHTML = errMsg;
+  document.getElementById('ownership').style.display = "block";
+  document.getElementById('claim').style.display = "none";
+  document.getElementById('claimprogress').style.display = "none";
 }
 
 function setPunkImage() {
@@ -62,7 +77,7 @@ function setPunkImage() {
 }
 function setTitle() {
   let title = document.getElementById("title");
-  title.innerHTML = `CryptoPunk #${punkId}`;
+  title.innerHTML = `SubstraPunk #${punkId}`;
 }
 function showExtensionWarning() {
   document.getElementById("punkDetails").style.display = "none";
