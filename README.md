@@ -3,7 +3,7 @@
 ## Project Description
 This is a Substrate based remake of CryptoPunks game, a classic game that inspired ERC-721 Ethereum standard.
 
-10,000 unique character images were generated from a brand new set of face parts and put on IPFS network (can be accessed by this link at UseTech IPFS Gateway: [SubstraPunks - IPFS](https://ipfs-gateway.usetech.com/ipfs/QmVfXUHTmt85c1Mq2DKmyKYnhbZYw6W1dUnEQc45yo6TEf/)) to prove that games and other applications that use our [NFT Chain](https://github.com/usetech-llc/nft_parachain) can be fully decentralized.
+10,000 unique character images were generated from a brand new set of face parts and put on IPFS network (can be accessed by this link at UseTech IPFS Gateway: [SubstraPunks - IPFS](https://ipfs-gateway.usetech.com/ipfs/QmR9pXvTfLfcMt6CG77PMFa8zmFyaHos5b3nMq7F9XHm8h/)) to prove that games and other applications that use our [NFT Chain](https://github.com/usetech-llc/nft_parachain) can be fully decentralized.
 
 Each character has its set of features that is programmed into the NFT TestNet Blockchain. NFT Pallet stores details about each Punk whether it has Brown Beard, Orange Hair or smokes a Pipe, and the IPFS hosted web page retrieves these details from NFT Chain, so the game becomes completely 100% serverless.
 
