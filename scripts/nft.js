@@ -120,11 +120,17 @@ class nft {
         });
       } catch (e) {
         console.log("Error: ", e);
-        reject();
+        reject(e);
       }
   
     });
 
+  }
+
+  async getBalance(addr) {
+    const api = await this.getApi();
+    const acc = await api.query.system.account(addr);
+    return acc.data.free.toString();
   }
 }
 
