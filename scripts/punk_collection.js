@@ -36,8 +36,10 @@ async function createCollectionAsync(api, alice) {
   
   // Mode: NFT
   // BTW, here is the way to create Re-Fungible: api.tx.nft.createCollection([], [], [], {"ReFungible":[data_size, decimal_points] });
-  const tx = api.tx.nft.createCollection(name, description, tokenPrefix, {"NFT": config.collectionDataSize});
-  await submitTransaction(alice, tx);
+
+  // Comment out the creation for now since collection is already created
+  // const tx = api.tx.nft.createCollection(name, description, tokenPrefix, {"NFT": config.collectionDataSize});
+  // await submitTransaction(alice, tx);
 
   const tx2 = api.tx.nft.setOffchainSchema(config.collectionId, config.offchainSchema);
   await submitTransaction(alice, tx2);
