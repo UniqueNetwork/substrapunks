@@ -27,7 +27,12 @@ async function getPunkInfo(punkId) {
       }
   
       if (isYou)
-        ownershipHtml += `<h4>Owner - You own it! (address ${punk.owner})</h4>`;
+        ownershipHtml += `
+        <h4>Owner</h4>
+        <p><b>You own it!</b> (address ${punk.owner})</p>
+        <h4>... so what's next?</h4>
+        <p>Now you can use the <a href="https://uniqueapps.usetech.com/#/nft">NFT Wallet</a> to find SubstraPunks collection (search for Collection <b>#4</b> there) and transfer your character. By the way, the transfers for SubstraPunks collection are free!</p>
+        `;
       else 
         ownershipHtml += `<h4>Owner - someone else: ${punk.owner}</h4>`;
     } else {
@@ -56,12 +61,16 @@ async function claimtx() {
   let errMsg = "";
   try {
     let n = new nft();
-    if (await n.getBalance(newOwner) == "0") throw "You need some Unique token balance in order to run a transaction. Please use a Faucet or contact us at our Telegram channel in order to get some";
-
+    if (await n.getBalance(newOwner) == "0") throw `
+      You need some Unique token balance in order to run a transaction. There are several ways to get this token:<br/>
+      <br/>
+      1. You can use a <a href='https://faucets.blockxlabs.com/'>BlockX Labs Faucet</a>, or<br/>
+      2. Contact us at our <a href="https://t.me/joinchat/DPVt1RwN50Uic_Q9lFcg9A">Telegram channel&nbsp;<img src="images/telegram_logo.png" style="max-width: 18px;"/></a>
+    `;
     await n.claimAsync(punkId, newOwner);
   }
   catch (err) {
-    errMsg = `<p style='color:red;'>Something went wrong: ${err}. You may want to try again.</p>`;
+    errMsg = `<p style='color:red;'>Something went wrong: ${err} <br/><br/>You may want to try again.<br/><br/></p>`;
   }
 
   await getPunkInfo(punkId);
