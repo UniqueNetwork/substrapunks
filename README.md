@@ -11,6 +11,8 @@ Originally, like with CryptoPunks game, these characters can be claimed, but unl
 
 Finally, we exercised our new economic model. Even though claiming punks requires gas, the transfers are free. You can transfer the punk to some address with 0 balance, and then transfer it back without spenging any gas.
 
+Please see the complete [Hackusama Walk-Through Guide](https://github.com/usetech-llc/nft_parachain/blob/master/doc/hackusama_walk_through.md) for demonstration of all features of Unique Network.
+
 ## Kusama Hackaphon Update
 
 Before the Kusama Hackaphon the SubstraPunks game was using VueJS and backend for claiming punks, and was meant to be hosted. Hackaphon changes made this game completely decentralized, we replaced LarvaLabs images with our own, added smart contract claiming, and updated all pages.
