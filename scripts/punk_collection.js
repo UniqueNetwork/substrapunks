@@ -41,8 +41,6 @@ async function createCollectionAsync(api, alice) {
   // const tx = api.tx.nft.createCollection(name, description, tokenPrefix, {"NFT": config.collectionDataSize});
   // await submitTransaction(alice, tx);
 
-  const tx2 = api.tx.nft.setOffchainSchema(config.collectionId, config.offchainSchema);
-  await submitTransaction(alice, tx2);
 }
 
 async function main() {
@@ -69,6 +67,9 @@ async function main() {
   } else {
     await createCollectionAsync(api, owner);
   }
+
+  const tx2 = api.tx.nft.setOffchainSchema(config.collectionId, config.offchainSchema);
+  await submitTransaction(owner, tx2);
 }
 
 main().catch(console.error).finally(() => process.exit());
