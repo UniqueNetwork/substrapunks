@@ -44,28 +44,32 @@ module.exports.attributes = attributes;
 
 },{}],2:[function(require,module,exports){
 // Local
-// const config = {
-//   wsEndpoint : 'ws://127.0.0.1:9944',
-//   collectionId : 1,
-//   collectionDataSize: 20,
-//   punksToImport: 100,
-
-//   ownerSeed : '//Alice',
-//   contractAddress: "5FAVnMK3cWzEgbE2KcNg2irqEogu8LHsDdzojsVc3pceAo2W",
-//   offchainSchema: "https://ipfs-gateway.usetech.com/ipfs/QmVdFFZjnq6i3fNDjm6FQe2tfAtUDnqMNkBh8e4sYWUmbH/images/image{id}.png"
-// };
-
-// Production
 const config = {
-  wsEndpoint : 'wss://unique.usetech.com',
-  collectionId : 4,
+  wsEndpoint : 'ws://127.0.0.1:9944',
+  collectionId : 1,
   collectionDataSize: 20,
-  punksToImport: 10000,
+  punksToImport: 100,
+
+  // ownerSeed : '//Alice',
+  // contractAddress: "5FAVnMK3cWzEgbE2KcNg2irqEogu8LHsDdzojsVc3pceAo2W",
+  offchainSchema: "https://ipfs-gateway.usetech.com/ipns/QmaMtDqE9nhMX9RQLTpaCboqg7bqkb6Gi67iCKMe8NDpCE/images/image{id}.png",
 
   ownerSeed : 'tunnel hair company air cage velvet egg crunch height fetch resource estate',
-  contractAddress: "5GdNqKMv4Sszq3SRd3TkXNa6a9ct4D3nXvtTWTFR7rTyccVJ",
-  offchainSchema: "https://ipfs-gateway.usetech.com/ipfs/QmRVBEk1o1Tyoc925FtRMQDJhubsKJjoayRRL5Dww2RTJZ/images/punks/image{id}.png"
+  //contractAddress: "5GdNqKMv4Sszq3SRd3TkXNa6a9ct4D3nXvtTWTFR7rTyccVJ",
+  contractAddress: "5HcHQXGHxMCgdf7w7oRZ3Gws2BtSsGqzzs316V7ZtCs5nWb2",
 };
+
+// Production
+// const config = {
+//   wsEndpoint : 'wss://unique.usetech.com',
+//   collectionId : 4,
+//   collectionDataSize: 20,
+//   punksToImport: 10000,
+
+//   ownerSeed : 'tunnel hair company air cage velvet egg crunch height fetch resource estate',
+//   contractAddress: "5GdNqKMv4Sszq3SRd3TkXNa6a9ct4D3nXvtTWTFR7rTyccVJ",
+//   offchainSchema: "https://ipfs-gateway.usetech.com/ipns/QmaMtDqE9nhMX9RQLTpaCboqg7bqkb6Gi67iCKMe8NDpCE/images/punks/image{id}.png"
+// };
 
 module.exports = config;
 },{}],3:[function(require,module,exports){
