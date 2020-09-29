@@ -62,10 +62,9 @@ async function claimtx() {
   try {
     let n = new nft();
     if (await n.getBalance(newOwner) == "0") throw `
-      You need some Unique token balance in order to run a transaction. There are several ways to get this token:<br/>
+      You need some Unique token balance in order to run a transaction.<br/>
       <br/>
-      1. You can use a <a href='https://faucets.blockxlabs.com/'>BlockX Labs Faucet</a>, or<br/>
-      2. Contact us at our <a href="https://t.me/joinchat/DPVt1RwN50Uic_Q9lFcg9A">Telegram channel&nbsp;<img src="images/telegram_logo.png" style="max-width: 18px;"/></a>
+      You can use our <a href='https://t.me/UniqueFaucetBot'>Telegram Unique Faucet Bot</a> to get a little Unique<br/>
     `;
     await n.claimAsync(punkId, newOwner);
   }
