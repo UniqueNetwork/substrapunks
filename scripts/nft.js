@@ -8,7 +8,7 @@
 
 const { ApiPromise, WsProvider } = require('@polkadot/api');
 const attributes = require('./attributes').attributes;
-const config = require('./config');
+const { wsEndpoint, collectionId, punksToImport, contractAddress } = require("./browser_config.json");
 
 const { web3Accounts, web3Enable, web3FromAddress } = require('@polkadot/extension-dapp');
 const { Abi } = require('@polkadot/api-contract');
@@ -18,20 +18,20 @@ const contractAbi = require("./metadata.json");
 class nft {
 
   isOwned(punk) {
-    console.log(`Comparing owner ${punk.Owner} to contract address: ${config.contractAddress}`);
-    return (config.contractAddress != punk.Owner);
+    console.log(`Comparing owner ${punk.Owner} to contract address: ${contractAddress}`);
+    return (contractAddress != punk.Owner);
   }
 
   getPunkCount() {
-    return config.punksToImport;
+    return punksToImport;
   }
   
   async getApi() {
     if (!this.api) {
-      console.log(`Connecting to node: ${config.wsEndpoint}`);
+      console.log(`Connecting to node: ${wsEndpoint}`);
 
       // Initialise the provider to connect to the node
-      const wsProvider = new WsProvider(config.wsEndpoint);
+      const wsProvider = new WsProvider(wsEndpoint);
     
       // Create the API and wait until ready
       const api = await ApiPromise.create({ 
@@ -45,11 +45,11 @@ class nft {
   }
 
   async loadPunkFromChain(punkId) {
-    console.log(`Loading punk ${punkId} from collection ${config.collectionId}`);
+    console.log(`Loading punk ${punkId} from collection ${collectionId}`);
 
     const api = await this.getApi();
 
-    const item = await api.query.nft.nftItemList(config.collectionId, punkId);
+    const item = await api.query.nft.nftItemList(collectionId, punkId);
     console.log("Received item: ", item);
 
     let attrArray = [];
@@ -81,7 +81,7 @@ class nft {
 
   claimAsync(punkId, claimerAddress) {
 
-    console.log(`Claiming punk ${punkId} in collection ${config.collectionId} by ${claimerAddress}`);
+    console.log(`Claiming punk ${punkId} in collection ${collectionId} by ${claimerAddress}`);
 
     let that = this;
   
@@ -100,7 +100,7 @@ class nft {
         api.setSigner(injector.signer);
       
         const unsub = await api.tx.contracts
-          .call(config.contractAddress, value, maxgas, abi.messages.claim(config.collectionId, punkId, claimerAddress))
+          .call(contractAddress, value, maxgas, abi.messages.claim(collectionId, punkId, claimerAddress))
           .signAndSend(claimerAddress, (result) => {
           console.log(`Current tx status is ${result.status}`);
         
@@ -131,6 +131,12 @@ class nft {
     const api = await this.getApi();
     const acc = await api.query.system.account(addr);
     return acc.data.free.toString();
+  }
+
+  async getAddressTokens(addr) {
+    const api = await this.getApi();
+    const nfts = await api.query.nft.addressTokens(collectionId, addr);
+    return nfts;
   }
 }
 

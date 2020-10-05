@@ -31,7 +31,10 @@ async function getPunkInfo(punkId) {
         <h4>Owner</h4>
         <p><b>You own it!</b> (address ${punk.owner})</p>
         <h4>... so what's next?</h4>
-        <p>Now you can use the <a href="https://uniqueapps.usetech.com/#/nft">NFT Wallet</a> to find SubstraPunks collection (search for Collection <b>#4</b> there) and transfer your character. By the way, the transfers for SubstraPunks collection are free!</p>
+        <p>
+          <button onclick='window.location="/trade.html?id=${punkId}&owner=${punk.owner}"' class="btn">Trade</button>
+        </p>
+        <p>Also you can use the <a href="https://uniqueapps.usetech.com/#/nft">NFT Wallet</a> to find SubstraPunks collection (search for Collection <b>#4</b> there) and transfer your character to someone else. By the way, the transfers for SubstraPunks collection are free!</p>
         `;
       else 
         ownershipHtml += `<h4>Owner - someone else: ${punk.owner}</h4>`;

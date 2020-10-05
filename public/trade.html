@@ -1,0 +1,72 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv=X-UA-Compatible content="IE=11">
+    <link rel="shortcut icon" type="image/png" href="images/favicon.png">
+    <title>SubstraPunks</title>
+    <meta name="description" content="10,000 unique collectible characters with proof of ownership stored on the NFT Substrate blockchain." />
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <!-- production -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/style1.css">
+
+    <script src="js/polkadot.js"></script>
+    <script src="js/trade.js"></script>
+    </head>
+
+<body>
+
+<link rel="stylesheet" type="text/css" href="css/cryptopunk.css" charset="utf-8" ></link>
+
+<div class="main_content project">
+    <div class="container item_header image_block" style="margin-bottom: 24px;">
+        <div class="row" style=' margin-left: 0px; margin-right: 0px;'>
+            <div class="col-md-12 col-xs-12" style="background-color: #638596;">
+                <img id="punkImg" src="" style='max-height: 200px; max-width: 200px; margin-top: 30px;' class="img-responsive pixelated center-block"/>
+            </div>
+        </div>
+    </div>
+    <div id="punkDetails" class='container text_block'>
+        <div class='row'>
+            <div class="col-md-10 col-md-offset-1 col-xs-12" style='margin-top: 20px;'>
+                <h1 id="title" style="margin-top: 0px; margin-bottom: 5px;">SubstraPunk #</h1>
+                <h4 style="margin-top: 0px;"><b><span id='gender'>???</span></b> punk</h4>
+                <br>
+            </div>
+        </div>
+        <div class='row detail-row'>
+            <div class='col-md-10 col-md-offset-1'>
+                <h3>Accessories</h3>
+                <div class='row' id='accessories'></div>
+                <br>
+            </div>
+            <div class='col-md-10 col-md-offset-1' id='trade'>
+              <h3>What is your KSM price?</h3>
+              <input type="text" id="price"/>
+              <br/>
+              <br/>
+              <button onclick='tradetx();' class="btn">Put on Market</button>
+            </div>
+            <div class='col-md-10 col-md-offset-1' id='txprogress' style='display:none;'>
+              <p>Mining trade transaction...</p>
+            </div>
+            <div class='col-md-10 col-md-offset-1' id='error' style='display:none;'>
+            </div>
+          </div>
+    </div>
+    <div id="extensionWarning" class='container text_block' style='display:none'>
+        <h3>Please enable Polkadot{.js} browser extension and create or import an address!</h3>
+        <p>
+            For <a href="https://chrome.google.com/webstore/detail/polkadot%7Bjs%7D-extension/mopnmbcafieddcagagdcbnhejhlodfdd">Chrome</a><br>
+            For <a href="https://addons.mozilla.org/en-US/firefox/addon/polkadot-js-extension/">Firefox</a>
+        </p>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,3 +1,7 @@
+ul {
+  list-style: none;
+}
+
 /* Homepage background styles */
 .cryptopunk-background {
     background: linear-gradient(to right, black, transparent), url('/public/images/product/cryptopunks/homepage-2x.png');
@@ -43,3 +47,150 @@ pre {
     margin: 0;
     border: 0;
 }
+
+@media screen and (min-width: 320px) and (max-width: 768px) {
+  .header__menu {
+    display: none;
+  }
+  .header__menu.active {
+    display: block;
+    position: fixed;
+    background-color: #fff;
+    top: 0;
+    bottom: 0;
+    height: 100vh;
+    padding-top: 40px;
+    left: 0;
+    right: 0;
+  }
+  .header__menu.active ul {
+    flex-direction: column;
+    margin-top: 40px;
+  }
+  .header__menu.active ul li a {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    font-size: 24px;
+  }
+}
+.header__menu ul {
+  display: flex;
+}
+.header__menu ul li {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+.header__menu ul li a {
+  font-size: 18px;
+  text-decoration: none;
+  font-weight: 600;
+  color: #262626;
+  position: relative;
+  z-index: 10;
+  display: inline-block;
+}
+.header__menu ul li a:hover:after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 10px;
+  background-color: #A2DD18;
+  position: absolute;
+  bottom: 0px;
+  z-index: -1;
+  opacity: 0.99;
+}
+.header__menu ul li.telegram a {
+  margin-left: 24px;
+}
+.header__menu ul li.telegram a:before {
+  background-image: url("../img/unique/telegram.svg");
+  background-size: cover;
+  content: '';
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  position: absolute;
+  left: -24px;
+}
+.slider {
+  padding-bottom: 20px;
+  padding-top: 120px;
+  border-bottom: 1px solid #000;
+}
+@media screen and (min-width: 320px) and (max-width: 768px) {
+  .slider {
+    padding-top: 0;
+  }
+}
+.slider p {
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+.substrate,
+.features,
+.more {
+  border-bottom: 1px solid #262626;
+  padding-bottom: 40px;
+}
+.substrate p,
+.features p,
+.more p {
+  font-size: 20px;
+  line-height: 1.5;
+}
+.substrate ul li,
+.features ul li,
+.more ul li {
+  font-size: 20px;
+  margin-bottom: 24px;
+}
+.substrate ul li:before,
+.features ul li:before,
+.more ul li:before {
+  content: '-';
+  margin-right: 4px;
+}
+.substrate ul li a,
+.features ul li a,
+.more ul li a {
+  font-size: 18px;
+  text-decoration: none;
+  font-weight: 600;
+  color: #262626;
+  position: relative;
+  z-index: 10;
+  display: inline-block;
+}
+.substrate ul li a:after,
+.features ul li a:after,
+.more ul li a:after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 10px;
+  background-color: #A2DD18;
+  position: absolute;
+  bottom: 0px;
+  z-index: -1;
+  opacity: 0.99;
+}
+.substrate ul li a:hover:after,
+.features ul li a:hover:after,
+.more ul li a:hover:after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 10px;
+  background-color: transparent;
+  position: absolute;
+  bottom: 0px;
+  z-index: -1;
+  opacity: 0.99;
+}
+.more {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+/*# sourceMappingURL=unique.css.map */

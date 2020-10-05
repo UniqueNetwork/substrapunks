@@ -13,11 +13,11 @@ function checkOwner(owner) {
   return false;
 }
 
-function mintAsync(api, owner, properties, recipient) {
+function transferFromAsync(api, admin, itemId, sender, recipient) {
   return new Promise(async function(resolve, reject) {
     const unsub = await api.tx.nft
-      .createItem(collectionId, properties, recipient)
-      .signAndSend(owner, (result) => {
+      .transferFrom(sender, recipient, collectionId, itemId, 0)
+      .signAndSend(admin, (result) => {
         console.log(`Current tx status is ${result.status}`);
     
         if (result.status.isInBlock) {
@@ -57,31 +57,25 @@ async function main() {
   console.log(`Next collection ID: ${id}`);
   console.log(`Collection: ${collection}`);
 
+  const oldContractAddress = "5GdNqKMv4Sszq3SRd3TkXNa6a9ct4D3nXvtTWTFR7rTyccVJ";
+
   if (checkOwner(collection.Owner.toString())) {
     // Import owner account from mnemonic phrase in config file
     const keyring = new Keyring({ type: 'sr25519' });
     const owner = keyring.addFromUri(config.ownerSeed);
 
     // Move Tokens from old contract to new
-    for (let i=0; i<config.punksToImport; i++) {
-      console.log(`=== Importing Punk ${i+1} of ${config.punksToImport} ===`);
-      // Format properties
-      // bytes 0-1:   Original ID
-      // byte    2:   Sex
-      // bytes 3-9:   Attribute IDs (if not present, FF)
-      // bytes 10-19: Reserved (FF)
-      let props = sprintf("0x%04X%02X", punks[i].id, (punks[i].gender == "Male" ? 0 : 1));
-      let j=0;
-      for (; j<punks[i].attributes.length; j++) {
-        const acc = sprintf("%02X", punks[i].attributes[j]);
-        props += acc;
-      }
-      for (; j<17; j++) {
-        props += "FF";
-      }
+    for (let i=1; i<=config.punksToImport; i++) {
+      let punk = await api.query.nft.nftItemList(config.collectionId, i);
 
-      // Mint
-      await mintAsync(api, owner, props, config.contractAddress);
+      if (punk.Owner == oldContractAddress) {
+        console.log(`=== Moving Punk ${i} ===`);
+
+        await transferFromAsync(api, owner, i, oldContractAddress, config.contractAddress);
+      }
+      else {
+        console.log(`=== Punk ${i} is already owned: ${punk.Owner} ===`);
+      }
     }
 
   }
