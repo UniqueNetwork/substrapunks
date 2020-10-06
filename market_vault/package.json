@@ -1,0 +1,38 @@
+{
+  "name": "nftmarketvault",
+  "version": "1.0.0",
+  "description": "The deposit vault for NFT marketplace",
+  "main": "",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {
+    "browserify": "^16.5.1",
+    "got": "^10.7.0",
+    "web3": "^1.2.6"
+  },
+  "scripts": {
+    "test": ""
+  },
+  "author": "",
+  "license": "Apache 2.0",
+  "homepage": "",
+  "dependencies": {
+    "bignumber.js": "^8.0.1",
+    "delay": "^4.4.0",
+    "fs": "^0.0.1-security",
+    "@polkadot/api": "1.28.1",
+    "@polkadot/api-contract": "1.28.1"
+  },
+  "standard": {
+    "globals": [
+      "it",
+      "assert",
+      "beforeEach",
+      "afterEach",
+      "describe",
+      "contract",
+      "artifacts"
+    ]
+  }
+}

@@ -1,4 +1,7 @@
 node_modules
+market_vault/node_modules
+market_vault/block.json
+market_vault/withdrawal_id.json
 scripts/config.js
 scripts/generated_faces
 smart_contract/calls/target

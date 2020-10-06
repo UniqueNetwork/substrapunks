@@ -12,7 +12,7 @@ mod calls {
     #[ink(storage)]
     struct Calls {
         /// Stores a single `bool` value for claimed tokens.
-        claim_status: storage::HashMap<u64, bool>,
+        claim_status: storage::HashMap<u64, bool>,z
     }
 
     impl Calls {
