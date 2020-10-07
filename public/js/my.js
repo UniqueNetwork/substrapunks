@@ -12,17 +12,30 @@ function showExtensionWarning() {
 }
 async function show() {
   let address = document.getElementById("address").value;
+  document.getElementById("tokenlist").innerHTML = "Loading data from Blockchain...";
 
   // Request address punks from blockchain
   let n = new nft();
-  const nfts = await n.getAddressTokens(address);
+  let nfts = await n.getAddressTokens(address);
+  let marketNfts = await n.getAddressTokensOnMarket(address);
 
   let listhtml = "";
+  for (let i=0; i<marketNfts.length; i++) {
+    const id = marketNfts[i].id;
+    const punk = await n.loadPunkFromChain(id);
+    punk["price"] = marketNfts[i].price;
+    listhtml += getPunkCard(id, punk);
+    document.getElementById("tokenlist").innerHTML = listhtml;
+  }
   for (let i=0; i<nfts.length; i++) {
     const id = nfts[i];
     const punk = await n.loadPunkFromChain(id);
     listhtml += getPunkCard(id, punk);
+    document.getElementById("tokenlist").innerHTML = listhtml;
   }
+  if (marketNfts.length == 0)
+    listhtml = "No tokens in the wallet. :( Check out the <a href='/marketplace.html'>Marketplace</a>";
+
   document.getElementById("tokenlist").innerHTML = listhtml;
 }
 
@@ -53,6 +66,10 @@ window.onload = async function() {
       opt.innerHTML = `${addr.meta.name} - ${addr.address}`;
       sel.appendChild(opt);
     }    
+
+    if (addrList.length >= 1) {
+      show();
+    }
 
     // Show punk info
     // await getPunkInfo(punkId);

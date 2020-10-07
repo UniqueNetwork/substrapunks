@@ -191,6 +191,12 @@ mod matchingengine {
             self.nft_deposits.insert((collection_id, token_id), user.clone());
         }
 
+        /// Get deposit 
+        #[ink(message)]
+        fn get_nft_deposit(&mut self, collection_id: u64, token_id: u64) -> AccountId {
+            *self.nft_deposits.get(&(collection_id, token_id)).unwrap()
+        }
+
         /// Admin: Place a deposited NFT for sale
         #[ink(message)]
         fn ask(&mut self, collection_id: u64, token_id: u64, quote_id: u64, price: Balance) {
@@ -216,7 +222,7 @@ mod matchingengine {
 
         /// Get ask by ID
         #[ink(message)]
-        fn get_ask_id_by_id(&self, ask_id: u128) -> (u64, u64, u64, Balance, AccountId) {
+        fn get_ask_by_id(&self, ask_id: u128) -> (u64, u64, u64, Balance, AccountId) {
             *self.asks.get(&ask_id).unwrap()
         }
 
@@ -240,6 +246,9 @@ mod matchingengine {
 
             // Remove an ask (from asks)
             let _ = self.asks.remove(&ask_id);
+
+            // Remove a deposit
+            let _ = self.nft_deposits.remove(&(collection_id, token_id));
 
             // Transfer token back to user through NFT Vault
             self.last_nft_withdraw_id.set(self.last_nft_withdraw_id.get() + 1);
@@ -304,6 +313,9 @@ mod matchingengine {
 
             // Remove an ask (from asks)
             let _ = self.asks.remove(&ask_id);
+
+            // Remove a deposit
+            let _ = self.nft_deposits.remove(&(collection_id, token_id));
 
             // Register the trade (actual transfers are made by the vault)
             // trade_id -> (collectionId, tokenId, quote_id, price, seller, buyer)

@@ -6,7 +6,7 @@ const config = {
 
   adminSeed : '//Alice',
   adminAddress : '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY', // Alice
-  marketContractAddress : '5Hh7Y6C1bujaLh87gvHMX6JvsGWLKkzKF5D9nNcTt1fZDVrw'
+  marketContractAddress : '5CiQD6xPUtVqBNwVGn8ovt4irQ7gtJ6wKSFbLdeNdN16V7hL'
 };
 
 module.exports = config;

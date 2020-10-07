@@ -16,7 +16,7 @@
   "license": "Apache 2.0",
   "homepage": "",
   "dependencies": {
-    "bn.js": "^5.1.2",
+    "bignumber.js": "^9.0.0",
     "body-parser": "^1.18.3",
     "express": "^4.17.1",
     "express-session": "^1.17.0",

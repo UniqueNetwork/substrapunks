@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="css/style1.css">
 
     <script src="js/polkadot.js"></script>
+    <script src="js/getPunkCard.js"></script>
     <script src="js/marketplace.js"></script>
     </head>
 
@@ -54,11 +55,38 @@
                     and it allows trading NFTs for assets with real value (such as KSM), don't use any assets that you can't afford losing for now
                     until this warning disappears.
                 </p>
+                <div id='walletselector' style='display:block;'>
+                    <p><b>Select your Polkadot-NFT address:</b></p>
+                    <select id='owner' onchange='update();' class='btn' style='background-color: white; color: #ff04b4; max-width: 600px; border: 1px solid; border-radius: 3px;'></select>
+                    <br/><br/>
+                </div>
+                <div>
+                    <p>KSM Balance:</p>
+                    <p><b><span id='ksmbal'>???</span></b></p>
+                    <div id="withdraw" style="display:none;">
+                        Enter the KSM amount you'd like to withdraw:<br/>
+                        (A withdraw commission of 0.01 KSM will be applied to cover network fees)<br/>
+                        <input type="text" id="amount"/><br/>
+                        <p><button onclick='withdrawtx();' class='btn'>Withdraw</button></p>
+                    </div>
+                    <div id="withdrawButton">
+                        <p><button onclick='withdraw();' class='btn'>Withdraw</button></p>
+                    </div>
+                    <div id="progress" style="display:none;">
+                        Mining withdraw transaction... 
+                    </div>
+                    <p>Deposit Address for KSM:</p>
+                    <p><b><span id='kusamaVaultAddress'>???</span></b></p>
+                    <br/><br/>
+                </div>
             </div>
-
+            <div class="col-md-12 text_block">
+                <h3>Tokens for Sale</h3>
+                <div class="row" id='tokenlist'>
+                    Loading data from blockchain...
+                </div>
+            </div>
         </div>
-
-
     </div>
     <div id="extensionWarning" class='container text_block' style='display:none'>
         <h3>Please enable Polkadot{.js} browser extension and create or import an address!</h3>

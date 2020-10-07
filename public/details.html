@@ -48,18 +48,30 @@
                 <h3>Ownership</h3>
                 <div id='error'>
                 </div>
+                <div id='walletselector' style='display:none;'>
+                    <p>Select your Polkadot-NFT address:</p>
+                    <select id='newowner' class='btn' style='background-color: white; color: #ff04b4; max-width: 600px; border: 1px solid; border-radius: 3px;'></select>
+                    <br/><br/>
+                </div>
                 <div id='ownership'>
                 </div>
+                <div id='trading'>
+                </div>
+                <br>
             </div>
             <div class='col-md-10 col-md-offset-1' id='claim' style='display:none;'>
-              <p>What is your Polkadot-NFT address?</p>
-              <select id='newowner' class='btn' style='background-color: white; color: #ff04b4; max-width: 600px; border: 1px solid; border-radius: 3px;'></select>
-              <br/>
-              <br/>
               <button onclick='claimtx();' class="btn">Claim</button>
             </div>
-            <div class='col-md-10 col-md-offset-1' id='claimprogress' style='display:none;'>
-              <p>Mining claim transaction...</p>
+            <div class='col-md-10 col-md-offset-1' id='tradeDetails' style='display:none;'>
+                <h3>What is your KSM price?</h3>
+                <input type="text" id="price"/>
+                <br/>
+                <br/>
+                <button onclick='tradetx();' class="btn">Sell</button><br/>
+                <p>Note: You will be asked to sign two transactions: 1. Vault deposit, 2. Place ask.</p>
+            </div>
+            <div class='col-md-10 col-md-offset-1' id='progress' style='display:none;'>
+                <p>Mining transaction...</p>
             </div>
         </div>
     </div>

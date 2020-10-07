@@ -3,6 +3,9 @@ const delay = require('delay');
 const config = require('./config');
 const fs = require('fs');
 
+var BigNumber = require('bignumber.js');
+BigNumber.config({ DECIMAL_PLACES: 12, ROUNDING_MODE: BigNumber.ROUND_DOWN, decimalSeparator: '.' });
+
 const { Abi, PromiseContract } = require('@polkadot/api-contract');
 const rtt = require("./runtime_types.json");
 const contractAbi = require("./market_metadata.json");
@@ -167,8 +170,14 @@ async function scanContract(admin) {
     const address = keyring.encodeAddress(pubKey); 
     console.log(`${address.toString()} withdarwing amount ${amount.toNumber()}`);
 
+    // Apply 0.01 KSM fee == 1e10 femto
+    amountBN = new BigNumber(amount);
+    amountBN = amountBN.minus(1e10);
+    console.log(`${address.toString()} will receive ${amountBN.toString()}`);
+
     // Send withdraw transaction
-    await sendTxAsync(api, admin, address, amount);
+    if (amountBN.isGreaterThanOrEqualTo(0))
+      await sendTxAsync(api, admin, address, amountBN.toString());
 
     lastQuoteWithdraw++;
     fs.writeFileSync("./withdrawal_id.json", JSON.stringify({ lastQuoteWithdraw, lastNftWithdraw }));
@@ -241,6 +250,7 @@ async function main() {
       }
 
     } catch (ex) {
+      console.log(ex);
       await delay(1000);
     }
   }
