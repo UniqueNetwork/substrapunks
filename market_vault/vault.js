@@ -206,7 +206,7 @@ function sendNftTxAsync(sender, recipient, collection_id, token_id) {
       const wsProviderNft = new WsProvider(config.wsEndpointNft);
 
       // Create the API and wait until ready
-      api = await ApiPromise.create({ 
+      const api = await ApiPromise.create({ 
         provider: wsProviderNft,
         types: rtt
       });
