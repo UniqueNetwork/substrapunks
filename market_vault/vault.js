@@ -321,8 +321,8 @@ async function handleKusama() {
 
   while (true) {
     try {
-      const finalizedHash = await apiKus.rpc.chain.getFinalizedHead();
-      const signedFinalizedBlock = await apiKus.rpc.chain.getBlock(finalizedHash);
+      const finalizedHash = await api.rpc.chain.getFinalizedHead();
+      const signedFinalizedBlock = await api.rpc.chain.getBlock(finalizedHash);
 
       if (lastKusamaBlock + 1 <= signedFinalizedBlock.block.header.number) {
         // Handle Kusama Deposits (by analysing block transactions)
