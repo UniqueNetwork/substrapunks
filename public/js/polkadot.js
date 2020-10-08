@@ -43,7 +43,7 @@ module.exports.attributes = attributes;
 
 
 },{}],2:[function(require,module,exports){
-module.exports={"wsEndpoint":"ws://127.0.0.1:9944","collectionId":2,"collectionDataSize":20,"punksToImport":100,"contractAddress":"5FAVnMK3cWzEgbE2KcNg2irqEogu8LHsDdzojsVc3pceAo2W","marketContractAddress":"5CiQD6xPUtVqBNwVGn8ovt4irQ7gtJ6wKSFbLdeNdN16V7hL","vaultAddress":"5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY","offchainSchema":"https://ipfs-gateway.usetech.com/ipns/QmaMtDqE9nhMX9RQLTpaCboqg7bqkb6Gi67iCKMe8NDpCE/images/image{id}.png"}
+module.exports={"wsEndpoint":"wss://unique.usetech.com","collectionId":4,"collectionDataSize":20,"punksToImport":10000,"contractAddress":"5HcHQXGHxMCgdf7w7oRZ3Gws2BtSsGqzzs316V7ZtCs5nWb2","marketContractAddress":"5FuZS6uzHqwn7aov668UErMYogVJBVzw6hQ253cGpmbu82MQ","vaultAddress":"5EWtBmfYnGu73KkwnoGwqCGmCmLWnZLBhp2CmQJ8bE78DbAN","offchainSchema":"https://ipfs-gateway.usetech.com/ipns/QmaMtDqE9nhMX9RQLTpaCboqg7bqkb6Gi67iCKMe8NDpCE/images/punks/image{id}.png"}
 },{}],3:[function(require,module,exports){
 module.exports={
   "registry": {
@@ -2635,14 +2635,10 @@ class nft {
     let priceBN = new BigNumber((''+price).replace(/,/g, '.'));
     const ksmexp = BigNumber(10).pow(this.ksmDecimals);
 
-    console.log(`As is: ${priceBN.toString()}`);
     priceBN = priceBN.multipliedBy(100);
-    console.log(`mul 100: ${priceBN.toString()}`);
     priceBN = priceBN.integerValue();
-    console.log(`int: ${priceBN.toString()}`);
     priceBN = priceBN.dividedBy(100);
     priceBN = priceBN.multipliedBy(ksmexp);
-    console.log(`mul ksmexp-2: ${priceBN.toString()}`);
 
     // Transaction #1: Deposit NFT to the vault
     await this.depositAsync(punkId, ownerAddress);

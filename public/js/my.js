@@ -33,7 +33,7 @@ async function show() {
     listhtml += getPunkCard(id, punk);
     document.getElementById("tokenlist").innerHTML = listhtml;
   }
-  if (marketNfts.length == 0)
+  if (marketNfts.length + nfts.length == 0)
     listhtml = "No tokens in the wallet. :( Check out the <a href='/marketplace.html'>Marketplace</a>";
 
   document.getElementById("tokenlist").innerHTML = listhtml;
