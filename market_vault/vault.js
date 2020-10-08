@@ -365,6 +365,7 @@ async function handleKusama() {
     await sendTxAsync(api, admin, quoteWithdrawals[i].address, quoteWithdrawals.amount);
     log(`Quote withdraw #${quoteWithdrawals[i].number}: ${quoteWithdrawals[i].address.toString()} withdarwing amount ${quoteWithdrawals[i].amount}`, "END");
   }
+  fs.writeFileSync("./quoteWithdrawals.json", "[]")
 
   // Handle queues deposits
   let quoteDeposits = [];
@@ -375,6 +376,7 @@ async function handleKusama() {
     await registerQuoteDepositAsync(admin, quoteDeposits[i].address, quoteDeposits[i].amount);
     log(`Quote deposit from ${quoteDeposits[i].address} amount ${quoteDeposits[i].amount}`, "REGISTERED");
   }
+  fs.writeFileSync("./quoteDeposits.json", "[]")
 
   api.disconnect();
 }
