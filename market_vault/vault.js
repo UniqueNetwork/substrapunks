@@ -214,7 +214,9 @@ function sendTxAsync(api, sender, recipient, amount) {
       
           if (result.status.isInBlock) {
             console.log(`Transaction included at blockHash ${result.status.asInBlock}`);
-          } else if (result.status.isFinalized) {
+            resolve();
+            unsub();
+            } else if (result.status.isFinalized) {
             console.log(`Transaction finalized at blockHash ${result.status.asFinalized}`);
             resolve();
             unsub();
@@ -244,6 +246,8 @@ function sendNftTxAsync(api, sender, recipient, collection_id, token_id) {
     
         if (result.status.isInBlock) {
           console.log(`Transaction included at blockHash ${result.status.asInBlock}`);
+          resolve();
+          unsub();
         } else if (result.status.isFinalized) {
           console.log(`Transaction finalized at blockHash ${result.status.asFinalized}`);
           resolve();
