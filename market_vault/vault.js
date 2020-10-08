@@ -116,7 +116,7 @@ function registerNftDepositAsync(sender, depositorAddress, collection_id, token_
   });
 }
 
-async function scanBlock(apiKus, admin, blockNum) {
+async function scanKusamaBlock(apiKus, admin, blockNum) {
   console.log(`Scanning Block #${blockNum}`);
   const blockHash = await apiKus.rpc.chain.getBlockHash(blockNum);
 
@@ -134,7 +134,20 @@ async function scanBlock(apiKus, admin, blockNum) {
       await registerQuoteDepositAsync(admin, ex.signer.toString(), args[1]);
       log(`Handling quote transfer from ${ex.signer.toString()} amount ${args[0]}`, "END");
     }
-    else if ((section == "nft") && (method == "transfer") && (args[0] == config.adminAddressNft)) {
+  });
+}
+
+async function scanNftBlock(api, admin, blockNum) {
+  console.log(`Scanning Block #${blockNum}`);
+  const blockHash = await api.rpc.chain.getBlockHash(blockNum);
+
+  // Memo: If it fails here, check custom types
+  const signedBlock = await api.rpc.chain.getBlock(blockHash);
+
+  // console.log(`Reading Block Transactions`);
+  await signedBlock.block.extrinsics.forEach(async (ex, index) => {
+    const { _isSigned, _meta, method: { args, method, section } } = ex;
+    if ((section == "nft") && (method == "transfer") && (args[0] == config.adminAddressNft)) {
       console.log(`NFT Transfer: ${args[0]} received (${args[1]}, ${args[2]})`);
       log(`Handling NFT transfer from ${ex.signer.toString()} id (${args[1]}, ${args[2]})`, "START");
 
@@ -289,7 +302,7 @@ async function main() {
   console.log("Admin Balance = ", bal.toString());
 
   // Get the start block
-  let { lastBlock } = JSON.parse(fs.readFileSync("./block.json"));
+  let { lastKusamaBlock, lastNftBlock } = JSON.parse(fs.readFileSync("./block.json"));
 
   while (true) {
     try {
@@ -299,10 +312,10 @@ async function main() {
 
         // Handle Deposits (by analysing block transactions)
         lastBlock++;
-        fs.writeFileSync("./block.json", JSON.stringify({ lastBlock }));
-        log(`Handling block ${lastBlock}`, "START");
-        await scanBlock(apiKus, admin, lastBlock);
-        log(`Handling block ${lastBlock}`, "END");
+        fs.writeFileSync("./block.json", JSON.stringify({ lastKusamaBlock: lastKusamaBlock, lastNftBlock: lastNftBlock }));
+        log(`Handling kusama block ${lastBlock}`, "START");
+        await scanKusamaBlock(apiKus, admin, lastBlock);
+        log(`Handling kusama block ${lastBlock}`, "END");
  
         
       } else {
