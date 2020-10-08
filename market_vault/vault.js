@@ -39,7 +39,7 @@ function log(operation, status) {
   fs.appendFileSync(`${logFile}_${getDay()}.csv`, `${getTime()},${operation},${status}\n`);
 }
 
-function getKusamaConnection() {
+async function getKusamaConnection() {
   // Initialise the provider to connect to the node
   const wsProvider = new WsProvider(config.wsEndpointKusama);
 
@@ -52,7 +52,7 @@ function getKusamaConnection() {
   return api;
 }
 
-function getUniqueConnection() {
+async function getUniqueConnection() {
   // Initialise the provider to connect to the node
   const wsProviderNft = new WsProvider(config.wsEndpointNft);
 
