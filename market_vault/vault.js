@@ -362,7 +362,7 @@ async function handleKusama() {
     quoteWithdrawals = JSON.parse(fs.readFileSync("./quoteWithdrawals.json"));
   } catch (e) {}
   for (let i=0; i<quoteWithdrawals.length; i++) {
-    await sendTxAsync(api, admin, quoteWithdrawals[i].address, quoteWithdrawals.amount);
+    await sendTxAsync(api, admin, quoteWithdrawals[i].address, quoteWithdrawals[i].amount);
     log(`Quote withdraw #${quoteWithdrawals[i].number}: ${quoteWithdrawals[i].address.toString()} withdarwing amount ${quoteWithdrawals[i].amount}`, "END");
   }
   fs.writeFileSync("./quoteWithdrawals.json", "[]")
