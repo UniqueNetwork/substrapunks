@@ -94,11 +94,6 @@ function registerQuoteDepositAsync(sender, depositorAddress, amount) {
           log(`Handling quote transfer`, `ERROR: ${result.status}`);
           reject();
           unsub();
-        } else {
-          console.log(`Unknown transaction status: ${result.status}`);
-          log(`Handling quote transfer`, `WARNING: ${result.status}`);
-          resolve();
-          unsub();
         }
       });
     } catch (e) {
@@ -137,11 +132,6 @@ function registerNftDepositAsync(api, sender, depositorAddress, collection_id, t
           console.log(`Something went wrong with transaction. Status: ${result.status}`);
           log(`Handling NFT transfer`, `ERROR: ${result.status}`);
           reject();
-          unsub();
-        } else {
-          console.log(`Unknown transaction status ${result.status}`);
-          log(`Handling NFT transfer`, `WARNING: ${result.status}`);
-          resolve();
           unsub();
         }
       });
@@ -233,11 +223,6 @@ function sendTxAsync(api, sender, recipient, amount) {
             log(`Quote qithdraw`, `ERROR: ${result.status}`);
             reject();
             unsub();
-          } else {
-            console.log(`Unknown transaction status: ${result.status}`);
-            log(`Quote qithdraw`, `WARNING: ${result.status}`);
-            resolve();
-            unsub();
           }
         });
     } catch (e) {
@@ -267,11 +252,6 @@ function sendNftTxAsync(api, sender, recipient, collection_id, token_id) {
           console.log(`Something went wrong with transaction. Status: ${result.status}`);
           log(`NFT qithdraw`, `ERROR: ${result.status}`);
           reject();
-          unsub();
-        } else {
-          console.log(`Unknown transaction status: ${result.status}`);
-          log(`NFT qithdraw`, `WARNING: ${result.status}`);
-          resolve();
           unsub();
         }
       });
@@ -436,8 +416,6 @@ async function handleUnique() {
 }
 
 async function main() {
-  log("Vault Started", "success");
-
   await handleKusama();
   await handleUnique();
 }
