@@ -65,7 +65,6 @@ async function getUniqueConnection() {
   return api;
 }
 
-
 function registerQuoteDepositAsync(sender, depositorAddress, amount) {
   console.log(`${depositorAddress} deposited ${amount} in ${quoteId} currency`);
   return new Promise(async function(resolve, reject) {
@@ -145,7 +144,7 @@ function registerNftDepositAsync(api, sender, depositorAddress, collection_id, t
   });
 }
 
-async function scanKusamaBlock(api, admin, blockNum) {
+async function scanKusamaBlock(api, blockNum) {
   console.log(`Scanning Block #${blockNum}`);
   const blockHash = await api.rpc.chain.getBlockHash(blockNum);
 
@@ -317,6 +316,8 @@ async function handleKusama() {
   let { lastKusamaBlock, lastNftBlock } = JSON.parse(fs.readFileSync("./block.json"));
 
   const api = await getKusamaConnection();
+  const keyring = new Keyring({ type: 'sr25519' });
+  const admin = keyring.addFromUri(config.adminSeed);
 
   while (true) {
     try {
@@ -329,7 +330,7 @@ async function handleKusama() {
         fs.writeFileSync("./block.json", JSON.stringify({ lastKusamaBlock: lastKusamaBlock, lastNftBlock: lastNftBlock }));
 
         log(`Handling kusama block ${lastKusamaBlock}`, "START");
-        await scanKusamaBlock(api, admin, lastKusamaBlock);
+        await scanKusamaBlock(api, lastKusamaBlock);
         log(`Handling kusama block ${lastKusamaBlock}`, "END");
       } else break;
 
@@ -362,6 +363,8 @@ async function handleUnique() {
   let { lastKusamaBlock, lastNftBlock } = JSON.parse(fs.readFileSync("./block.json"));
 
   const api = await getUniqueConnection();
+  const keyring = new Keyring({ type: 'sr25519' });
+  const admin = keyring.addFromUri(config.adminSeed);
 
   while (true) {
     try {
@@ -392,13 +395,6 @@ async function handleUnique() {
 
 async function main() {
   log("Vault Started", "success");
-
-  // Get address balance
-  const keyring = new Keyring({ type: 'sr25519' });
-
-  const admin = keyring.addFromUri(config.adminSeed);
-  let bal = (await apiKus.query.system.account(admin.address)).data.free;
-  console.log("Admin Balance = ", bal.toString());
 
   while (true) {
     await handleKusama();
