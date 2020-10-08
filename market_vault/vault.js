@@ -328,7 +328,7 @@ async function main() {
         lastNftBlock++;
         fs.writeFileSync("./block.json", JSON.stringify({ lastKusamaBlock: lastKusamaBlock, lastNftBlock: lastNftBlock }));
         log(`Handling nft block ${lastNftBlock}`, "START");
-        await scanKusamaBlock(apiKus, admin, lastNftBlock);
+        await scanNftBlock(apiKus, admin, lastNftBlock);
         log(`Handling nft block ${lastNftBlock}`, "END");
       } else {
         // Handle Withdrawals (by getting them from market contracts)
