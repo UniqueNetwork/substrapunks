@@ -161,9 +161,18 @@ async function scanNftBlock(api, admin, blockNum) {
   });
 }
 
-function sendTxAsync(api, sender, recipient, amount) {
+function sendTxAsync(sender, recipient, amount) {
   return new Promise(async function(resolve, reject) {
     try {
+      // Initialise the provider to connect to the node
+      const wsProvider = new WsProvider(config.wsEndpointKusama);
+
+      // Create the API and wait until ready
+      const api = await ApiPromise.create({ 
+        provider: wsProvider,
+        // types: rtt
+      });
+
       const unsub = await api.tx.balances
         .transfer(recipient, amount)
         .signAndSend(sender, (result) => {
@@ -190,9 +199,18 @@ function sendTxAsync(api, sender, recipient, amount) {
   });
 }
 
-function sendNftTxAsync(api, sender, recipient, collection_id, token_id) {
+function sendNftTxAsync(sender, recipient, collection_id, token_id) {
   return new Promise(async function(resolve, reject) {
     try {
+      // Initialise the provider to connect to the node
+      const wsProviderNft = new WsProvider(config.wsEndpointNft);
+
+      // Create the API and wait until ready
+      api = await ApiPromise.create({ 
+        provider: wsProviderNft,
+        types: rtt
+      });
+
       const unsub = await api.tx.nft
       .transfer(recipient, collection_id, token_id, 0)
       .signAndSend(sender, (result) => {
@@ -249,7 +267,7 @@ async function scanContract(admin) {
 
     // Send withdraw transaction
     if (amountBN.isGreaterThanOrEqualTo(0))
-      await sendTxAsync(apiKus, admin, address, amountBN.toString());
+      await sendTxAsync(admin, address, amountBN.toString());
 
     log(`Quote withdraw #${lastQuoteWithdraw+1}: ${address.toString()} withdarwing amount ${amount.toNumber()}`, "END");
 
@@ -267,7 +285,7 @@ async function scanContract(admin) {
     log(`NFT withdraw #${lastNftWithdraw+1}: ${address.toString()} withdarwing ${collection_id.toNumber()}, ${token_id.toNumber()}`, "START");
 
     // Send withdraw transaction
-    await sendNftTxAsync(api, admin, address, collection_id, token_id);
+    await sendNftTxAsync(admin, address, collection_id, token_id);
     log(`NFT withdraw #${lastNftWithdraw+1}: ${address.toString()} withdarwing ${collection_id.toNumber()}, ${token_id.toNumber()}`, "END");
 
     lastNftWithdraw++;
