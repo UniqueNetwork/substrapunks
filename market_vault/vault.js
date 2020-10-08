@@ -126,7 +126,7 @@ async function scanKusamaBlock(apiKus, admin, blockNum) {
   // console.log(`Reading Block Transactions`);
   await signedBlock.block.extrinsics.forEach(async (ex, index) => {
     let { _isSigned, _meta, method: { args, method, section } } = ex;
-    console.log(`Section: ${section}, method: ${method} args: ${args[0]}`);
+    // console.log(`Section: ${section}, method: ${method} args: ${args[0]}`);
     if (method == "transferKeepAlive") method = "transfer";
     if ((section == "balances") && (method == "transfer") && (args[0] == config.adminAddressKusama)) {
       console.log(`Transfer: ${args[0]} received ${args[1]} from ${ex.signer.toString()}`);
