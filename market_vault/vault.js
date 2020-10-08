@@ -94,6 +94,11 @@ function registerQuoteDepositAsync(sender, depositorAddress, amount) {
           log(`Handling quote transfer`, `ERROR: ${result.status}`);
           reject();
           unsub();
+        } else {
+          console.log(`Unknown transaction status: ${result.status}`);
+          log(`Handling quote transfer`, `WARNING: ${result.status}`);
+          resolve();
+          unsub();
         }
       });
     } catch (e) {
@@ -132,6 +137,11 @@ function registerNftDepositAsync(api, sender, depositorAddress, collection_id, t
           console.log(`Something went wrong with transaction. Status: ${result.status}`);
           log(`Handling NFT transfer`, `ERROR: ${result.status}`);
           reject();
+          unsub();
+        } else {
+          console.log(`Unknown transaction status ${result.status}`);
+          log(`Handling NFT transfer`, `WARNING: ${result.status}`);
+          resolve();
           unsub();
         }
       });
@@ -220,6 +230,11 @@ function sendTxAsync(api, sender, recipient, amount) {
             log(`Quote qithdraw`, `ERROR: ${result.status}`);
             reject();
             unsub();
+          } else {
+            console.log(`Unknown transaction status: ${result.status}`);
+            log(`Quote qithdraw`, `WARNING: ${result.status}`);
+            resolve();
+            unsub();
           }
         });
     } catch (e) {
@@ -230,33 +245,39 @@ function sendTxAsync(api, sender, recipient, amount) {
   });
 }
 
-async function sendNftTxAsync(api, sender, recipient, collection_id, token_id) {
-  // return new Promise(async function(resolve, reject) {
-  try {
-    const unsub = await api.tx.nft
-    .transfer(recipient, collection_id, token_id, 0)
-    .signAndSend(sender, (result) => {
-      console.log(`Current tx status is ${result.status}`);
-  
-      if (result.status.isInBlock) {
-        console.log(`Transaction included at blockHash ${result.status.asInBlock}`);
-      } else if (result.status.isFinalized) {
-        console.log(`Transaction finalized at blockHash ${result.status.asFinalized}`);
-        // resolve();
-        unsub();
-      } else if (result.status.isUsurped) {
-        console.log(`Something went wrong with transaction. Status: ${result.status}`);
-        log(`NFT qithdraw`, `ERROR: ${result.status}`);
-        // reject();
-        unsub();
-      }
-    });
-  } catch (e) {
-    console.log("Error: ", e);
-    log(`NFT withdraw`, `ERROR: ${e.toString()}`);
-    reject(e);
-  }
-  // });
+function sendNftTxAsync(api, sender, recipient, collection_id, token_id) {
+  return new Promise(async function(resolve, reject) {
+    try {
+      console.log(`Sending nft transfer transaction...`);
+      const unsub = await api.tx.nft
+      .transfer(recipient, collection_id, token_id, 0)
+      .signAndSend(sender, (result) => {
+        console.log(`Current tx status is ${result.status}`);
+    
+        if (result.status.isInBlock) {
+          console.log(`Transaction included at blockHash ${result.status.asInBlock}`);
+        } else if (result.status.isFinalized) {
+          console.log(`Transaction finalized at blockHash ${result.status.asFinalized}`);
+          resolve();
+          unsub();
+        } else if (result.status.isUsurped) {
+          console.log(`Something went wrong with transaction. Status: ${result.status}`);
+          log(`NFT qithdraw`, `ERROR: ${result.status}`);
+          reject();
+          unsub();
+        } else {
+          console.log(`Unknown transaction status: ${result.status}`);
+          log(`NFT qithdraw`, `WARNING: ${result.status}`);
+          resolve();
+          unsub();
+        }
+      });
+    } catch (e) {
+      console.log("Error: ", e);
+      log(`NFT withdraw`, `ERROR: ${e.toString()}`);
+      reject(e);
+    }
+  });
 }
 
 async function scanContract(api, admin) {
