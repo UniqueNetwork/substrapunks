@@ -301,7 +301,7 @@ async function scanContract(api, admin) {
     log(`NFT withdraw #${lastNftWithdraw+1}: ${address.toString()} withdarwing ${collection_id.toNumber()}, ${token_id.toNumber()}`, "START");
 
     // Send withdraw transaction
-    await sendNftTxAsync(admin, address, collection_id, token_id);
+    await sendNftTxAsync(api, admin, address, collection_id, token_id);
     log(`NFT withdraw #${lastNftWithdraw+1}: ${address.toString()} withdarwing ${collection_id.toNumber()}, ${token_id.toNumber()}`, "END");
 
     lastNftWithdraw++;
