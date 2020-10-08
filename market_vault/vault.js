@@ -308,16 +308,28 @@ async function main() {
     try {
       const finalizedHash = await apiKus.rpc.chain.getFinalizedHead();
       const signedFinalizedBlock = await apiKus.rpc.chain.getBlock(finalizedHash);
-      if (lastBlock + 1 <= signedFinalizedBlock.block.header.number) {
 
-        // Handle Deposits (by analysing block transactions)
-        lastBlock++;
+      const finalizedHashNft = await api.rpc.chain.getFinalizedHead();
+      const signedFinalizedBlockNft = await api.rpc.chain.getBlock(finalizedHashNft);
+
+      if (lastKusamaBlock + 1 <= signedFinalizedBlock.block.header.number) {
+
+        // Handle Kusama Deposits (by analysing block transactions)
+        lastKusamaBlock++;
         fs.writeFileSync("./block.json", JSON.stringify({ lastKusamaBlock: lastKusamaBlock, lastNftBlock: lastNftBlock }));
-        log(`Handling kusama block ${lastBlock}`, "START");
-        await scanKusamaBlock(apiKus, admin, lastBlock);
-        log(`Handling kusama block ${lastBlock}`, "END");
+        log(`Handling kusama block ${lastKusamaBlock}`, "START");
+        await scanKusamaBlock(apiKus, admin, lastKusamaBlock);
+        log(`Handling kusama block ${lastKusamaBlock}`, "END");
  
         
+      } else if (lastNftBlock + 1 <= signedFinalizedBlockNft.block.header.number) {
+
+        // Handle NFT Deposits (by analysing block transactions)
+        lastNftBlock++;
+        fs.writeFileSync("./block.json", JSON.stringify({ lastKusamaBlock: lastKusamaBlock, lastNftBlock: lastNftBlock }));
+        log(`Handling nft block ${lastNftBlock}`, "START");
+        await scanKusamaBlock(apiKus, admin, lastNftBlock);
+        log(`Handling nft block ${lastNftBlock}`, "END");
       } else {
         // Handle Withdrawals (by getting them from market contracts)
         await scanContract(admin);
