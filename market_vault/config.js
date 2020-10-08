@@ -5,7 +5,8 @@ const config = {
   wsEndpointKusama : 'ws://127.0.0.1:9944',
 
   adminSeed : '//Alice',
-  adminAddress : '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY', // Alice
+  adminAddressKusama : '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY', // Alice
+  adminAddressNft    : '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY', // Alice
   marketContractAddress : '5CiQD6xPUtVqBNwVGn8ovt4irQ7gtJ6wKSFbLdeNdN16V7hL'
 };
 

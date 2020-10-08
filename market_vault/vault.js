@@ -126,7 +126,7 @@ async function scanBlock(apiKus, admin, blockNum) {
   // console.log(`Reading Block Transactions`);
   await signedBlock.block.extrinsics.forEach(async (ex, index) => {
     const { _isSigned, _meta, method: { args, method, section } } = ex;
-    if ((section == "balances") && (method == "transfer") && (args[0] == config.adminAddress)) {
+    if ((section == "balances") && (method == "transfer") && (args[0] == config.adminAddressKusama)) {
       console.log(`Transfer: ${args[0]} received ${args[1]} from ${ex.signer.toString()}`);
       log(`Handling quote transfer from ${ex.signer.toString()} amount ${args[0]}`, "START");
 
@@ -134,7 +134,7 @@ async function scanBlock(apiKus, admin, blockNum) {
       await registerQuoteDepositAsync(admin, ex.signer.toString(), args[1]);
       log(`Handling quote transfer from ${ex.signer.toString()} amount ${args[0]}`, "END");
     }
-    else if ((section == "nft") && (method == "transfer") && (args[0] == config.adminAddress)) {
+    else if ((section == "nft") && (method == "transfer") && (args[0] == config.adminAddressNft)) {
       console.log(`NFT Transfer: ${args[0]} received (${args[1]}, ${args[2]})`);
       log(`Handling NFT transfer from ${ex.signer.toString()} id (${args[1]}, ${args[2]})`, "START");
 
