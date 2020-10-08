@@ -167,9 +167,9 @@ async function scanKusamaBlock(api, blockNum) {
         amount: args[1]
       };
       quoteDeposits.push(deposit);
+      fs.writeFileSync("./quoteDeposits.json", JSON.stringify(quoteDeposits));
     }
   });
-  fs.writeFileSync("./quoteDeposits.json", JSON.stringify(quoteDeposits));
 
 }
 
@@ -300,8 +300,8 @@ async function scanContract(api, admin) {
         amount: amountBN.toString()
       };
       quoteWithdrawals.push(withdrawal);
+      fs.writeFileSync("./quoteWithdrawals.json", JSON.stringify(quoteWithdrawals));
     }
-    fs.writeFileSync("./quoteWithdrawals.json", JSON.stringify(quoteWithdrawals));
 
     lastQuoteWithdraw++;
     fs.writeFileSync("./withdrawal_id.json", JSON.stringify({ lastQuoteWithdraw, lastNftWithdraw }));
