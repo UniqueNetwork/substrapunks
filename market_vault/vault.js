@@ -65,7 +65,7 @@ async function getUniqueConnection() {
   return api;
 }
 
-function registerQuoteDepositAsync(sender, depositorAddress, amount) {
+function registerQuoteDepositAsync(api, sender, depositorAddress, amount) {
   console.log(`${depositorAddress} deposited ${amount} in ${quoteId} currency`);
   return new Promise(async function(resolve, reject) {
 
@@ -373,7 +373,7 @@ async function handleKusama() {
     quoteDeposits = JSON.parse(fs.readFileSync("./quoteDeposits.json"));
   } catch (e) {}
   for (let i=0; i<quoteDeposits.length; i++) {
-    await registerQuoteDepositAsync(admin, quoteDeposits[i].address, quoteDeposits[i].amount);
+    await registerQuoteDepositAsync(api, admin, quoteDeposits[i].address, quoteDeposits[i].amount);
     log(`Quote deposit from ${quoteDeposits[i].address} amount ${quoteDeposits[i].amount}`, "REGISTERED");
   }
   fs.writeFileSync("./quoteDeposits.json", "[]")
