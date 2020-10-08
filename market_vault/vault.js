@@ -367,17 +367,6 @@ async function handleKusama() {
   }
   fs.writeFileSync("./quoteWithdrawals.json", "[]")
 
-  // Handle queues deposits
-  let quoteDeposits = [];
-  try {
-    quoteDeposits = JSON.parse(fs.readFileSync("./quoteDeposits.json"));
-  } catch (e) {}
-  for (let i=0; i<quoteDeposits.length; i++) {
-    await registerQuoteDepositAsync(api, admin, quoteDeposits[i].address, quoteDeposits[i].amount);
-    log(`Quote deposit from ${quoteDeposits[i].address} amount ${quoteDeposits[i].amount}`, "REGISTERED");
-  }
-  fs.writeFileSync("./quoteDeposits.json", "[]")
-
   api.disconnect();
 }
 
@@ -413,6 +402,17 @@ async function handleUnique() {
 
   // Handle Withdrawals (by getting them from market contracts)
   await scanContract(api, admin);
+
+  // Handle queued KSM deposits
+  let quoteDeposits = [];
+  try {
+    quoteDeposits = JSON.parse(fs.readFileSync("./quoteDeposits.json"));
+  } catch (e) {}
+  for (let i=0; i<quoteDeposits.length; i++) {
+    await registerQuoteDepositAsync(api, admin, quoteDeposits[i].address, quoteDeposits[i].amount);
+    log(`Quote deposit from ${quoteDeposits[i].address} amount ${quoteDeposits[i].amount}`, "REGISTERED");
+  }
+  fs.writeFileSync("./quoteDeposits.json", "[]")
 
   api.disconnect();
 }
