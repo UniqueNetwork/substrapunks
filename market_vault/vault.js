@@ -438,10 +438,8 @@ async function handleUnique() {
 async function main() {
   log("Vault Started", "success");
 
-  while (true) {
-    await handleKusama();
-    await handleUnique();
-  }
+  await handleKusama();
+  await handleUnique();
 }
 
 main().catch(console.error).finally(() => process.exit());
