@@ -11,8 +11,31 @@ const rtt = require("./runtime_types.json");
 const contractAbi = require("./market_metadata.json");
 
 const quoteId = 2; // KSM
+const logFile = "./operations_log";
 
 let api;
+
+function getTime() {
+  var a = new Date();
+  var hour = a.getHours();
+  var min = a.getMinutes();
+  var sec = a.getSeconds();
+  var time = `${hour}:${min}:${sec}`;
+  return time;
+}
+
+function getDay() {
+  var a = new Date();
+  var year = a.getFullYear();
+  var month = a.getMonth()+1;
+  var date = a.getDate();
+  var time = `${year}-${month}-${date}`;
+  return time;
+}
+
+function log(operation, status) {
+  fs.appendFileSync(`${logFile}_${getDay()}.csv`, `${getTime()},${operation},${status}\n`);
+}
 
 function registerQuoteDepositAsync(sender, depositorAddress, amount) {
   console.log(`${depositorAddress} deposited ${amount} in ${quoteId} currency`);
@@ -40,12 +63,14 @@ function registerQuoteDepositAsync(sender, depositorAddress, amount) {
           unsub();
         } else if (result.status.isUsurped) {
           console.log(`Something went wrong with transaction. Status: ${result.status}`);
+          log(`Handling quote transfer`, `ERROR: ${result.status}`);
           reject();
           unsub();
         }
       });
     } catch (e) {
       console.log("Error: ", e);
+      log(`Handling quote transfer`, `ERROR: ${e.toString()}`);
       reject(e);
     }
 
@@ -77,12 +102,14 @@ function registerNftDepositAsync(sender, depositorAddress, collection_id, token_
           unsub();
         } else if (result.status.isUsurped) {
           console.log(`Something went wrong with transaction. Status: ${result.status}`);
+          log(`Handling NFT transfer`, `ERROR: ${result.status}`);
           reject();
           unsub();
         }
       });
     } catch (e) {
       console.log("Error: ", e);
+      log(`Handling NFT transfer`, `ERROR: ${e.toString()}`);
       reject(e);
     }
 
@@ -101,40 +128,56 @@ async function scanBlock(apiKus, admin, blockNum) {
     const { _isSigned, _meta, method: { args, method, section } } = ex;
     if ((section == "balances") && (method == "transfer") && (args[0] == config.adminAddress)) {
       console.log(`Transfer: ${args[0]} received ${args[1]} from ${ex.signer.toString()}`);
+      log(`Handling quote transfer from ${ex.signer.toString()} amount ${args[0]}`, "START");
 
       // Register Quote Deposit
       await registerQuoteDepositAsync(admin, ex.signer.toString(), args[1]);
+      log(`Handling quote transfer from ${ex.signer.toString()} amount ${args[0]}`, "END");
     }
     else if ((section == "nft") && (method == "transfer") && (args[0] == config.adminAddress)) {
       console.log(`NFT Transfer: ${args[0]} received (${args[1]}, ${args[2]})`);
+      log(`Handling NFT transfer from ${ex.signer.toString()} id (${args[1]}, ${args[2]})`, "START");
 
       // Register NFT Deposit
       await registerNftDepositAsync(admin, ex.signer.toString(), args[1], args[2]);
+      log(`Handling NFT transfer from ${ex.signer.toString()} id (${args[1]}, ${args[2]})`, "END");
     }
   });
 }
 
 function sendTxAsync(api, sender, recipient, amount) {
   return new Promise(async function(resolve, reject) {
-    const unsub = await api.tx.balances
-      .transfer(recipient, amount)
-      .signAndSend(sender, (result) => {
-        console.log(`Current tx status is ${result.status}`);
-    
-        if (result.status.isInBlock) {
-          console.log(`Transaction included at blockHash ${result.status.asInBlock}`);
-        } else if (result.status.isFinalized) {
-          console.log(`Transaction finalized at blockHash ${result.status.asFinalized}`);
-          resolve();
-          unsub();
-        }
-      });
+    try {
+      const unsub = await api.tx.balances
+        .transfer(recipient, amount)
+        .signAndSend(sender, (result) => {
+          console.log(`Current tx status is ${result.status}`);
+      
+          if (result.status.isInBlock) {
+            console.log(`Transaction included at blockHash ${result.status.asInBlock}`);
+          } else if (result.status.isFinalized) {
+            console.log(`Transaction finalized at blockHash ${result.status.asFinalized}`);
+            resolve();
+            unsub();
+          } else if (result.status.isUsurped) {
+            console.log(`Something went wrong with transaction. Status: ${result.status}`);
+            log(`Quote qithdraw`, `ERROR: ${result.status}`);
+            reject();
+            unsub();
+          }
+        });
+    } catch (e) {
+      console.log("Error: ", e);
+      log(`Quote withdraw`, `ERROR: ${e.toString()}`);
+      reject(e);
+    }
   });
 }
 
 function sendNftTxAsync(api, sender, recipient, collection_id, token_id) {
   return new Promise(async function(resolve, reject) {
-    const unsub = await api.tx.nft
+    try {
+      const unsub = await api.tx.nft
       .transfer(recipient, collection_id, token_id, 0)
       .signAndSend(sender, (result) => {
         console.log(`Current tx status is ${result.status}`);
@@ -145,8 +188,18 @@ function sendNftTxAsync(api, sender, recipient, collection_id, token_id) {
           console.log(`Transaction finalized at blockHash ${result.status.asFinalized}`);
           resolve();
           unsub();
+        } else if (result.status.isUsurped) {
+          console.log(`Something went wrong with transaction. Status: ${result.status}`);
+          log(`NFT qithdraw`, `ERROR: ${result.status}`);
+          reject();
+          unsub();
         }
-      });
+    });
+    } catch (e) {
+      console.log("Error: ", e);
+      log(`NFT withdraw`, `ERROR: ${e.toString()}`);
+      reject(e);
+    }
   });
 }
 
@@ -161,6 +214,7 @@ async function scanContract(admin) {
 
   let { lastQuoteWithdraw, lastNftWithdraw } = JSON.parse(fs.readFileSync("./withdrawal_id.json"));
   const keyring = new Keyring({ type: 'sr25519' });
+  log(`Checking withdrawals. Last/handled quote withdraw id: ${lastContractQuoteWithdrawId}/${lastQuoteWithdraw} last/handled nft withdraw id: ${lastContractNftWithdrawId}/${lastNftWithdraw}`, "OK");
 
   // Process Quote withdraws
   while (lastContractQuoteWithdrawId > lastQuoteWithdraw) {
@@ -169,15 +223,19 @@ async function scanContract(admin) {
     const [pubKey, amount] = result3.output;
     const address = keyring.encodeAddress(pubKey); 
     console.log(`${address.toString()} withdarwing amount ${amount.toNumber()}`);
+    log(`Quote withdraw #${lastQuoteWithdraw+1}: ${address.toString()} withdarwing amount ${amount.toNumber()}`, "START");
 
     // Apply 0.01 KSM fee == 1e10 femto
     amountBN = new BigNumber(amount);
     amountBN = amountBN.minus(1e10);
     console.log(`${address.toString()} will receive ${amountBN.toString()}`);
+    log(`Quote withdraw #${lastQuoteWithdraw+1}: sending ${amountBN.toString()}`, "START");
 
     // Send withdraw transaction
     if (amountBN.isGreaterThanOrEqualTo(0))
       await sendTxAsync(api, admin, address, amountBN.toString());
+
+    log(`Quote withdraw #${lastQuoteWithdraw+1}: ${address.toString()} withdarwing amount ${amount.toNumber()}`, "END");
 
     lastQuoteWithdraw++;
     fs.writeFileSync("./withdrawal_id.json", JSON.stringify({ lastQuoteWithdraw, lastNftWithdraw }));
@@ -190,9 +248,11 @@ async function scanContract(admin) {
     const [pubKey, collection_id, token_id] = result4.output;
     const address = keyring.encodeAddress(pubKey); 
     console.log(`${address.toString()} withdarwing NFT ${collection_id.toNumber()}, ${token_id.toNumber()}`);
+    log(`NFT withdraw #${lastNftWithdraw+1}: ${address.toString()} withdarwing ${collection_id.toNumber()}, ${token_id.toNumber()}`, "START");
 
     // Send withdraw transaction
     await sendNftTxAsync(api, admin, address, collection_id, token_id);
+    log(`NFT withdraw #${lastNftWithdraw+1}: ${address.toString()} withdarwing ${collection_id.toNumber()}, ${token_id.toNumber()}`, "END");
 
     lastNftWithdraw++;
     fs.writeFileSync("./withdrawal_id.json", JSON.stringify({ lastQuoteWithdraw, lastNftWithdraw }));
@@ -218,7 +278,8 @@ async function main() {
     provider: wsProviderNft,
     types: rtt
   });
-  
+
+  log("Vault Started", "success");
 
   // Get address balance
   const keyring = new Keyring({ type: 'sr25519' });
@@ -239,7 +300,9 @@ async function main() {
         // Handle Deposits (by analysing block transactions)
         lastBlock++;
         fs.writeFileSync("./block.json", JSON.stringify({ lastBlock }));
+        log(`Handling block ${lastBlock}`, "START");
         await scanBlock(apiKus, admin, lastBlock);
+        log(`Handling block ${lastBlock}`, "END");
  
         
       } else {
