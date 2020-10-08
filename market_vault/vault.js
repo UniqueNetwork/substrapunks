@@ -178,6 +178,7 @@ async function scanNftBlock(api, admin, blockNum) {
   const signedBlock = await api.rpc.chain.getBlock(blockHash);
 
   // console.log(`Reading Block Transactions`);
+  let nftDeposits = [];
   await signedBlock.block.extrinsics.forEach(async (ex, index) => {
     const { _isSigned, _meta, method: { args, method, section } } = ex;
     if ((section == "nft") && (method == "transfer") && (args[0] == config.adminAddressNft)) {
@@ -185,10 +186,19 @@ async function scanNftBlock(api, admin, blockNum) {
       log(`NFT deposit from ${ex.signer.toString()} id (${args[1]}, ${args[2]})`, "RECEIVED");
 
       // Register NFT Deposit
-      await registerNftDepositAsync(api, admin, ex.signer.toString(), args[1], args[2]);
-      log(`NFT deposit from ${ex.signer.toString()} id (${args[1]}, ${args[2]})`, "REGISTERED");
+      const deposit = {
+        address: ex.signer.toString(),
+        collectionId: args[1],
+        tokenId: args[2]
+      };
+      nftDeposits.push(deposit);
     }
   });
+
+  for (let i=0; i<nftDeposits.length; i++) {
+    await registerNftDepositAsync(api, admin, nftDeposits[i].address, nftDeposits[i].collectionId, nftDeposits[i].tokenId);
+    log(`NFT deposit from ${nftDeposits[i].address} id (${nftDeposits[i].collectionId}, ${nftDeposits[i].tokenId})`, "REGISTERED");
+  }
 }
 
 function sendTxAsync(api, sender, recipient, amount) {
@@ -268,8 +278,8 @@ async function scanContract(api, admin) {
     const result3 = await contractInstance.call('rpc', 'get_withdraw_by_id', 0, 1000000000000, lastQuoteWithdraw+1).send(admin.address);
     const [pubKey, amount] = result3.output;
     const address = keyring.encodeAddress(pubKey); 
-    console.log(`${address.toString()} withdarwing amount ${amount.toNumber()}`);
-    log(`Quote withdraw #${lastQuoteWithdraw+1}: ${address.toString()} withdarwing amount ${amount.toNumber()}`, "START");
+    console.log(`${address.toString()} withdrawing amount ${amount.toNumber()}`);
+    log(`Quote withdraw #${lastQuoteWithdraw+1}: ${address.toString()} withdrawing amount ${amount.toNumber()}`, "START");
 
     // Apply 0.01 KSM fee == 1e10 femto
     amountBN = new BigNumber(amount);
@@ -297,12 +307,12 @@ async function scanContract(api, admin) {
     const result4 = await contractInstance.call('rpc', 'get_nft_withdraw_by_id', 0, 1000000000000, lastNftWithdraw+1).send(admin.address);
     const [pubKey, collection_id, token_id] = result4.output;
     const address = keyring.encodeAddress(pubKey); 
-    console.log(`${address.toString()} withdarwing NFT ${collection_id.toNumber()}, ${token_id.toNumber()}`);
-    log(`NFT withdraw #${lastNftWithdraw+1}: ${address.toString()} withdarwing ${collection_id.toNumber()}, ${token_id.toNumber()}`, "START");
+    console.log(`${address.toString()} withdrawing NFT ${collection_id.toNumber()}, ${token_id.toNumber()}`);
+    log(`NFT withdraw #${lastNftWithdraw+1}: ${address.toString()} withdrawing ${collection_id.toNumber()}, ${token_id.toNumber()}`, "START");
 
     // Send withdraw transaction
     await sendNftTxAsync(api, admin, address, collection_id, token_id);
-    log(`NFT withdraw #${lastNftWithdraw+1}: ${address.toString()} withdarwing ${collection_id.toNumber()}, ${token_id.toNumber()}`, "END");
+    log(`NFT withdraw #${lastNftWithdraw+1}: ${address.toString()} withdrawing ${collection_id.toNumber()}, ${token_id.toNumber()}`, "END");
 
     lastNftWithdraw++;
     fs.writeFileSync("./withdrawal_id.json", JSON.stringify({ lastQuoteWithdraw, lastNftWithdraw }));
