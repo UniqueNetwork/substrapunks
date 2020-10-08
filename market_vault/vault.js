@@ -14,6 +14,7 @@ const quoteId = 2; // KSM
 const logFile = "./operations_log";
 
 let api;
+let apiKus;
 
 function getTime() {
   var a = new Date();
@@ -248,7 +249,7 @@ async function scanContract(admin) {
 
     // Send withdraw transaction
     if (amountBN.isGreaterThanOrEqualTo(0))
-      await sendTxAsync(api, admin, address, amountBN.toString());
+      await sendTxAsync(apiKus, admin, address, amountBN.toString());
 
     log(`Quote withdraw #${lastQuoteWithdraw+1}: ${address.toString()} withdarwing amount ${amount.toNumber()}`, "END");
 
@@ -280,7 +281,7 @@ async function main() {
   const wsProvider = new WsProvider(config.wsEndpointKusama);
 
   // Create the API and wait until ready
-  const apiKus = await ApiPromise.create({ 
+  apiKus = await ApiPromise.create({ 
     provider: wsProvider,
     types: rtt
   });
