@@ -185,7 +185,7 @@ async function scanNftBlock(api, admin, blockNum) {
       log(`NFT deposit from ${ex.signer.toString()} id (${args[1]}, ${args[2]})`, "RECEIVED");
 
       // Register NFT Deposit
-      await registerNftDepositAsync(admin, ex.signer.toString(), args[1], args[2]);
+      await registerNftDepositAsync(api, admin, ex.signer.toString(), args[1], args[2]);
       log(`NFT deposit from ${ex.signer.toString()} id (${args[1]}, ${args[2]})`, "REGISTERED");
     }
   });
