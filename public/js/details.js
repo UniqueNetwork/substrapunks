@@ -194,7 +194,7 @@ async function tradetx() {
 
     await n.trade(punkId, price, owner);
 
-    window.location = `marketplace.html?owner=${owner}`;
+    window.location = `marketplace.html`;
   }
   catch (err) {
     errMsg = `<p style='color:red;'>Something went wrong: ${err} <br/><br/>You may want to try again.<br/><br/></p>`;
