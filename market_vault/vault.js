@@ -14,8 +14,8 @@ const quoteId = 2; // KSM
 const logFile = "./operations_log";
 
 // Queues of deposits and withdrawals
-let quoteDeposits = [];
-let quoteWithdrawals = [];
+// let quoteDeposits = [];
+// let quoteWithdrawals = [];
 
 function getTime() {
   var a = new Date();
@@ -162,6 +162,7 @@ async function scanKusamaBlock(api, blockNum) {
   const signedBlock = await api.rpc.chain.getBlock(blockHash);
 
   // console.log(`Reading Block Transactions`);
+  let quoteDeposits = [];
   await signedBlock.block.extrinsics.forEach(async (ex, index) => {
     let { _isSigned, _meta, method: { args, method, section } } = ex;
     // console.log(`Section: ${section}, method: ${method} args: ${args[0]}`);
@@ -178,6 +179,8 @@ async function scanKusamaBlock(api, blockNum) {
       quoteDeposits.push(deposit);
     }
   });
+  fs.writeFileSync("./quoteDeposits.json", JSON.stringify(quoteDeposits));
+
 }
 
 async function scanNftBlock(api, admin, blockNum) {
@@ -294,6 +297,7 @@ async function scanContract(api, admin) {
   log(`Checking withdrawals. Last/handled quote withdraw id: ${lastContractQuoteWithdrawId}/${lastQuoteWithdraw} last/handled nft withdraw id: ${lastContractNftWithdrawId}/${lastNftWithdraw}`, "OK");
 
   // Process Quote withdraws
+  let quoteWithdrawals = [];
   while (lastContractQuoteWithdrawId > lastQuoteWithdraw) {
     // Get the withdraw amount and address
     const result3 = await contractInstance.call('rpc', 'get_withdraw_by_id', 0, 1000000000000, lastQuoteWithdraw+1).send(admin.address);
@@ -317,6 +321,7 @@ async function scanContract(api, admin) {
       };
       quoteWithdrawals.push(withdrawal);
     }
+    fs.writeFileSync("./quoteWithdrawals.json", JSON.stringify(quoteWithdrawals));
 
     lastQuoteWithdraw++;
     fs.writeFileSync("./withdrawal_id.json", JSON.stringify({ lastQuoteWithdraw, lastNftWithdraw }));
@@ -372,18 +377,24 @@ async function handleKusama() {
   }
 
   // Handle queued withdrawals
+  let quoteWithdrawals = [];
+  try {
+    quoteWithdrawals = JSON.parse(fs.readFileSync("./quoteWithdrawals.json"));
+  } catch (e) {}
   for (let i=0; i<quoteWithdrawals.length; i++) {
     await sendTxAsync(api, admin, quoteWithdrawals[i].address, quoteWithdrawals.amount);
     log(`Quote withdraw #${quoteWithdrawals[i].number}: ${quoteWithdrawals[i].address.toString()} withdarwing amount ${quoteWithdrawals[i].amount}`, "END");
   }
-  quoteWithdrawals = [];
 
   // Handle queues deposits
+  let quoteDeposits = [];
+  try {
+    quoteDeposits = JSON.parse(fs.readFileSync("./quoteDeposits.json"));
+  } catch (e) {}
   for (let i=0; i<quoteDeposits.length; i++) {
     await registerQuoteDepositAsync(admin, quoteDeposits[i].address, quoteDeposits[i].amount);
     log(`Quote deposit from ${quoteDeposits[i].address} amount ${quoteDeposits[i].amount}`, "REGISTERED");
   }
-  quoteDeposits = [];
 
   api.disconnect();
 }
