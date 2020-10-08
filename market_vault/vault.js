@@ -283,7 +283,7 @@ async function main() {
   // Create the API and wait until ready
   apiKus = await ApiPromise.create({ 
     provider: wsProvider,
-    types: rtt
+    // types: rtt
   });
 
   // Initialise the provider to connect to the node
