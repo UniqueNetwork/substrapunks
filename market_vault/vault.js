@@ -230,33 +230,33 @@ function sendTxAsync(api, sender, recipient, amount) {
   });
 }
 
-function sendNftTxAsync(api, sender, recipient, collection_id, token_id) {
-  return new Promise(async function(resolve, reject) {
-    try {
-      const unsub = await api.tx.nft
-      .transfer(recipient, collection_id, token_id, 0)
-      .signAndSend(sender, (result) => {
-        console.log(`Current tx status is ${result.status}`);
-    
-        if (result.status.isInBlock) {
-          console.log(`Transaction included at blockHash ${result.status.asInBlock}`);
-        } else if (result.status.isFinalized) {
-          console.log(`Transaction finalized at blockHash ${result.status.asFinalized}`);
-          resolve();
-          unsub();
-        } else if (result.status.isUsurped) {
-          console.log(`Something went wrong with transaction. Status: ${result.status}`);
-          log(`NFT qithdraw`, `ERROR: ${result.status}`);
-          reject();
-          unsub();
-        }
+async function sendNftTxAsync(api, sender, recipient, collection_id, token_id) {
+  // return new Promise(async function(resolve, reject) {
+  try {
+    const unsub = await api.tx.nft
+    .transfer(recipient, collection_id, token_id, 0)
+    .signAndSend(sender, (result) => {
+      console.log(`Current tx status is ${result.status}`);
+  
+      if (result.status.isInBlock) {
+        console.log(`Transaction included at blockHash ${result.status.asInBlock}`);
+      } else if (result.status.isFinalized) {
+        console.log(`Transaction finalized at blockHash ${result.status.asFinalized}`);
+        // resolve();
+        unsub();
+      } else if (result.status.isUsurped) {
+        console.log(`Something went wrong with transaction. Status: ${result.status}`);
+        log(`NFT qithdraw`, `ERROR: ${result.status}`);
+        // reject();
+        unsub();
+      }
     });
-    } catch (e) {
-      console.log("Error: ", e);
-      log(`NFT withdraw`, `ERROR: ${e.toString()}`);
-      reject(e);
-    }
-  });
+  } catch (e) {
+    console.log("Error: ", e);
+    log(`NFT withdraw`, `ERROR: ${e.toString()}`);
+    reject(e);
+  }
+  // });
 }
 
 async function scanContract(api, admin) {
@@ -307,7 +307,7 @@ async function scanContract(api, admin) {
     const result4 = await contractInstance.call('rpc', 'get_nft_withdraw_by_id', 0, 1000000000000, lastNftWithdraw+1).send(admin.address);
     const [pubKey, collection_id, token_id] = result4.output;
     const address = keyring.encodeAddress(pubKey); 
-    console.log(`${address.toString()} withdrawing NFT ${collection_id.toNumber()}, ${token_id.toNumber()}`);
+    console.log(`${address.toString()} withdrawing NFT (${collection_id.toNumber()}, ${token_id.toNumber()})`);
     log(`NFT withdraw #${lastNftWithdraw+1}: ${address.toString()} withdrawing ${collection_id.toNumber()}, ${token_id.toNumber()}`, "START");
 
     // Send withdraw transaction
