@@ -541,6 +541,13 @@ class nft {
     return kusamaAddress;
   }
 
+  convertToKusamaAddress(address) {
+    const keyring = new Keyring({ type: 'sr25519' });
+    const publicKey = keyring.decodeAddress(address);
+    const kusamaAddress = keyring.encodeAddress(publicKey, 2); // 2 for Kusama SS58
+    return kusamaAddress;
+  }
+
 }
 
 window.nft = nft;
