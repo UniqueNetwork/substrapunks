@@ -1,5 +1,6 @@
 #!/bin/bash
 while :
 do
-	node vault.js
+	node kusama_vault.js
+	node unique_vault.js
 done

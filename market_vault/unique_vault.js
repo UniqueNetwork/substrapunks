@@ -1,4 +1,5 @@
-const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
+const { ApiPromise, WsProvider, Keyring } = require('api_v128');
+const { Abi, PromiseContract } = require('api_contracts');
 const delay = require('delay');
 const config = require('./config');
 const fs = require('fs');
@@ -6,16 +7,11 @@ const fs = require('fs');
 var BigNumber = require('bignumber.js');
 BigNumber.config({ DECIMAL_PLACES: 12, ROUNDING_MODE: BigNumber.ROUND_DOWN, decimalSeparator: '.' });
 
-const { Abi, PromiseContract } = require('@polkadot/api-contract');
 const rtt = require("./runtime_types.json");
 const contractAbi = require("./market_metadata.json");
 
 const quoteId = 2; // KSM
 const logFile = "./operations_log";
-
-// Queues of deposits and withdrawals
-// let quoteDeposits = [];
-// let quoteWithdrawals = [];
 
 function getTime() {
   var a = new Date();
@@ -37,19 +33,6 @@ function getDay() {
 
 function log(operation, status) {
   fs.appendFileSync(`${logFile}_${getDay()}.csv`, `${getTime()},${operation},${status}\n`);
-}
-
-async function getKusamaConnection() {
-  // Initialise the provider to connect to the node
-  const wsProvider = new WsProvider(config.wsEndpointKusama);
-
-  // Create the API and wait until ready
-  const api = await ApiPromise.create({ 
-    provider: wsProvider,
-    // types: rtt
-  });
-
-  return api;
 }
 
 async function getUniqueConnection() {
@@ -144,35 +127,6 @@ function registerNftDepositAsync(api, sender, depositorAddress, collection_id, t
   });
 }
 
-async function scanKusamaBlock(api, blockNum) {
-  console.log(`Scanning Block #${blockNum}`);
-  const blockHash = await api.rpc.chain.getBlockHash(blockNum);
-
-  // Memo: If it fails here, check custom types
-  const signedBlock = await api.rpc.chain.getBlock(blockHash);
-
-  // console.log(`Reading Block Transactions`);
-  let quoteDeposits = [];
-  await signedBlock.block.extrinsics.forEach(async (ex, index) => {
-    let { _isSigned, _meta, method: { args, method, section } } = ex;
-    // console.log(`Section: ${section}, method: ${method} args: ${args[0]}`);
-    if (method == "transferKeepAlive") method = "transfer";
-    if ((section == "balances") && (method == "transfer") && (args[0] == config.adminAddressKusama)) {
-      console.log(`Transfer: ${args[0]} received ${args[1]} from ${ex.signer.toString()}`);
-      log(`Quote deposit from ${ex.signer.toString()} amount ${args[0]}`, "RECEIVED");
-
-      // Register Quote Deposit
-      const deposit = {
-        address: ex.signer.toString(),
-        amount: args[1]
-      };
-      quoteDeposits.push(deposit);
-      fs.writeFileSync("./quoteDeposits.json", JSON.stringify(quoteDeposits));
-    }
-  });
-
-}
-
 async function scanNftBlock(api, admin, blockNum) {
   console.log(`Scanning Block #${blockNum}`);
   const blockHash = await api.rpc.chain.getBlockHash(blockNum);
@@ -202,37 +156,6 @@ async function scanNftBlock(api, admin, blockNum) {
     await registerNftDepositAsync(api, admin, nftDeposits[i].address, nftDeposits[i].collectionId, nftDeposits[i].tokenId);
     log(`NFT deposit from ${nftDeposits[i].address} id (${nftDeposits[i].collectionId}, ${nftDeposits[i].tokenId})`, "REGISTERED");
   }
-}
-
-function sendTxAsync(api, sender, recipient, amount) {
-  return new Promise(async function(resolve, reject) {
-    try {
-      const unsub = await api.tx.balances
-        .transfer(recipient, amount)
-        .signAndSend(sender, (result) => {
-          console.log(`Current tx status is ${result.status}`);
-      
-          if (result.status.isInBlock) {
-            console.log(`Transaction included at blockHash ${result.status.asInBlock}`);
-            resolve();
-            unsub();
-            } else if (result.status.isFinalized) {
-            console.log(`Transaction finalized at blockHash ${result.status.asFinalized}`);
-            resolve();
-            unsub();
-          } else if (result.status.isUsurped) {
-            console.log(`Something went wrong with transaction. Status: ${result.status}`);
-            log(`Quote qithdraw`, `ERROR: ${result.status}`);
-            reject();
-            unsub();
-          }
-        });
-    } catch (e) {
-      console.log("Error: ", e);
-      log(`Quote withdraw`, `ERROR: ${e.toString()}`);
-      reject(e);
-    }
-  });
 }
 
 function sendNftTxAsync(api, sender, recipient, collection_id, token_id) {
@@ -330,50 +253,6 @@ async function scanContract(api, admin) {
 
 }
 
-async function handleKusama() {
-
-  // Get the start block
-  let { lastKusamaBlock, lastNftBlock } = JSON.parse(fs.readFileSync("./block.json"));
-
-  const api = await getKusamaConnection();
-  const keyring = new Keyring({ type: 'sr25519' });
-  const admin = keyring.addFromUri(config.adminSeed);
-
-  while (true) {
-    try {
-      const finalizedHash = await api.rpc.chain.getFinalizedHead();
-      const signedFinalizedBlock = await api.rpc.chain.getBlock(finalizedHash);
-
-      if (lastKusamaBlock + 1 <= signedFinalizedBlock.block.header.number) {
-        // Handle Kusama Deposits (by analysing block transactions)
-        lastKusamaBlock++;
-        fs.writeFileSync("./block.json", JSON.stringify({ lastKusamaBlock: lastKusamaBlock, lastNftBlock: lastNftBlock }));
-
-        log(`Handling kusama block ${lastKusamaBlock}`, "START");
-        await scanKusamaBlock(api, lastKusamaBlock);
-        log(`Handling kusama block ${lastKusamaBlock}`, "END");
-      } else break;
-
-    } catch (ex) {
-      console.log(ex);
-      await delay(1000);
-    }
-  }
-
-  // Handle queued withdrawals
-  let quoteWithdrawals = [];
-  try {
-    quoteWithdrawals = JSON.parse(fs.readFileSync("./quoteWithdrawals.json"));
-  } catch (e) {}
-  for (let i=0; i<quoteWithdrawals.length; i++) {
-    await sendTxAsync(api, admin, quoteWithdrawals[i].address, quoteWithdrawals[i].amount);
-    log(`Quote withdraw #${quoteWithdrawals[i].number}: ${quoteWithdrawals[i].address.toString()} withdarwing amount ${quoteWithdrawals[i].amount}`, "END");
-  }
-  fs.writeFileSync("./quoteWithdrawals.json", "[]")
-
-  api.disconnect();
-}
-
 async function handleUnique() {
 
   // Get the start block
@@ -383,11 +262,11 @@ async function handleUnique() {
   const keyring = new Keyring({ type: 'sr25519' });
   const admin = keyring.addFromUri(config.adminSeed);
 
+  const finalizedHashNft = await api.rpc.chain.getFinalizedHead();
+  const signedFinalizedBlockNft = await api.rpc.chain.getBlock(finalizedHashNft);
+
   while (true) {
     try {
-      const finalizedHashNft = await api.rpc.chain.getFinalizedHead();
-      const signedFinalizedBlockNft = await api.rpc.chain.getBlock(finalizedHashNft);
-
       if (lastNftBlock + 1 <= signedFinalizedBlockNft.block.header.number) {
 
         // Handle NFT Deposits (by analysing block transactions)
@@ -422,7 +301,6 @@ async function handleUnique() {
 }
 
 async function main() {
-  await handleKusama();
   await handleUnique();
 }
 
