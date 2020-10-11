@@ -12,6 +12,7 @@ async function update() {
   let newOwner = document.getElementById("owner").value;
   document.getElementById('ksmbal').innerHTML = await n.getKsmBalance(newOwner);
   document.getElementById('kusamaVaultAddress').innerHTML = await n.getKusamaVaultAddress();
+  document.getElementById('myAddressInKusama').innerHTML = n.convertToKusamaAddress(newOwner);
 }
 
 async function showTokensForSale() {
