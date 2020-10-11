@@ -2438,6 +2438,10 @@ class nft {
       //   console.log('No specific chain properties found.');
       // }
       // console.log("Kusama decimals: ", this.ksmDecimals);
+
+
+      const abi = new Abi(api.registry, marketContractAbi);
+      this.contractInstance = new PromiseContract(api, abi, marketContractAddress);
     }
 
     return this.api;
@@ -2565,14 +2569,12 @@ class nft {
 
   async waitForDeposit(punkId, depositor) {
     try {
-      const api = await this.getApi();
-      const abi = new Abi(api.registry, marketContractAbi);
-      const contractInstance = new PromiseContract(api, abi, marketContractAddress);
       const keyring = new Keyring({ type: 'sr25519' });
+      await this.getApi();
     
       console.log("Waiting for deposit transaction");
       while (true) {
-        const result = await contractInstance.call('rpc', 'get_nft_deposit', 0, 1000000000000, collectionId, punkId).send(depositor);
+        const result = await this.contractInstance.call('rpc', 'get_nft_deposit', 0, 1000000000000, collectionId, punkId).send(depositor);
         if (result.output) {
           const address = keyring.encodeAddress(result.output.toString()); 
           console.log("Deposit address: ", address);
@@ -2805,11 +2807,8 @@ class nft {
 
   async getKsmBalance(addr) {
     try {
-      const api = await this.getApi();
-      const abi = new Abi(api.registry, marketContractAbi);
-      const contractInstance = new PromiseContract(api, abi, marketContractAddress);
-    
-      const result = await contractInstance.call('rpc', 'get_balance', 0, 1000000000000, 2).send(addr);
+      await this.getApi();
+      const result = await this.contractInstance.call('rpc', 'get_balance', 0, 1000000000000, 2).send(addr);
       if (result.output) {
         return this.ksmToFixed(result.output.toString());
       }
@@ -2821,14 +2820,12 @@ class nft {
   }
 
   async getAddressTokensOnMarket(addr) {
-    const api = await this.getApi();
-    const abi = new Abi(api.registry, marketContractAbi);
-    const contractInstance = new PromiseContract(api, abi, marketContractAddress);
     const keyring = new Keyring({ type: 'sr25519' });
     let nfts = [];
+    await this.getApi();
   
     console.log("Getting all active asks on the market");
-    const askIdResult = await contractInstance.call('rpc', 'get_last_ask_id', 0, 1000000000000).send(addr);
+    const askIdResult = await this.contractInstance.call('rpc', 'get_last_ask_id', 0, 1000000000000).send(addr);
     let lastAskId = 0;
     if (askIdResult.output) {
       lastAskId = askIdResult.output.toNumber();
@@ -2836,7 +2833,7 @@ class nft {
     }
 
     for (let i=1; i<=lastAskId; i++) {
-      const askResult = await contractInstance.call('rpc', 'get_ask_by_id', 0, 1000000000000, i).send(addr);
+      const askResult = await this.contractInstance.call('rpc', 'get_ask_by_id', 0, 1000000000000, i).send(addr);
       if (askResult.output) {
         const tokenId = askResult.output[1].toNumber();
         const tokenPrice = this.ksmToFixed(askResult.output[3].toString());
@@ -2852,14 +2849,11 @@ class nft {
   }
 
   async getRecentAsks(limit) {
-    const api = await this.getApi();
-    const abi = new Abi(api.registry, marketContractAbi);
-    const contractInstance = new PromiseContract(api, abi, marketContractAddress);
-    const keyring = new Keyring({ type: 'sr25519' });
     let nfts = [];
+    await this.getApi();
   
     console.log("Getting all active asks on the market");
-    const askIdResult = await contractInstance.call('rpc', 'get_last_ask_id', 0, 1000000000000).send(marketContractAddress);
+    const askIdResult = await this.contractInstance.call('rpc', 'get_last_ask_id', 0, 1000000000000).send(marketContractAddress);
     let lastAskId = 0;
     if (askIdResult.output) {
       lastAskId = askIdResult.output.toNumber();
@@ -2870,7 +2864,7 @@ class nft {
     let count = 0;
 
     while (askId >= 1) {
-      const askResult = await contractInstance.call('rpc', 'get_ask_by_id', 0, 1000000000000, askId).send(marketContractAddress);
+      const askResult = await this.contractInstance.call('rpc', 'get_ask_by_id', 0, 1000000000000, askId).send(marketContractAddress);
       if (askResult.output) {
         const tokenId = askResult.output[1].toNumber();
         const tokenPrice = this.ksmToFixed(askResult.output[3].toString());
@@ -2889,16 +2883,14 @@ class nft {
 
 
   async getTokenAsk(tokenId) {
-    const api = await this.getApi();
-    const abi = new Abi(api.registry, marketContractAbi);
-    const contractInstance = new PromiseContract(api, abi, marketContractAddress);
     const keyring = new Keyring({ type: 'sr25519' });
-  
-    const askIdResult = await contractInstance.call('rpc', 'get_ask_id_by_token', 0, 1000000000000, collectionId, tokenId).send(marketContractAddress);
+    await this.getApi();
+    
+    const askIdResult = await this.contractInstance.call('rpc', 'get_ask_id_by_token', 0, 1000000000000, collectionId, tokenId).send(marketContractAddress);
     if (askIdResult.output) {
       const askId = askIdResult.output.toNumber();
       console.log("Token Ask ID: ", askId);
-      const askResult = await contractInstance.call('rpc', 'get_ask_by_id', 0, 1000000000000, askId).send(marketContractAddress);
+      const askResult = await this.contractInstance.call('rpc', 'get_ask_by_id', 0, 1000000000000, askId).send(marketContractAddress);
       if (askResult.output) {
         const askOwnerAddress = keyring.encodeAddress(askResult.output[4].toString());
         console.log("Ask owner: ", askOwnerAddress);

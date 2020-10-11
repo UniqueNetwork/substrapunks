@@ -41,20 +41,57 @@
                 </ul>
             </div>
         </div>
+
+        <h1>Marketplace</h1>
+
+        <table style="border: 0px solid black;border-collapse: collapse; width:100%;">
+            <tr>
+                <td width="80%" style="vertical-align: top;">
+                    <h3>Tokens for Sale</h3>
+                    <div class="row" id='tokenlist'>
+                        Loading data from blockchain - знаю, что медленно, ускорю позже...
+                    </div>
+                </td>
+                <td style="vertical-align: top;">
+                    <div id='walletselector' style='display:block;'>
+                        <p><b>Select your Unique address:</b></p>
+                        <select id='owner' onchange='update();' class='btn' style='background-color: white; color: #ff04b4; max-width: 600px; border: 1px solid; border-radius: 3px;'></select>
+                        <br/><br/>
+                    </div>
+                    <div>
+                        <p>KSM Balance:</p>
+                        <p><b><span id='ksmbal'>???</span></b></p>
+                        <div id="withdraw" style="display:none;">
+                            Enter the KSM amount you'd like to withdraw:<br/>
+                            (A withdraw commission of 0.01 KSM will be applied to cover network fees)<br/>
+                            <input type="text" id="amount"/><br/>
+                            <p><button onclick='withdrawtx();' class='btn'>Withdraw</button></p>
+                        </div>
+                        <div id="withdrawButton">
+                            <p><button onclick='deposit();' class='btn'>Deposit KSM</button></p>
+                            <p><button onclick='withdraw();' class='btn'>Withdraw KSM</button></p>
+                        </div>
+                        <div id="progress" style="display:none;">
+                            Mining withdraw transaction... 
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
         <div class="row">
             <div class="col-md-10 col-xs-12">
                 <!-- CMS title -->
+                <!--
                 <h1>Marketplace</h1>
-                <p>
-                    The NFTs listed here are the <span id="limit"></span> NFTs recently placed on the market. The older asks are still tradeable, but 
-                    will not appear here. In order to refresh an ask, it needs to be cancelled and replaced. More filtering options are to come, 
-                    stay tuned!
-                </p>
-                <p>
-                    This marketplace is a BETA functionality. Please be warned: Even though we did our best to review and test this functionality, 
-                    and it allows trading NFTs for assets with real value (such as KSM), don't use any assets that you can't afford losing for now
-                    until this warning disappears.
-                </p>
+
+                <h3>Tokens for Sale</h3>
+                <div class="row" id='tokenlist'>
+                    Loading data from blockchain - знаю, что медленно, ускорю позже...
+                </div>
+
+                <br>
+
                 <div id='walletselector' style='display:block;'>
                     <p><b>Select your Polkadot-NFT address:</b></p>
                     <select id='owner' onchange='update();' class='btn' style='background-color: white; color: #ff04b4; max-width: 600px; border: 1px solid; border-radius: 3px;'></select>
@@ -79,12 +116,22 @@
                     <p><b><span id='kusamaVaultAddress'>???</span></b></p>
                     <br/><br/>
                 </div>
+
+                -->
+
             </div>
             <div class="col-md-12 text_block">
-                <h3>Tokens for Sale</h3>
-                <div class="row" id='tokenlist'>
-                    Loading data from blockchain...
-                </div>
+                <p>
+                    The NFTs listed here are the <span id="limit"></span> NFTs recently placed on the market. The older asks are still tradeable, but 
+                    will not appear here. In order to refresh an ask, it needs to be cancelled and replaced. More filtering options are to come, 
+                    stay tuned!
+                </p>
+                <p>
+                    This marketplace is a BETA functionality. Please be warned: Even though we did our best to review and test this functionality, 
+                    and it allows trading NFTs for assets with real value (such as KSM), don't use any assets that you can't afford losing for now
+                    until this warning disappears.
+                </p>
+
             </div>
         </div>
     </div>
@@ -94,6 +141,13 @@
             For <a href="https://chrome.google.com/webstore/detail/polkadot%7Bjs%7D-extension/mopnmbcafieddcagagdcbnhejhlodfdd">Chrome</a><br>
             For <a href="https://addons.mozilla.org/en-US/firefox/addon/polkadot-js-extension/">Firefox</a>
         </p>
+    </div>
+
+    <div id='kusamaDeposit' class='modal'>
+        <div class="modal-content">
+            In order to deposit KSM to your account in this marketplace, please send KSM to this address:
+            <span id='kusamaVaultAddress'></span>
+        </div>
     </div>
 
 </div>

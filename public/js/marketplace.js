@@ -32,6 +32,10 @@ async function showTokensForSale() {
   document.getElementById("tokenlist").innerHTML = listhtml;
 }
 
+function deposit() {
+  document.getElementById("kusamaDeposit").style.display = "block";
+}
+
 function withdraw() {
   document.getElementById("withdrawButton").style.display = "none";
   document.getElementById("withdraw").style.display = "block";
@@ -49,6 +53,12 @@ async function withdrawtx() {
   await n.withdrawAsync(amount, address);
 
   document.getElementById("progress").innerHTML = "Withdraw complete. Balance will appear on your address after processing in the vault (usually a few seconds).";
+}
+
+window.onclick = function(event) {
+  if (event.target == document.getElementById("kusamaDeposit")) {
+    document.getElementById("kusamaDeposit").style.display = "none";
+  }
 }
 
 window.onload = async function() {
