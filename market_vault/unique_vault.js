@@ -1,4 +1,4 @@
-const { ApiPromise, WsProvider, Keyring } = require('api_v128');
+const { ApiPromise, WsProvider, Keyring } = require('api_v1');
 const { Abi, PromiseContract } = require('api_contracts');
 const delay = require('delay');
 const config = require('./config');
@@ -40,10 +40,21 @@ async function getUniqueConnection() {
   const wsProviderNft = new WsProvider(config.wsEndpointNft);
 
   // Create the API and wait until ready
-  api = await ApiPromise.create({ 
+  const api = new ApiPromise({ 
     provider: wsProviderNft,
     types: rtt
   });
+
+  api.on('disconnected', async (value) => {
+    log(`disconnected: ${value}`);
+    process.exit();
+  });
+  api.on('error', async (value) => {
+    log(`error: ${value}`);
+    process.exit();
+  });
+
+  await api.isReady;
 
   return api;
 }

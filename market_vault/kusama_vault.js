@@ -1,9 +1,10 @@
-const { ApiPromise, WsProvider, Keyring } = require('api_v211');
+const { ApiPromise, WsProvider, Keyring } = require('api_v2');
 const delay = require('delay');
 const config = require('./config');
 const fs = require('fs');
 
 var BigNumber = require('bignumber.js');
+const { exit } = require('process');
 BigNumber.config({ DECIMAL_PLACES: 12, ROUNDING_MODE: BigNumber.ROUND_DOWN, decimalSeparator: '.' });
 
 const logFile = "./operations_log";
@@ -35,10 +36,18 @@ async function getKusamaConnection() {
   const wsProvider = new WsProvider(config.wsEndpointKusama);
 
   // Create the API and wait until ready
-  const api = await ApiPromise.create({ 
-    provider: wsProvider,
-    // types: rtt
+  const api = new ApiPromise({ provider: wsProvider });
+
+  api.on('disconnected', async (value) => {
+    log(`disconnected: ${value}`);
+    process.exit();
   });
+  api.on('error', async (value) => {
+    log(`error: ${value}`);
+    process.exit();
+  });
+
+  await api.isReady;
 
   return api;
 }
@@ -103,6 +112,21 @@ function sendTxAsync(api, sender, recipient, amount) {
   });
 }
 
+// Handle at least one block every 10 seconds or die
+let lastWatchDogBlock = 0;
+let updateWatchdog = 0;
+function watchDog() {
+  setTimeout(() => {
+    if (updateWatchdog != lastWatchDogBlock) {
+      lastWatchDogBlock = updateWatchdog;
+      watchDog();
+    } else {
+      log('WatchDog', `Process frozen on block ${lastWatchDogBlock}`);
+      process.exit();
+    }
+  }, 10000);
+}
+
 async function handleKusama() {
 
   // Get the start block
@@ -115,11 +139,15 @@ async function handleKusama() {
   const finalizedHash = await api.rpc.chain.getFinalizedHead();
   const signedFinalizedBlock = await api.rpc.chain.getBlock(finalizedHash);
 
+  // Start the watchdog
+  watchDog();
+
   while (true) {
     try {
       if (lastKusamaBlock + 1 <= signedFinalizedBlock.block.header.number) {
         // Handle Kusama Deposits (by analysing block transactions)
         lastKusamaBlock++;
+        updateWatchdog = lastKusamaBlock;
         fs.writeFileSync("./block.json", JSON.stringify({ lastKusamaBlock: lastKusamaBlock, lastNftBlock: lastNftBlock }));
 
         log(`Handling kusama block ${lastKusamaBlock}`, "START");
@@ -144,7 +172,7 @@ async function handleKusama() {
   }
   fs.writeFileSync("./quoteWithdrawals.json", "[]")
 
-  api.disconnect();
+  // api.disconnect();
 }
 
 async function main() {

@@ -332,6 +332,7 @@ dependencies = [
  "ink_abi",
  "ink_core",
  "ink_lang",
+ "ink_prelude",
  "ink_primitives",
  "parity-scale-codec",
  "type-metadata",

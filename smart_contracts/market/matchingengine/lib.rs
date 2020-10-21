@@ -5,6 +5,9 @@ use ink_lang as ink;
 #[ink::contract(version = "0.1.0")]
 mod matchingengine {
     use ink_core::storage;
+    use ink_prelude::vec::Vec;
+
+    const MAX_ASKS_CACHE: usize = 200;
 
     #[ink(storage)]
     struct MatchingEngine {
@@ -13,9 +16,6 @@ mod matchingengine {
 
         /// Contract admin (server that will input/output quote currency)
         admin: storage::Value<AccountId>,
-
-        /// Trade commission, per thousand
-        trade_fee_per_k: storage::Value<u128>,
 
         /////////////////////////////////////////////////////////////////////////////////
         // Deposits / Balances / Withdrawals
@@ -29,6 +29,9 @@ mod matchingengine {
         /// (...) more to come
         quote_balance: storage::HashMap<(u64, AccountId), Balance>,
 
+        /// Total trades counter (resettable)
+        total_traded: storage::HashMap<u64, Balance>,
+
         /// Vault withdraw ledger
         withdraw_queue: storage::HashMap<u128, (AccountId, Balance)>,
 
@@ -37,12 +40,6 @@ mod matchingengine {
 
         /// Recorded NFT deposits
         nft_deposits: storage::HashMap<(u64, u64), AccountId>,
-
-        // /// NFT Deposit Queue
-        // nft_deposit_queue: storage::HashMap<u128, (u64, u64, AccountId)>,
-
-        // /// Last NFT Deposit ID
-        // last_nft_deposit_id: storage::Value<u128>,
 
         /// NFT Vault withdraw ledger
         nft_withdraw_queue: storage::HashMap<u128, (AccountId, u64, u64)>,
@@ -56,8 +53,14 @@ mod matchingengine {
         /// Current asks: ask_id -> (collectionId, tokenId, quote_id, price, seller)
         asks: storage::HashMap<u128, (u64, u64, u64, Balance, AccountId)>,
 
-        /// Ask index: helps find the ask by the colectionId + tokenId
+        /// Ask index: Helps find the ask by the colectionId + tokenId
         asks_by_token: storage::HashMap<(u64, u64), u128>,
+
+        /// Ask index: Helps find asks by seller address
+        asks_by_seller: storage::HashMap<AccountId, Vec<(u64, u64, u64, Balance, AccountId)>>,
+
+        /// Ask cache: Helps find all recent asks
+        asks_cache: storage::Value<Vec<(u64, u64, u64, Balance, AccountId)>>,
 
         /// Last Ask ID
         last_ask_id: storage::Value<u128>,
@@ -70,6 +73,9 @@ mod matchingengine {
 
         /// Last Trade ID
         last_trade_id: storage::Value<u128>,
+
+        /// Completed trades by user
+        trades_by_seller: storage::HashMap<AccountId, Vec<(u64, u64, u64, Balance, AccountId, AccountId)>>,
 
     }
 
@@ -89,8 +95,8 @@ mod matchingengine {
             // Initialize last trade ID
             self.last_trade_id.set(0);
 
-            // Set trade fee to 2%
-            self.trade_fee_per_k.set(20);
+            // Init KSM totals
+            self.total_traded.insert(2, 0);
         }
 
         /// Returns the contract owner
@@ -104,6 +110,19 @@ mod matchingengine {
         fn set_admin(&mut self, admin: AccountId) {
             self.ensure_only_owner();
             self.admin.set(admin);
+        }
+
+        /// Get total
+        #[ink(message)]
+        fn get_total(&self, quote_id: u64) -> Balance{
+            *self.total_traded.get(&quote_id).unwrap()
+        }
+        
+        /// Reset total
+        #[ink(message)]
+        fn reset_total(&mut self, quote_id: u64) {
+            self.ensure_only_owner();
+            self.total_traded.insert(quote_id, 0);
         }
 
         /// Admin: Make a deposit for a user
@@ -128,19 +147,7 @@ mod matchingengine {
         /// User: Withdraw funds
         #[ink(message)]
         fn withdraw(&mut self, quote_id: u64, withdraw_balance: Balance) {
-
-            // Make sure the user has enough
-            let initial_balance = self.balance_of_or_zero(quote_id, &self.env().caller());
-            assert!(initial_balance >= withdraw_balance);
-
-            // Update user's quote balance
-            self.quote_balance.insert((quote_id, self.env().caller().clone()), initial_balance - withdraw_balance);
-
-            // Increase last withdraw index
-            self.last_withdraw_id.set(self.last_withdraw_id.get() + 1);
-
-            // Start a withdraw from the vault
-            self.withdraw_queue.insert(*self.last_withdraw_id.get(), (self.env().caller().clone(), withdraw_balance));
+            self.vault_withdraw(&self.env().caller(), quote_id, withdraw_balance);
         }
 
         /// Get last withdraw id
@@ -167,20 +174,6 @@ mod matchingengine {
             *self.nft_withdraw_queue.get(&id).unwrap()
         }
 
-        /// Set the contract commission
-        #[ink(message)]
-        fn set_commission(&mut self, commission: u128) {
-            self.ensure_only_owner();
-            self.trade_fee_per_k.set(commission);
-        }
-
-        /// User: Tell the market about a pending NFT deposit
-        // #[ink(message)]
-        // fn request_nft_deposit(&mut self, collection_id: u64, token_id: u64) {
-        //     self.last_nft_deposit_id.set(self.last_nft_deposit_id.get() + 1);
-        //     self.nft_deposit_queue.insert(*self.last_nft_deposit_id.get(), (collection_id, token_id, self.env().caller().clone()));
-        // }
-
         /// Admin: Tell the market about a successful NFT deposit
         #[ink(message)]
         fn register_nft_deposit(&mut self, collection_id: u64, token_id: u64, user: AccountId) {
@@ -193,11 +186,11 @@ mod matchingengine {
 
         /// Get deposit 
         #[ink(message)]
-        fn get_nft_deposit(&mut self, collection_id: u64, token_id: u64) -> AccountId {
+        fn get_nft_deposit(&self, collection_id: u64, token_id: u64) -> AccountId {
             *self.nft_deposits.get(&(collection_id, token_id)).unwrap()
         }
 
-        /// Admin: Place a deposited NFT for sale
+        /// User: Place a deposited NFT for sale
         #[ink(message)]
         fn ask(&mut self, collection_id: u64, token_id: u64, quote_id: u64, price: Balance) {
 
@@ -207,11 +200,29 @@ mod matchingengine {
 
             // Place an ask (into asks with a new Ask ID)
             let ask_id = self.last_ask_id.get() + 1;
+            let ask = (collection_id, token_id, quote_id, price, self.env().caller().clone());
             self.last_ask_id.set(ask_id);
-            self.asks.insert(ask_id, (collection_id, token_id, quote_id, price, self.env().caller().clone()));
+            self.asks.insert(ask_id, ask.clone());
 
             // Record that token is being sold by this user (in asks_by_token) in reverse lookup index
             self.asks_by_token.insert((collection_id, token_id), ask_id);
+
+            // Add to asks by seller index
+            // Check if the seller already has a list of asks, insert if not, and add this ask to his list
+            match self.asks_by_seller.get_mut(&deposit_owner) {
+                Some(asks) => (*asks).push(ask),
+                None => {
+                    let mut asks = Vec::<(u64, u64, u64, Balance, AccountId)>::new();
+                    asks.push(ask);
+                    self.asks_by_seller.insert(deposit_owner, asks);
+                }
+            };
+            
+            // Add to ask cache
+            self.asks_cache.push(ask);
+            if self.asks_cache.get().len() > MAX_ASKS_CACHE {
+                self.asks_cache.pop();
+            }
         }
 
         /// Get last ask ID
@@ -232,6 +243,18 @@ mod matchingengine {
             *self.asks_by_token.get(&(collection_id, token_id)).unwrap()
         }
 
+        /// Get asks for a seller
+        #[ink(message)]
+        fn get_asks_by_seller(&self) -> Vec<(u64, u64, u64, Balance, AccountId)> {
+            (*self.asks_by_seller.get(&self.env().caller()).unwrap()).clone()
+        }
+
+        /// Get asks cache
+        #[ink(message)]
+        fn get_asks_cache(&self) -> Vec<(u64, u64, u64, Balance, AccountId)> {
+            (*self.asks_cache.get()).clone()
+        }
+
         /// Cancel an ask
         #[ink(message)]
         fn cancel(&mut self, collection_id: u64, token_id: u64) {
@@ -241,14 +264,8 @@ mod matchingengine {
             let (_, _, _, _, user) = (*self.asks.get(&ask_id).unwrap()).clone();
             assert!(user == self.env().caller().clone());
 
-            // Remove the record that token is being sold by this user (from asks_by_token)
-            let _ = self.asks_by_token.remove(&(collection_id, token_id));
-
-            // Remove an ask (from asks)
-            let _ = self.asks.remove(&ask_id);
-
-            // Remove a deposit
-            let _ = self.nft_deposits.remove(&(collection_id, token_id));
+            // Remove ask from everywhere
+            self.remove_ask(collection_id, token_id, ask_id, &user);
 
             // Transfer token back to user through NFT Vault
             self.last_nft_withdraw_id.set(self.last_nft_withdraw_id.get() + 1);
@@ -269,62 +286,51 @@ mod matchingengine {
             
             // Subtract balance from buyer and increase balance of the seller and owner (due to commission)
             let initial_seller_balance = self.balance_of_or_zero(quote_id, &seller);
-            let initial_owner_balance = self.balance_of_or_zero(quote_id, &self.owner);
             assert!(initial_seller_balance + price > initial_seller_balance); // overflow protection
             self.quote_balance.insert((quote_id, self.env().caller().clone()), initial_buyer_balance - price);
+            self.quote_balance.insert((quote_id, seller.clone()), initial_seller_balance + price);
 
-            // Calculate fees. Division panics, so we can't use it and will hardcode to 2%. :((
-            let mut fee = 0;
-            if price > 100_000_000_000_000_000 {
-                fee =    2_000_000_000_000_000;
-            }
-            else if price > 10_000_000_000_000_000 {
-                fee =          200_000_000_000_000;
-            }
-            else if price > 1_000_000_000_000_000 {
-                fee =          20_000_000_000_000;
-            }
-            else if price > 100_000_000_000_000 {
-                fee =         2_000_000_000_000;
-            }
-            else if price > 10_000_000_000_000 {
-                fee =          200_000_000_000;
-            }
-            else if price > 1_000_000_000_000 {
-                fee =          20_000_000_000;
-            }
-            else if price > 100_000_000_000 {
-                fee =         2_000_000_000;
-            }
-            else if price > 10_000_000_000 {
-                fee =          200_000_000;
-            }
-            else if price > 1_000_000_000 {
-                fee =          20_000_000;
-            }
-            self.trade_fee_per_k.get();
-            let price_less_fee = price - fee;
-
-            self.quote_balance.insert((quote_id, seller.clone()), initial_seller_balance + price_less_fee);
-            self.quote_balance.insert((quote_id, self.owner.clone()), initial_owner_balance + fee);
-
-            // Remove the record that token is being sold by this user (from asks_by_token)
-            let _ = self.asks_by_token.remove(&(collection_id, token_id));
-
-            // Remove an ask (from asks)
-            let _ = self.asks.remove(&ask_id);
-
-            // Remove a deposit
-            let _ = self.nft_deposits.remove(&(collection_id, token_id));
+            // Remove ask from everywhere
+            self.remove_ask(collection_id, token_id, ask_id, &seller);
 
             // Register the trade (actual transfers are made by the vault)
             // trade_id -> (collectionId, tokenId, quote_id, price, seller, buyer)
             self.last_trade_id.set(self.last_trade_id.get() + 1);
-            self.trades.insert(*self.last_trade_id.get(), (collection_id, token_id, quote_id, price, seller.clone(), self.env().caller().clone()));
+            let trade = (collection_id, token_id, quote_id, price, seller.clone(), self.env().caller().clone());
+            self.trades.insert(*self.last_trade_id.get(), trade);
+
+            // Add to trades by seller index
+            match self.trades_by_seller.get_mut(&seller) {
+                Some(trades) => (*trades).push(trade),
+                None => {
+                    let mut trades = Vec::<(u64, u64, u64, Balance, AccountId, AccountId)>::new();
+                    trades.push(trade);
+                    self.trades_by_seller.insert(seller, trades);
+                }
+            };
 
             // Start an NFT withdraw from the vault
             self.last_nft_withdraw_id.set(self.last_nft_withdraw_id.get() + 1);
             self.nft_withdraw_queue.insert(*self.last_nft_withdraw_id.get(), (self.env().caller().clone(), collection_id, token_id));
+
+            // Start Quote withdraw from the vault for the seller
+            self.vault_withdraw(&seller, quote_id, price);
+
+            // Update totals
+            let total = *self.total_traded.get(&quote_id).unwrap();
+            self.total_traded.insert(quote_id, total + price);
+        }
+
+        /// Get historic trades by id
+        #[ink(message)]
+        fn get_trade_by_id(&self, trade_id: u128) -> (u64, u64, u64, Balance, AccountId, AccountId) {
+            *self.trades.get(&trade_id).unwrap()
+        }
+
+        /// Get trades by user
+        #[ink(message)]
+        fn get_trades_by_user(&self) -> Vec<(u64, u64, u64, Balance, AccountId, AccountId)> {
+            (*self.trades_by_seller.get(&self.env().caller()).unwrap()).clone()
         }
 
         /// Panic if the sender is not the contract owner
@@ -341,6 +347,59 @@ mod matchingengine {
         fn balance_of_or_zero(&self, quote_id: u64, user: &AccountId) -> Balance {
             *self.quote_balance.get(&(quote_id, *user)).unwrap_or(&0)
         }
+
+        fn remove_ask(&mut self, collection_id: u64, token_id: u64, ask_id: u128, user: &AccountId) {
+            // Remove the record that token is being sold by this user (from asks_by_token)
+            let _ = self.asks_by_token.remove(&(collection_id, token_id));
+
+            // Remove an ask (from asks)
+            let _ = self.asks.remove(&ask_id);
+
+            // Remove ask from seller asks
+            match self.asks_by_seller.get_mut(&user) {
+                Some(asks) => {
+                    let mut index = 0;
+                    for (c_id, t_id, _, _, _) in asks.iter() {
+                        if (*c_id == collection_id) && (*t_id == token_id) {
+                            break;
+                        }
+                        index += 1;
+                    }
+                    asks.remove(index);
+                },
+                None => {}
+            };
+
+            // Remove ask from cache
+            let mut cache_index = 0;
+            let cache = self.asks_cache.get_mut();
+            for (c_id, t_id, _, _, _) in cache.iter() {
+                if (*c_id == collection_id) && (*t_id == token_id) {
+                    break;
+                }
+                cache_index += 1;
+            }
+            cache.remove(cache_index);
+
+            // Remove a deposit
+            let _ = self.nft_deposits.remove(&(collection_id, token_id));
+        }
+
+        fn vault_withdraw(&mut self, user: &AccountId, quote_id: u64, withdraw_balance: Balance) {
+            // Make sure the user has enough
+            let initial_balance = self.balance_of_or_zero(quote_id, user);
+            assert!(initial_balance >= withdraw_balance);
+
+            // Update user's quote balance
+            self.quote_balance.insert((quote_id, (*user).clone()), initial_balance - withdraw_balance);
+
+            // Increase last withdraw index
+            self.last_withdraw_id.set(self.last_withdraw_id.get() + 1);
+
+            // Start a withdraw from the vault
+            self.withdraw_queue.insert(*self.last_withdraw_id.get(), ((*user).clone(), withdraw_balance));
+        }
+
     }
 }
 

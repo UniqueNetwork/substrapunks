@@ -21,8 +21,8 @@
     "bignumber.js": "^9.0.0",
     "delay": "^4.4.0",
     "fs": "^0.0.1-security",
-    "api_v128": "npm:@polkadot/api@1.28.1",
-    "api_v211": "npm:@polkadot/api@2.1.1",
+    "api_v1": "npm:@polkadot/api@1.28.1",
+    "api_v2": "npm:@polkadot/api@2.3.1",
     "api_contracts": "npm:@polkadot/api-contract@1.28.1"
   },
   "standard": {
