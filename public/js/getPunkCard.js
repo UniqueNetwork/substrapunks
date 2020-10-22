@@ -1,8 +1,13 @@
-function getPunkCard(id, punk) {
+function getPunkCard(id, punk, my) {
 
   let status = "Claimed";
   if (punk.price) {
-    status = `For sale:<br/>${punk.price} KSM`;
+    if (my) {
+      status = `I'm selling:<br/>${punk.price} KSM`;
+    }
+    else {
+      status = `For sale:<br/>${punk.price} KSM`;
+    }
   }
 
   let backgroundColor = 'd6adad';

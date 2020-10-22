@@ -6,15 +6,17 @@
  *   browserify nft.js > ../public/js/polkadot.js
  */
 
-const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
+const { ApiPromise, WsProvider, Keyring } = require('api_v1');
+const { ApiPromise: ApiPromiseKsm, WsProvider: WsProviderKsm } = require('api_v2');
 const attributes = require('./attributes').attributes;
-const { wsEndpoint, collectionId, punksToImport, contractAddress, marketContractAddress, vaultAddress } = require("./browser_config.json");
+const { wsEndpoint, wsEndpointKusama, collectionId, punksToImport, contractAddress, marketContractAddress, vaultAddress } = require("./browser_config.json");
 
 const { web3Accounts, web3Enable, web3FromAddress } = require('@polkadot/extension-dapp');
 const { Abi, PromiseContract } = require('@polkadot/api-contract');
 const rtt = require("./runtime_types.json");
 const contractAbi = require("./metadata.json");
 const marketContractAbi = require("./market_metadata.json");
+const delay = require('delay');
 
 var BigNumber = require('bignumber.js');
 BigNumber.config({ DECIMAL_PLACES: 12, ROUNDING_MODE: BigNumber.ROUND_DOWN, decimalSeparator: '.' });
@@ -31,6 +33,12 @@ class nft {
   }
   
   async getApi() {
+    if (this.kusamaApi) {
+      try {
+        this.kusamaApi.disconnect();
+      } catch (e) {}
+    }
+
     if (!this.api) {
       console.log(`Connecting to node: ${wsEndpoint}`);
 
@@ -65,6 +73,24 @@ class nft {
     }
 
     return this.api;
+  }
+
+  async getKusamaApi() {
+    if (this.api) {
+      try {
+        this.api.disconnect();
+      } catch (e) {}
+    }
+    if (!this.kusamaApi) {
+      // Initialise the provider to connect to the node
+      const wsProvider = new WsProviderKsm(wsEndpointKusama);
+    
+      // Create the API and wait until ready
+      const api = await ApiPromiseKsm.create({ provider: wsProvider });
+      this.kusamaApi = api;
+      this.ksmDecimals = 12;
+    }
+    return this.kusamaApi;
   }
 
   async loadPunkFromChain(punkId) {
@@ -187,24 +213,32 @@ class nft {
     });
   }
 
-  async waitForDeposit(punkId, depositor) {
+  async delay(ms) {
+    await delay(ms);
+  }
+
+  async waitForDeposit(punkId, depositorAddressList) {
     try {
       const keyring = new Keyring({ type: 'sr25519' });
       await this.getApi();
     
-      console.log("Waiting for deposit transaction");
+      console.log("Waiting for deposit transaction", depositorAddressList);
       while (true) {
-        const result = await this.contractInstance.call('rpc', 'get_nft_deposit', 0, 1000000000000, collectionId, punkId).send(depositor);
+        const result = await this.contractInstance.call('rpc', 'get_nft_deposit', 0, 1000000000000, collectionId, punkId).send(depositorAddressList[0]);
         if (result.output) {
           const address = keyring.encodeAddress(result.output.toString()); 
           console.log("Deposit address: ", address);
-          if (depositor == address) break;
+          if (depositorAddressList.includes(address)) return address;
+        } else {
+          await delay(5000);
         }
       };
 
     } catch (e) {
       console.log("Error: ", e);
     }
+
+    return null;
   }
 
   askAsync(punkId, price, ownerAddress) {
@@ -253,6 +287,8 @@ class nft {
   async trade(punkId, price, ownerAddress) {
     console.log(`Selling punk ${punkId} in collection ${collectionId} for ${price}`);
 
+    await this.getApi();
+
     // Convert price to "Weis" and round to hundredths of KSM, round to 0.01 KSM
     let priceBN = new BigNumber((''+price).replace(/,/g, '.'));
     const ksmexp = BigNumber(10).pow(this.ksmDecimals);
@@ -262,14 +298,8 @@ class nft {
     priceBN = priceBN.dividedBy(100);
     priceBN = priceBN.multipliedBy(ksmexp);
 
-    // Transaction #1: Deposit NFT to the vault
-    await this.depositAsync(punkId, ownerAddress);
-
-    // Wait for Vault transaction
-    await this.waitForDeposit(punkId, ownerAddress);
-
     // Transaction #2: Invoke ask method on market contract to set the price
-    await this.askAsync(punkId, priceBN.toString(), ownerAddress)
+    await this.askAsync(punkId, priceBN.toString(), ownerAddress);
   }
 
   cancelAsync(punkId, ownerAddress) {
@@ -413,6 +443,53 @@ class nft {
     return acc.data.free.toString();
   }
 
+  async getKusamaBalance(addr) {
+    const api = await this.getKusamaApi();
+    const acc = await api.query.system.account(addr);
+    return this.ksmToFixed(acc.data.free);
+  }
+
+  async sendKusamaBalance(sender, recepient, amount) {
+    // Convert to u128
+    const ksmexp = BigNumber(10).pow(this.ksmDecimals);
+    const balance = new BigNumber(amount);
+    const balanceToSend = balance.multipliedBy(ksmexp);
+    const api = await this.getKusamaApi();
+
+    console.log("balanceToSend: ", balanceToSend.toString());
+
+    return new Promise(async function(resolve, reject) {
+      try {
+        const injector = await web3FromAddress(sender);
+        api.setSigner(injector.signer);
+
+        const unsub = await api.tx.balances
+          .transfer(recepient, balanceToSend.toString())
+          .signAndSend(sender, (result) => {
+            console.log(`Kusama transfer: Current tx status is ${result.status}`);
+        
+            if (result.status.isInBlock) {
+              console.log(`Kusama transfer: Transaction included at blockHash ${result.status.asInBlock}`);
+              resolve();
+              unsub();
+              } else if (result.status.isFinalized) {
+              console.log(`Kusama transfer: Transaction finalized at blockHash ${result.status.asFinalized}`);
+              resolve();
+              unsub();
+            } else if (result.status.isUsurped) {
+              console.log(`Kusama transfer: Something went wrong with transaction. Status: ${result.status}`);
+              reject();
+              unsub();
+            }
+          });
+      } catch (e) {
+        console.log("Kusama transfer: Error: ", e);
+        reject(e);
+      }
+    });
+  }
+
+
   async getAddressTokens(addr) {
     const api = await this.getApi();
     const nfts = await api.query.nft.addressTokens(collectionId, addr);
@@ -443,59 +520,38 @@ class nft {
     const keyring = new Keyring({ type: 'sr25519' });
     let nfts = [];
     await this.getApi();
-  
-    console.log("Getting all active asks on the market");
-    const askIdResult = await this.contractInstance.call('rpc', 'get_last_ask_id', 0, 1000000000000).send(addr);
-    let lastAskId = 0;
-    if (askIdResult.output) {
-      lastAskId = askIdResult.output.toNumber();
-      console.log("Last Ask ID: ", lastAskId);
-    }
 
-    for (let i=1; i<=lastAskId; i++) {
-      const askResult = await this.contractInstance.call('rpc', 'get_ask_by_id', 0, 1000000000000, i).send(addr);
-      if (askResult.output) {
-        const tokenId = askResult.output[1].toNumber();
-        const tokenPrice = this.ksmToFixed(askResult.output[3].toString());
-        const tokenOwner = keyring.encodeAddress(askResult.output[4].toString());
-        if (tokenOwner == addr) {
-          nfts.push({id: tokenId, price: tokenPrice});
-          console.log("Found token: ", tokenId);
-        }
+    const asksResult = await this.contractInstance.call('rpc', 'get_asks_cache', 0, 1000000000000).send(addr);
+    const asks = asksResult.output.elems;
+  
+    for (let i=0; i<asks.length; i++) {
+      const tokenId = asks[i][1].toNumber();
+      const tokenPrice = this.ksmToFixed(asks[i][3].toString());
+      const tokenOwner = keyring.encodeAddress(asks[i][4].toString());
+      if (tokenOwner == addr) {
+        nfts.push({id: tokenId, price: tokenPrice});
+        console.log("Found token: ", tokenId);
       }
     }
 
     return nfts;
   }
 
-  async getRecentAsks(limit) {
+  async getRecentAsks(addr) {
+    const keyring = new Keyring({ type: 'sr25519' });
     let nfts = [];
     await this.getApi();
+
+    const asksResult = await this.contractInstance.call('rpc', 'get_asks_cache', 0, 1000000000000).send(addr);
+    const asks = asksResult.output.elems;
   
-    console.log("Getting all active asks on the market");
-    const askIdResult = await this.contractInstance.call('rpc', 'get_last_ask_id', 0, 1000000000000).send(marketContractAddress);
-    let lastAskId = 0;
-    if (askIdResult.output) {
-      lastAskId = askIdResult.output.toNumber();
-      console.log("Last Ask ID: ", lastAskId);
-    }
+    for (let i=0; i<asks.length; i++) {
+      const tokenId = asks[i][1].toNumber();
+      const tokenPrice = this.ksmToFixed(asks[i][3].toString());
+      const tokenOwner = keyring.encodeAddress(asks[i][4].toString());
 
-    let askId = lastAskId;
-    let count = 0;
-
-    while (askId >= 1) {
-      const askResult = await this.contractInstance.call('rpc', 'get_ask_by_id', 0, 1000000000000, askId).send(marketContractAddress);
-      if (askResult.output) {
-        const tokenId = askResult.output[1].toNumber();
-        const tokenPrice = this.ksmToFixed(askResult.output[3].toString());
-        nfts.push({id: tokenId, price: tokenPrice});
-        console.log("Found token: ", tokenId);
-        count++;
-
-        if (count >= limit) break;
-      }
-
-      askId--;
+      nfts.push({id: tokenId, price: tokenPrice, owner: tokenOwner});
+      console.log("Found token: ", tokenId);
     }
 
     return nfts;

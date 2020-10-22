@@ -226,7 +226,9 @@ async function scanContract(api, admin) {
 
     // Apply 0.01 KSM fee == 1e10 femto
     amountBN = new BigNumber(amount);
-    amountBN = amountBN.minus(1e10);
+    let fee = amountBN.multipliedBy(0.02);
+    if (fee < 1e10) fee = 1e10;
+    amountBN = amountBN.minus(fee);
     console.log(`${address.toString()} will receive ${amountBN.toString()}`);
     log(`Quote withdraw #${lastQuoteWithdraw+1}: sending ${amountBN.toString()}`, "START");
 

@@ -8,23 +8,26 @@
     <meta name="description" content="10,000 unique collectible characters with proof of ownership stored on the NFT Substrate blockchain." />
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/bootstrap-theme.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700">
     <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700">
     <!-- production -->
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/style1.css">
 
     <script src="js/polkadot.js"></script>
+    <script src="js/cookies.js"></script>    
     <script src="js/getPunkCard.js"></script>
-    <script src="js/home.js"></script>
-</head>
+    <script src="js/marketplace.js"></script>
+    </head>
+
 <body>
 
 <link rel="stylesheet" type="text/css" href="css/cryptopunk.css" charset="utf-8" ></link>
 
 <div class="main_content project">
-    <div class="container item_header header_block">
+    <div class="container item_header image_block" style="margin-bottom: 24px;">
+        
         <div class="row">
             <div class="col-md-10 col-xs-12">
                 <p></p>
@@ -34,55 +37,43 @@
             <div class="header__menu">
                 <br/>
                 <ul>
-                    <li><a href="my.html">My&nbsp;Punks</a></li>
-                    <li><a href="marketplace.html">Marketplace</a></li>
+                    <li><a href="index.html">Buy</a></li>
+                    <li><a href="my.html">Sell</a></li>
                 </ul>
             </div>
         </div>
+
         <div class="row">
             <div class="col-md-10 col-xs-12">
-                <!-- CMS title -->
-                <h1>SubstraPunks</h1>
-                <!-- CMS excerpt -->
-                <p>
-                    10,000 unique collectible characters with proof of ownership stored on the NFT Substrate blockchain Unique Network, 
-                    is a remake and a tribute to CryptoPunks, the first "Non-Fungible Token," and inspiration for the Ethereum 
-                    <a href="https://eips.ethereum.org/EIPS/eip-721">ERC-721 standard</a> that powers most digital art and collectibles.
-                </p>
-            </div>
-
-        </div>
-        <div class="row">
-            <div class="col-md-12 text_block">
-                <h3 class="m-t-50">Random Punks</h3>
-                <div class="row" id="randompunks">
-                    <p>Loading random punks from Polkadot Blockchain.</p>
-                    <p>Please wait just a bit...</p>
+                <h1>Marketplace</h1>
+                <div class="row" id='tokenlist'>
+                    Loading data from blockchain...
                 </div>
             </div>
-
             <div class="col-md-12 text_block">
                 <p>
-                    The CryptoPunks are 10,000 uniquely generated characters. No two are exactly the same, and each one of them 
-                    can be officially owned by a single person on the Unique Network blockchain. Initially they can be claimed 
-                    for free by anybody with an NFT wallet. The zoomable image above is connected to the Polkadot NFT network and 
-                    has been colored to show you the status of each Punk in the market. Punks with a 
-                    <span style="background-color: #adc9d6; padding-left: 2px; padding-right: 2px;">blue background</span>
-                    have been claimed. Punks with a 
-                    <span style="background-color: #d6adad; padding-left: 2px; padding-right: 2px;">red background</span>
-                    are available for claiming. Punks with a 
-                    <span style="background-color: #b8a7ce; padding-left: 2px; padding-right: 2px;">purple background</span>
-                    are available for sale. You can click to zoom in on a Punk and reveal its details and claim the free 
-                    ones.
+                    The NFTs listed here are the <span id="limit"></span> NFTs recently placed on the market. The older asks are still tradeable, but 
+                    will not appear here. In order to refresh an ask, it needs to be cancelled and replaced. More filtering options are to come, 
+                    stay tuned!
                 </p>
                 <p>
-                    <br/>
-                    <a href="https://t.me/joinchat/DPVt1RwN50Uic_Q9lFcg9A"><img src="images/telegram_logo.png" style="max-width: 40px;"/></a>&nbsp;&nbsp;&nbsp;&nbsp;Please contact us if you have any questions
+                    This marketplace is a BETA functionality. Please be warned: Even though we did our best to review and test this functionality, 
+                    and it allows trading NFTs for assets with real value (such as KSM), don't use any assets that you can't afford losing for now
+                    until this warning disappears.
                 </p>
+
             </div>
         </div>
     </div>
-            
+    <div id="extensionWarning" class='modal' style='display:none'>
+        <div class="modal-content">
+            <h3>Please enable Polkadot{.js} browser extension and create or import an address!</h3>
+            <p>
+                For <a href="https://chrome.google.com/webstore/detail/polkadot%7Bjs%7D-extension/mopnmbcafieddcagagdcbnhejhlodfdd">Chrome</a><br>
+                For <a href="https://addons.mozilla.org/en-US/firefox/addon/polkadot-js-extension/">Firefox</a>
+            </p>
+        </div>
+    </div>
 
 </div>
 

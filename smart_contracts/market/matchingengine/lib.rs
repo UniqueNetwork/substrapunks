@@ -7,7 +7,8 @@ mod matchingengine {
     use ink_core::storage;
     use ink_prelude::vec::Vec;
 
-    const MAX_ASKS_CACHE: usize = 200;
+    const MAX_ASKS_CACHE: u32 = 200;
+    const MAX_TRADES_CACHE: u32 = 1000;
 
     #[ink(storage)]
     struct MatchingEngine {
@@ -56,11 +57,8 @@ mod matchingengine {
         /// Ask index: Helps find the ask by the colectionId + tokenId
         asks_by_token: storage::HashMap<(u64, u64), u128>,
 
-        /// Ask index: Helps find asks by seller address
-        asks_by_seller: storage::HashMap<AccountId, Vec<(u64, u64, u64, Balance, AccountId)>>,
-
         /// Ask cache: Helps find all recent asks
-        asks_cache: storage::Value<Vec<(u64, u64, u64, Balance, AccountId)>>,
+        asks_cache: storage::Vec<(u64, u64, u64, Balance, AccountId)>,
 
         /// Last Ask ID
         last_ask_id: storage::Value<u128>,
@@ -68,18 +66,12 @@ mod matchingengine {
         /////////////////////////////////////////////////////////////////////////////////
         // Trades
 
-        /// Completed trades: trade_id -> (collectionId, tokenId, quote_id, price, seller, buyer)
-        trades: storage::HashMap<u128, (u64, u64, u64, Balance, AccountId, AccountId)>,
-
-        /// Last Trade ID
-        last_trade_id: storage::Value<u128>,
-
-        /// Completed trades by user
-        trades_by_seller: storage::HashMap<AccountId, Vec<(u64, u64, u64, Balance, AccountId, AccountId)>>,
-
+        /// Completed trades: (collectionId, tokenId, quote_id, price, seller, buyer)
+        trades: storage::Vec<(u64, u64, u64, Balance, AccountId, AccountId)>,
     }
 
     impl MatchingEngine {
+
         #[ink(constructor)]
         fn new(&mut self) {
             // Set contract owner 
@@ -91,9 +83,6 @@ mod matchingengine {
 
             // Initialize the last ask ID
             self.last_ask_id.set(0);
-
-            // Initialize last trade ID
-            self.last_trade_id.set(0);
 
             // Init KSM totals
             self.total_traded.insert(2, 0);
@@ -207,20 +196,9 @@ mod matchingengine {
             // Record that token is being sold by this user (in asks_by_token) in reverse lookup index
             self.asks_by_token.insert((collection_id, token_id), ask_id);
 
-            // Add to asks by seller index
-            // Check if the seller already has a list of asks, insert if not, and add this ask to his list
-            match self.asks_by_seller.get_mut(&deposit_owner) {
-                Some(asks) => (*asks).push(ask),
-                None => {
-                    let mut asks = Vec::<(u64, u64, u64, Balance, AccountId)>::new();
-                    asks.push(ask);
-                    self.asks_by_seller.insert(deposit_owner, asks);
-                }
-            };
-            
             // Add to ask cache
             self.asks_cache.push(ask);
-            if self.asks_cache.get().len() > MAX_ASKS_CACHE {
+            if self.asks_cache.len() > MAX_ASKS_CACHE {
                 self.asks_cache.pop();
             }
         }
@@ -243,16 +221,14 @@ mod matchingengine {
             *self.asks_by_token.get(&(collection_id, token_id)).unwrap()
         }
 
-        /// Get asks for a seller
-        #[ink(message)]
-        fn get_asks_by_seller(&self) -> Vec<(u64, u64, u64, Balance, AccountId)> {
-            (*self.asks_by_seller.get(&self.env().caller()).unwrap()).clone()
-        }
-
         /// Get asks cache
         #[ink(message)]
         fn get_asks_cache(&self) -> Vec<(u64, u64, u64, Balance, AccountId)> {
-            (*self.asks_cache.get()).clone()
+            let mut asks: Vec<(u64, u64, u64, Balance, AccountId)> = Vec::new();
+            for ask in self.asks_cache.iter() {
+                asks.push((*ask).clone());
+            }
+            asks
         }
 
         /// Cancel an ask
@@ -265,7 +241,7 @@ mod matchingengine {
             assert!(user == self.env().caller().clone());
 
             // Remove ask from everywhere
-            self.remove_ask(collection_id, token_id, ask_id, &user);
+            self.remove_ask(collection_id, token_id, ask_id);
 
             // Transfer token back to user through NFT Vault
             self.last_nft_withdraw_id.set(self.last_nft_withdraw_id.get() + 1);
@@ -291,23 +267,15 @@ mod matchingengine {
             self.quote_balance.insert((quote_id, seller.clone()), initial_seller_balance + price);
 
             // Remove ask from everywhere
-            self.remove_ask(collection_id, token_id, ask_id, &seller);
+            self.remove_ask(collection_id, token_id, ask_id);
 
             // Register the trade (actual transfers are made by the vault)
-            // trade_id -> (collectionId, tokenId, quote_id, price, seller, buyer)
-            self.last_trade_id.set(self.last_trade_id.get() + 1);
+            // (collectionId, tokenId, quote_id, price, seller, buyer)
             let trade = (collection_id, token_id, quote_id, price, seller.clone(), self.env().caller().clone());
-            self.trades.insert(*self.last_trade_id.get(), trade);
-
-            // Add to trades by seller index
-            match self.trades_by_seller.get_mut(&seller) {
-                Some(trades) => (*trades).push(trade),
-                None => {
-                    let mut trades = Vec::<(u64, u64, u64, Balance, AccountId, AccountId)>::new();
-                    trades.push(trade);
-                    self.trades_by_seller.insert(seller, trades);
-                }
-            };
+            self.trades.push(trade);
+            if self.trades.len() > MAX_TRADES_CACHE {
+                self.trades.pop();
+            }
 
             // Start an NFT withdraw from the vault
             self.last_nft_withdraw_id.set(self.last_nft_withdraw_id.get() + 1);
@@ -321,16 +289,14 @@ mod matchingengine {
             self.total_traded.insert(quote_id, total + price);
         }
 
-        /// Get historic trades by id
+        /// Get historic trades
         #[ink(message)]
-        fn get_trade_by_id(&self, trade_id: u128) -> (u64, u64, u64, Balance, AccountId, AccountId) {
-            *self.trades.get(&trade_id).unwrap()
-        }
-
-        /// Get trades by user
-        #[ink(message)]
-        fn get_trades_by_user(&self) -> Vec<(u64, u64, u64, Balance, AccountId, AccountId)> {
-            (*self.trades_by_seller.get(&self.env().caller()).unwrap()).clone()
+        fn get_trades(&self) -> Vec<(u64, u64, u64, Balance, AccountId, AccountId)> {
+            let mut trades: Vec<(u64, u64, u64, Balance, AccountId, AccountId)> = Vec::new();
+            for trade in self.trades.iter() {
+                trades.push((*trade).clone());
+            }
+            trades
         }
 
         /// Panic if the sender is not the contract owner
@@ -348,38 +314,22 @@ mod matchingengine {
             *self.quote_balance.get(&(quote_id, *user)).unwrap_or(&0)
         }
 
-        fn remove_ask(&mut self, collection_id: u64, token_id: u64, ask_id: u128, user: &AccountId) {
+        fn remove_ask(&mut self, collection_id: u64, token_id: u64, ask_id: u128) {
             // Remove the record that token is being sold by this user (from asks_by_token)
             let _ = self.asks_by_token.remove(&(collection_id, token_id));
 
             // Remove an ask (from asks)
             let _ = self.asks.remove(&ask_id);
 
-            // Remove ask from seller asks
-            match self.asks_by_seller.get_mut(&user) {
-                Some(asks) => {
-                    let mut index = 0;
-                    for (c_id, t_id, _, _, _) in asks.iter() {
-                        if (*c_id == collection_id) && (*t_id == token_id) {
-                            break;
-                        }
-                        index += 1;
-                    }
-                    asks.remove(index);
-                },
-                None => {}
-            };
-
             // Remove ask from cache
             let mut cache_index = 0;
-            let cache = self.asks_cache.get_mut();
-            for (c_id, t_id, _, _, _) in cache.iter() {
+            for (c_id, t_id, _, _, _) in self.asks_cache.iter() {
                 if (*c_id == collection_id) && (*t_id == token_id) {
                     break;
                 }
                 cache_index += 1;
             }
-            cache.remove(cache_index);
+            self.asks_cache.swap_remove(cache_index);
 
             // Remove a deposit
             let _ = self.nft_deposits.remove(&(collection_id, token_id));

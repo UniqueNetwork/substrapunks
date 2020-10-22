@@ -1,168 +1,60 @@
 <style>
-    html {font-size: 100%}
+html {font-size: 100%}
 
-    .discord-dialog a {
-        text-decoration: none;
-    }
+.container {
+  width: 100%;
+}
 
-    @keyframes discord-dialog__transition {
-    0% {
-        opacity: 0;
-        bottom: -2rem;
-    }
-    100% {
-        opacity: 1;
-        bottom: 0;
-    }
-    }
+.progressbar {
+  counter-reset: step;
+}
+.progressbar li {
+  list-style: none;
+  display: inline-block;
+  width: 30.33%;
+  position: relative;
+  text-align: center;
+}
+.progressbar li:before {
+  content: counter(step);
+  counter-increment: step;
+  width: 30px;
+  height: 30px;
+  line-height : 25px;
+  border: 3px solid #fcc;
+  border-radius: 100%;
+  display: block;
+  text-align: center;
+  margin: 0 auto 10px auto;
+  background-color: #fff;
+}
+.progressbar li:after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  background-color: #ddd;
+  top: 15px;
+  left: -50%;
+  z-index : -1;
+}
+.progressbar li:first-child:after {
+  content: none;
+}
+.progressbar li.active {
+  color: green;
+}
+.progressbar li.active:before {
+  border-color: green;
+} 
+.progressbar li.active + li:after {
+  background-color: green;
+}
 
-    .discord-dialog {
-        -webkit-tap-highlight-color: rgba(0,0,0,0);
-        box-sizing: border-box;
-        display: none;
-        z-index: 60;
-        position: fixed;
-        max-width: 24rem;
-        min-width: 18rem;
-        right: 0;
-        bottom: 0;
-        margin: 1rem;
-        background: #2e3136;
-        box-shadow: 0 0.1875rem 0.375rem rgba(0, 0, 0, 0.16), 0 0.1875rem 0.375rem rgba(0, 0, 0, 0.23);
-        color: rgba(0, 0, 0, 0.6);
-        transition: opacity 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), bottom 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        animation: discord-dialog__transition 0.2s;
-    }
+.progressStatus {
+    display:block;
+    height:100px;
+    overflow:hidden;
+}
 
-    .discord-dialog--active {
-        display: block;
-    }
-
-    .discord-dialog__container {
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #99aab5;
-        padding: 1rem;
-    }
-
-    .discord-dialog__logo {
-        width: auto;
-        height: 2rem;
-    }
-
-    .discord-dialog__logo path {
-        fill: #7289DA;
-    }
-
-    .discord-dialog__close-button {
-        float: right;
-        height: 1.5rem;
-        width: 1.5rem;
-        position: relative;
-        top: 0.25rem;
-        cursor: pointer;
-    }
-
-    .discord-dialog__close-button path {
-        fill: #99aab5;
-    }
-
-    .discord-dialog__close-button:hover path {
-        fill: #7a8891;
-    }
-
-    .discord-dialog__close-button:active path {
-        fill: #5c666d;
-    }
-
-    .discord-dialog__header, .discord-dialog__footer {
-        background: #282b30;
-        padding: 0.8rem;
-        height: 3.6rem;
-    }
-
-    .discord-dialog__header {
-        border-bottom: 0.1rem solid #36393f;
-    }
-
-    .discord-dialog__footer {
-        border-top: 0.1rem solid #36393f;
-    }
-
-    .discord-dialog__btn {
-        background: #7289da;
-        color: #fff;
-        border-radius: 0.1rem;
-        float: right;
-        margin: 0.5rem;
-        font-size: 1rem;
-        padding: 0.2rem 1rem;
-        position: relative;
-        top: -0.4rem;
-    }
-
-    .discord-dialog__btn:hover {
-        background: #677bc4;
-    }
-
-    .discord-dialog__btn:active {
-        background: #5b6eae;
-    }
-
-    /**
-     * Floating action button
-     */
-
-    .discord-dialog__strong-text {
-        color: #b9bbbe;
-        font-weight: bold;
-        text-transform: uppercase;
-        font-size: 1rem;
-        display: block;
-        margin-bottom: 0.8rem;
-    }
-
-    .discord-button {
-        -webkit-tap-highlight-color: rgba(0,0,0,0);
-        box-sizing: border-box;
-        box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.12), 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.24);
-        position: fixed;
-        bottom: 0;
-        right: 0;
-        z-index: 50;
-        margin: 1.25rem;
-        padding: 0.75rem;
-        border-radius: 50%;
-        height: 3.5rem;
-        background: #fff;
-        cursor: pointer;
-        transition: box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), background 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    }
-
-    .discord-button svg {
-        height: 2rem;
-        width: 2rem;
-    }
-
-    .discord-button svg path {
-        fill: #7289da;
-    }
-
-    .discord-button:hover {
-        background: #d9d9d9;
-        box-shadow: 0 0.1875rem 0.375rem rgba(0, 0, 0, 0.16), 0 0.1875rem 0.375rem rgba(0, 0, 0, 0.23);
-    }
-
-    .discord-button:hover svg path {
-        fill: #6174b9;
-    }
-
-    .discord-button:active {
-        background: #b3b3b3;
-        box-shadow: 0 0.625rem 1.25rem rgba(0, 0, 0, 0.19), 0 0.375rem 0.375rem rgba(0, 0, 0, 0.23);
-    }
-
-    .discord-button:active svg path {
-        fill: #506099;
-    }
 </style>

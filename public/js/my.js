@@ -12,6 +12,7 @@ function showExtensionWarning() {
 }
 async function show() {
   let address = document.getElementById("address").value;
+  setCookie("userSelectedAddress", address, 365);
   document.getElementById("tokenlist").innerHTML = "Loading data from Blockchain...";
 
   // Request address punks from blockchain
@@ -20,21 +21,21 @@ async function show() {
   let marketNfts = await n.getAddressTokensOnMarket(address);
 
   let listhtml = "";
-  for (let i=0; i<marketNfts.length; i++) {
+  for (let i=marketNfts.length-1; i>=0; i--) {
     const id = marketNfts[i].id;
     const punk = await n.loadPunkFromChain(id);
     punk["price"] = marketNfts[i].price;
-    listhtml += getPunkCard(id, punk);
+    listhtml += getPunkCard(id, punk, true);
     document.getElementById("tokenlist").innerHTML = listhtml;
   }
-  for (let i=0; i<nfts.length; i++) {
+  for (let i=nfts.length-1; i>=0; i--) {
     const id = nfts[i];
     const punk = await n.loadPunkFromChain(id);
-    listhtml += getPunkCard(id, punk);
+    listhtml += getPunkCard(id, punk, false);
     document.getElementById("tokenlist").innerHTML = listhtml;
   }
   if (marketNfts.length + nfts.length == 0)
-    listhtml = "No tokens in the wallet. :( Check out the <a href='/marketplace.html'>Marketplace</a>";
+    listhtml = "No tokens in the wallet. :( Check out the <a href='index.html'>Marketplace</a>";
 
   document.getElementById("tokenlist").innerHTML = listhtml;
 }
@@ -66,6 +67,11 @@ window.onload = async function() {
       opt.innerHTML = `${addr.meta.name} - ${addr.address}`;
       sel.appendChild(opt);
     }    
+
+    let userSelectedAddress = getCookie('userSelectedAddress');
+    if (userSelectedAddress) {
+      sel.value = userSelectedAddress;
+    }
 
     if (addrList.length >= 1) {
       show();

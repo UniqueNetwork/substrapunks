@@ -16,9 +16,10 @@
     <link rel="stylesheet" href="css/style1.css">
 
     <script src="js/polkadot.js"></script>
+    <script src="js/cookies.js"></script>    
     <script src="js/getPunkCard.js"></script>
     <script src="js/my.js"></script>
-    </head>
+</head>
 
 <body>
 
@@ -36,8 +37,8 @@
             <div class="header__menu">
                 <br/>
                 <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="marketplace.html">Marketplace</a></li>
+                    <li><a href="index.html">Buy</a></li>
+                    <li><a href="my.html">Sell</a></li>
                 </ul>
             </div>
         </div>
@@ -53,13 +54,11 @@
     </div>
     <div id="punkDetails" class='container text_block'>
         <div class='row detail-row'>
-            <div class='col-md-10 col-md-offset-1'>
-              <p>What is your Polkadot-NFT address?</p>
-              <select id='address' class='btn' style='background-color: white; color: #ff04b4; max-width: 600px; border: 1px solid; border-radius: 3px;'></select>
-              <br/>
-              <br/>
-              <button onclick='show();' class="btn">Show</button>
-            </div>
+            <p>What is your Unique address?</p>
+            <select id='address' onchange='show()' class='btn' style='background-color: white; color: #ff04b4; max-width: 600px; border: 1px solid; border-radius: 3px;'></select>
+            <br/>
+            <br/>
+
             <div class="col-md-12 text_block">
                 <div class="row" id="tokenlist">
                 </div>
