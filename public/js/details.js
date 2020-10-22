@@ -95,7 +95,7 @@ function displayPageState() {
     document.getElementById("ownershipcontainer").style.display = "none";
     document.getElementById("tradecontainer").style.display = "block";
     document.getElementById("trading").style.display = "block";
-    document.getElementById("tradeTitle").innerHTML = "Buy this NFT";
+    document.getElementById("tradeTitle").innerHTML = "Buying this NFT";
     showBuySection();
   }
   else if (pageState == 7) {
@@ -103,6 +103,7 @@ function displayPageState() {
     document.getElementById("trading").style.display = "none";
     document.getElementById('tradecontainer').style.display = "block";
     document.getElementById('buyProgress').style.display = "block";
+    document.getElementById("tradeTitle").innerHTML = "Buying this NFT";
     buyStep2();
   } else if (pageState == 8) {
     document.getElementById("ownershipcontainer").style.display = "none";
@@ -110,6 +111,7 @@ function displayPageState() {
     document.getElementById('tradecontainer').style.display = "block";
     document.getElementById('buyProgress').style.display = "block";
     document.getElementById("buy1").classList.add("active");
+    document.getElementById("tradeTitle").innerHTML = "Buying this NFT";
     buyStep3();
   } else if (pageState == 9) {
     document.getElementById("ownershipcontainer").style.display = "none";
@@ -118,6 +120,7 @@ function displayPageState() {
     document.getElementById('buyProgress').style.display = "block";
     document.getElementById("buy1").classList.add("active");
     document.getElementById("buy2").classList.add("active");
+    document.getElementById("tradeTitle").innerHTML = "Buying this NFT";
     buyStep4();
   }
 
@@ -369,7 +372,7 @@ async function buyStep3() {
     let deposited = 0;    
     while(true) {
       deposited = parseFloat(await n.getKsmBalance(newOwner));
-      if (deposited < parseFloat(punk.price)) n.delay(6000);
+      if (deposited < parseFloat(punk.price)) await n.delay(6000);
       else break;
     }
 
@@ -394,6 +397,14 @@ async function buyStep4() {
 
     // Buy
     await n.buyAsync(punkId, newOwner);
+
+    // Wait for the token to arrive
+    while (true) {
+      await getPunkInfo(punkId);
+      if (punk.owner == newOwner) break;
+      await n.delay(3000);
+    }
+
     pageState = 0;
     justBought = true;
   }
@@ -427,9 +438,15 @@ function showExtensionWarning() {
   showError(msg);
 }
 
-function walletupdate() {
+async function walletupdate() {
   let address = document.getElementById("newowner").value;
   setCookie("userSelectedAddress", address, 365);
+
+  // Show KSM balance
+  const n = new nft();
+  document.getElementById("ksmBalance").innerHTML = `KSM Balance: ...`;
+  const balance = await n.getKusamaBalance(address);
+  document.getElementById("ksmBalance").innerHTML = `KSM Balance: ${balance}`;
 }
 
 window.onclick = function(event) {
@@ -476,5 +493,6 @@ window.onload = async function() {
     await getPunkInfo(punkId);
   }
 
+  walletupdate();
   displayPageState();
 }
