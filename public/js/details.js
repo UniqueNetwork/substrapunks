@@ -174,6 +174,7 @@ function showCancelSection() {
   <p><b>You own it!</b> (address ${punk.owner})</p><p>... and you have put it on sale.</p>
   <p>
     <button onclick='canceltx();' class="btn">Cancel Sale</button>
+    <button onclick='window.location="my.html"' class="btn">My Punks</button>
   </p>
   `;
   document.getElementById('trading').innerHTML = html;
@@ -212,20 +213,28 @@ async function getPunkInfo(punkId) {
 
     let punkIsOnSale = false;
     if (punk.owner == n.getVaultAddress()) {
-      pageState = 2;
+      punkIsOnSale = true;
       const ask = await n.getTokenAsk(punkId);
       console.log("ask: ", ask);
       if (ask) {
         punk.owner = ask.owner;
         punk.price = ask.price;
-        punkIsOnSale = true;
-        pageState = 3;
+        pageState = 4;
+      } 
+      else {
+        // Get the owner from the deposit
+        punk.owner = await n.getDepositor(punkId);
+        if (punk.owner) pageState = 3;
+        else pageState = 2;
       }
     }
 
     // Determine punk trading status (and state) and display corresponding section
     if (punkIsOnSale) {
-      pageState = isMyPunk(punk) ? 4 : 6;
+      if (!isMyPunk(punk)) {
+        if (pageState == 4) pageState = 6;
+        else pageState = 5;
+      }
     } else {
       // Show the ownership
       pageState = isMyPunk(punk) ? 0 : 5;

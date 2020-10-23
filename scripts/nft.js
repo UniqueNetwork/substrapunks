@@ -217,18 +217,26 @@ class nft {
     await delay(ms);
   }
 
+  async getDepositor(punkId, readerAddress) {
+    const keyring = new Keyring({ type: 'sr25519' });
+    const result = await this.contractInstance.call('rpc', 'get_nft_deposit', 0, 1000000000000, collectionId, punkId).send(readerAddress);
+    if (result.output) {
+      const address = keyring.encodeAddress(result.output.toString()); 
+      console.log("Deposit address: ", address);
+      return address;
+    }
+    return null;
+  }
+
   async waitForDeposit(punkId, depositorAddressList) {
     try {
-      const keyring = new Keyring({ type: 'sr25519' });
       await this.getApi();
     
       console.log("Waiting for deposit transaction", depositorAddressList);
       while (true) {
-        const result = await this.contractInstance.call('rpc', 'get_nft_deposit', 0, 1000000000000, collectionId, punkId).send(depositorAddressList[0]);
-        if (result.output) {
-          const address = keyring.encodeAddress(result.output.toString()); 
-          console.log("Deposit address: ", address);
-          if (depositorAddressList.includes(address)) return address;
+        const address = await this.getDepositor(punkId, depositorAddressList[0]);
+        if (depositorAddressList.includes(address)) {
+          return address;
         } else {
           await delay(5000);
         }

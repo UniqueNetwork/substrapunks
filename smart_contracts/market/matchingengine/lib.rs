@@ -236,9 +236,9 @@ mod matchingengine {
         fn cancel(&mut self, collection_id: u64, token_id: u64) {
 
             // Ensure that sender owns this ask
-            let ask_id = (self.asks_by_token.get(&(collection_id, token_id)).unwrap()).clone();
-            let (_, _, _, _, user) = (*self.asks.get(&ask_id).unwrap()).clone();
-            assert!(user == self.env().caller().clone());
+            let ask_id = *self.asks_by_token.get(&(collection_id, token_id)).unwrap();
+            let (_, _, _, _, user) = *self.asks.get(&ask_id).unwrap();
+            assert_eq!(self.env().caller(), user);
 
             // Remove ask from everywhere
             self.remove_ask(collection_id, token_id, ask_id);
