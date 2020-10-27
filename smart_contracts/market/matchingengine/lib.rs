@@ -253,8 +253,8 @@ mod matchingengine {
         fn buy(&mut self, collection_id: u64, token_id: u64) {
 
             // Get the ask
-            let ask_id = (self.asks_by_token.get(&(collection_id, token_id)).unwrap()).clone();
-            let (_, _, quote_id, price, seller) = (*self.asks.get(&ask_id).unwrap()).clone();
+            let ask_id = *self.asks_by_token.get(&(collection_id, token_id)).unwrap();
+            let (_, _, quote_id, price, seller) = *self.asks.get(&ask_id).unwrap();
 
             // Check that buyer has enough balance
             let initial_buyer_balance = self.balance_of_or_zero(quote_id, &self.env().caller());
