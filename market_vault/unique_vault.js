@@ -12,6 +12,7 @@ const contractAbi = require("./market_metadata.json");
 
 const quoteId = 2; // KSM
 const logFile = "./operations_log";
+let txInProgress = false;
 
 function getTime() {
   var a = new Date();
@@ -59,83 +60,92 @@ async function getUniqueConnection() {
   return api;
 }
 
-function registerQuoteDepositAsync(api, sender, depositorAddress, amount) {
-  console.log(`${depositorAddress} deposited ${amount} in ${quoteId} currency`);
+function sendTransactionAsync(api, sender, transaction) {
   return new Promise(async function(resolve, reject) {
 
     try {
-
-      const abi = new Abi(api.registry, contractAbi);
-
-      const value = 0;
-      const maxgas = 1000000000000;
-    
-      const unsub = await api.tx.contracts
-        .call(config.marketContractAddress, value, maxgas, abi.messages.registerDeposit(quoteId, amount, depositorAddress))
-        .signAndSend(sender, (result) => {
-        console.log(`Current tx status is ${result.status}`);
+      txInProgress = true;
+      const unsub = await transaction
+        .signAndSend(sender, ({ events = [], status }) => {
       
-        if (result.status.isInBlock) {
-          console.log(`Transaction included at blockHash ${result.status.asInBlock}`);
-          resolve();
+        if (status == 'Ready') {
+          // nothing to do
+          console.log(`Current tx status is Ready`);
+        }
+        else if (JSON.parse(status).Broadcast) {
+          // nothing to do
+          console.log(`Current tx status is Broadcast`);
+        }
+        else if (status.isInBlock) {
+          console.log(`Transaction included at blockHash ${status.asInBlock}`);
+          log(`Transaction`, `In Block`);
+          // resolve();
+          // unsub();
+        } else if (status.isFinalized) {
+          console.log(`Transaction finalized at blockHash ${status.asFinalized}`);
+          log(`Transaction`, `Finalized`);
+
+          // Loop through Vec<EventRecord> to display all events
+          let success = false;
+          events.forEach(({ phase, event: { data, method, section } }) => {
+            console.log(`\t' ${phase}: ${section}.${method}:: ${data}`);
+            if (method == 'ExtrinsicSuccess') {
+              log(`Transaction`, `Successful`);
+              success = true;
+            }
+          });
+
+          if (success) resolve();
+          else {
+            reject();
+            log(`Transaction`, `FAILED`);
+          }
           unsub();
-        } else if (result.status.isFinalized) {
-          console.log(`Transaction finalized at blockHash ${result.status.asFinalized}`);
-          resolve();
-          unsub();
-        } else if (result.status.isUsurped) {
-          console.log(`Something went wrong with transaction. Status: ${result.status}`);
-          log(`Handling quote transfer`, `ERROR: ${result.status}`);
+          txInProgress = false;
+        }
+        else //if (status.isUsurped) 
+        {
+          console.log(`Something went wrong with transaction. Status: ${status}`);
+          log(`Transaction`, `ERROR: ${status}`);
+
           reject();
           unsub();
+          txInProgress = false;
         }
       });
     } catch (e) {
       console.log("Error: ", e);
-      log(`Handling quote transfer`, `ERROR: ${e.toString()}`);
+      log(`Transaction`, `ERROR: ${e.toString()}`);
       reject(e);
+      txInProgress = false;
     }
-
   });
+
 }
 
-function registerNftDepositAsync(api, sender, depositorAddress, collection_id, token_id) {
+async function registerQuoteDepositAsync(api, sender, depositorAddress, amount) {
+  console.log(`${depositorAddress} deposited ${amount} in ${quoteId} currency`);
+
+  const abi = new Abi(api.registry, contractAbi);
+
+  const value = 0;
+  const maxgas = 1000000000000;
+
+  const tx = api.tx.contracts
+        .call(config.marketContractAddress, value, maxgas, abi.messages.registerDeposit(quoteId, amount, depositorAddress));
+  await sendTransactionAsync(api, sender, tx);
+}
+
+async function registerNftDepositAsync(api, sender, depositorAddress, collection_id, token_id) {
   console.log(`${depositorAddress} deposited ${collection_id}, ${token_id}`);
-  return new Promise(async function(resolve, reject) {
+  const abi = new Abi(api.registry, contractAbi);
 
-    try {
-      const abi = new Abi(api.registry, contractAbi);
+  const value = 0;
+  const maxgas = 1000000000000;
 
-      const value = 0;
-      const maxgas = 1000000000000;
-    
-      const unsub = await api.tx.contracts
-        .call(config.marketContractAddress, value, maxgas, abi.messages.registerNftDeposit(collection_id, token_id, depositorAddress))
-        .signAndSend(sender, (result) => {
-        console.log(`Current tx status is ${result.status}`);
-      
-        if (result.status.isInBlock) {
-          console.log(`Transaction included at blockHash ${result.status.asInBlock}`);
-          resolve();
-          unsub();
-        } else if (result.status.isFinalized) {
-          console.log(`Transaction finalized at blockHash ${result.status.asFinalized}`);
-          resolve();
-          unsub();
-        } else if (result.status.isUsurped) {
-          console.log(`Something went wrong with transaction. Status: ${result.status}`);
-          log(`Handling NFT transfer`, `ERROR: ${result.status}`);
-          reject();
-          unsub();
-        }
-      });
-    } catch (e) {
-      console.log("Error: ", e);
-      log(`Handling NFT transfer`, `ERROR: ${e.toString()}`);
-      reject(e);
-    }
-
-  });
+  const tx = api.tx.contracts
+    .call(config.marketContractAddress, value, maxgas, abi.messages.registerNftDeposit(collection_id, token_id, depositorAddress))
+  await sendTransactionAsync(api, sender, tx);
 }
 
 async function scanNftBlock(api, admin, blockNum) {
@@ -169,36 +179,10 @@ async function scanNftBlock(api, admin, blockNum) {
   }
 }
 
-function sendNftTxAsync(api, sender, recipient, collection_id, token_id) {
-  return new Promise(async function(resolve, reject) {
-    try {
-      console.log(`Sending nft transfer transaction...`);
-      const unsub = await api.tx.nft
-      .transfer(recipient, collection_id, token_id, 0)
-      .signAndSend(sender, (result) => {
-        console.log(`Current tx status is ${result.status}`);
-    
-        if (result.status.isInBlock) {
-          console.log(`Transaction included at blockHash ${result.status.asInBlock}`);
-          resolve();
-          unsub();
-        } else if (result.status.isFinalized) {
-          console.log(`Transaction finalized at blockHash ${result.status.asFinalized}`);
-          resolve();
-          unsub();
-        } else if (result.status.isUsurped) {
-          console.log(`Something went wrong with transaction. Status: ${result.status}`);
-          log(`NFT qithdraw`, `ERROR: ${result.status}`);
-          reject();
-          unsub();
-        }
-      });
-    } catch (e) {
-      console.log("Error: ", e);
-      log(`NFT withdraw`, `ERROR: ${e.toString()}`);
-      reject(e);
-    }
-  });
+async function sendNftTxAsync(api, sender, recipient, collection_id, token_id) {
+  const tx = api.tx.nft
+    .transfer(recipient, collection_id, token_id, 0);
+  await sendTransactionAsync(api, sender, tx);
 }
 
 async function scanContract(api, admin) {
@@ -313,7 +297,17 @@ async function handleUnique() {
   api.disconnect();
 }
 
+// Should not run longer than 30 seconds
+function killTimer() {
+  setTimeout(() => { 
+    if (!txInProgress) process.exit();
+    else killTimer();
+  }, 30000);
+}
+
 async function main() {
+  killTimer();
+
   await handleUnique();
 }
 

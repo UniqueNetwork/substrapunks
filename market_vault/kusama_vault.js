@@ -8,6 +8,7 @@ const { exit } = require('process');
 BigNumber.config({ DECIMAL_PLACES: 12, ROUNDING_MODE: BigNumber.ROUND_DOWN, decimalSeparator: '.' });
 
 const logFile = "./operations_log";
+let txInProgress = false;
 
 function getTime() {
   var a = new Date();
@@ -84,30 +85,39 @@ async function scanKusamaBlock(api, blockNum) {
 function sendTxAsync(api, sender, recipient, amount) {
   return new Promise(async function(resolve, reject) {
     try {
+      txInProgress = true;
       const unsub = await api.tx.balances
         .transfer(recipient, amount)
-        .signAndSend(sender, (result) => {
-          console.log(`Current tx status is ${result.status}`);
-      
-          if (result.status.isInBlock) {
-            console.log(`Transaction included at blockHash ${result.status.asInBlock}`);
+        .signAndSend(sender, ({ events = [], status }) => {
+    
+          if (status == 'Ready') {
+            // nothing to do
+            console.log(`Current tx status is Ready`);
+          }
+          else if (JSON.parse(status).Broadcast) {
+            // nothing to do
+            console.log(`Current tx status is Broadcast`);
+          }
+          else if (status.isInBlock) {
+            console.log(`Transaction included at blockHash ${status.asInBlock}`);
+          } else if (status.isFinalized) {
+            console.log(`Transaction finalized at blockHash ${status.asFinalized}`);
             resolve();
             unsub();
-            } else if (result.status.isFinalized) {
-            console.log(`Transaction finalized at blockHash ${result.status.asFinalized}`);
-            resolve();
-            unsub();
-          } else if (result.status.isUsurped) {
-            console.log(`Something went wrong with transaction. Status: ${result.status}`);
-            log(`Quote qithdraw`, `ERROR: ${result.status}`);
+            txInProgress = false;
+          } else {
+            console.log(`Something went wrong with transaction. Status: ${status}`);
+            log(`Quote qithdraw`, `ERROR: ${status}`);
             reject();
             unsub();
+            txInProgress = false;
           }
         });
     } catch (e) {
       console.log("Error: ", e);
       log(`Quote withdraw`, `ERROR: ${e.toString()}`);
       reject(e);
+      txInProgress = false;
     }
   });
 }
@@ -175,7 +185,17 @@ async function handleKusama() {
   // api.disconnect();
 }
 
+// Should not run longer than 30 seconds
+function killTimer() {
+  setTimeout(() => { 
+    if (!txInProgress) process.exit();
+    else killTimer();
+  }, 30000);
+}
+
 async function main() {
+  killTimer();
+
   await handleKusama();
 }
 
