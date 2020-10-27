@@ -174,8 +174,12 @@ async function scanNftBlock(api, admin, blockNum) {
   });
 
   for (let i=0; i<nftDeposits.length; i++) {
-    await registerNftDepositAsync(api, admin, nftDeposits[i].address, nftDeposits[i].collectionId, nftDeposits[i].tokenId);
-    log(`NFT deposit from ${nftDeposits[i].address} id (${nftDeposits[i].collectionId}, ${nftDeposits[i].tokenId})`, "REGISTERED");
+    try {
+      await registerNftDepositAsync(api, admin, nftDeposits[i].address, nftDeposits[i].collectionId, nftDeposits[i].tokenId);
+      log(`NFT deposit from ${nftDeposits[i].address} id (${nftDeposits[i].collectionId}, ${nftDeposits[i].tokenId})`, "REGISTERED");
+    } catch (e) {
+      log(`NFT deposit from ${nftDeposits[i].address} id (${nftDeposits[i].collectionId}, ${nftDeposits[i].tokenId})`, "FAILED");
+    }
   }
 }
 
@@ -238,11 +242,15 @@ async function scanContract(api, admin) {
     const [pubKey, collection_id, token_id] = result4.output;
     const address = keyring.encodeAddress(pubKey); 
     console.log(`${address.toString()} withdrawing NFT (${collection_id.toNumber()}, ${token_id.toNumber()})`);
-    log(`NFT withdraw #${lastNftWithdraw+1}: ${address.toString()} withdrawing ${collection_id.toNumber()}, ${token_id.toNumber()}`, "START");
+    log(`NFT withdraw #${lastNftWithdraw+1}: ${address.toString()} withdrawing ${collection_id.toNumber()}-${token_id.toNumber()}`, "START");
 
     // Send withdraw transaction
-    await sendNftTxAsync(api, admin, address, collection_id, token_id);
-    log(`NFT withdraw #${lastNftWithdraw+1}: ${address.toString()} withdrawing ${collection_id.toNumber()}, ${token_id.toNumber()}`, "END");
+    try {
+      await sendNftTxAsync(api, admin, address, collection_id, token_id);
+    } catch (e) {
+      log(`NFT withdraw #${lastNftWithdraw+1}: ${address.toString()} withdrawing ${collection_id.toNumber()}-${token_id.toNumber()}`, "FAILED");
+    }
+    log(`NFT withdraw #${lastNftWithdraw+1}: ${address.toString()} withdrawing ${collection_id.toNumber()}-${token_id.toNumber()}`, "END");
 
     lastNftWithdraw++;
     fs.writeFileSync("./withdrawal_id.json", JSON.stringify({ lastQuoteWithdraw, lastNftWithdraw }));
@@ -289,8 +297,12 @@ async function handleUnique() {
     quoteDeposits = JSON.parse(fs.readFileSync("./quoteDeposits.json"));
   } catch (e) {}
   for (let i=0; i<quoteDeposits.length; i++) {
-    await registerQuoteDepositAsync(api, admin, quoteDeposits[i].address, quoteDeposits[i].amount);
-    log(`Quote deposit from ${quoteDeposits[i].address} amount ${quoteDeposits[i].amount}`, "REGISTERED");
+    try {
+      await registerQuoteDepositAsync(api, admin, quoteDeposits[i].address, quoteDeposits[i].amount);
+      log(`Quote deposit from ${quoteDeposits[i].address} amount ${quoteDeposits[i].amount}`, "REGISTERED");
+    } catch (e) {
+      log(`Quote deposit from ${quoteDeposits[i].address} amount ${quoteDeposits[i].amount}`, "FAILED");
+    }
   }
   fs.writeFileSync("./quoteDeposits.json", "[]")
 
