@@ -15,6 +15,12 @@ function resetView() {
     document.getElementById('buyProgress').style.display = "none";
     document.getElementById("tradeTitle").innerHTML = "Selling this NFT";
     document.getElementById("walletselector").style.display = "none";
+    document.getElementById("buy1").classList.remove("active");
+    document.getElementById("buy2").classList.remove("active");
+    document.getElementById("buy3").classList.remove("active");
+    document.getElementById("sell1").classList.remove("active");
+    document.getElementById("sell2").classList.remove("active");
+    document.getElementById("sell3").classList.remove("active");
   } catch (e) {
     console.log('resetView error', e);
     showError(e);
