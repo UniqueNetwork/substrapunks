@@ -50,7 +50,7 @@ async function getUniqueConnection() {
     process.exit();
   });
   api.on('error', async (value) => {
-    log(`error: ${value}`);
+    log(`error: ${value.toString()}`);
     process.exit();
   });
 
