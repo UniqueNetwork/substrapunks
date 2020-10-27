@@ -4,16 +4,21 @@ let punk;
 let marketContract;
 
 function resetView() {
-  document.getElementById("punkDetails").style.display = "block";
-  document.getElementById("ownership").style.display = "block";
-  document.getElementById("progress").style.display = "none";
-  document.getElementById("trading").style.display = "none";
-  document.getElementById("tradecontainer").style.display = "none";
-  document.getElementById("ownershipcontainer").style.display = "block";
-  document.getElementById('sellProgress').style.display = "none";
-  document.getElementById('buyProgress').style.display = "none";
-  document.getElementById("tradeTitle").innerHTML = "Selling this NFT";
-  document.getElementById("walletselector").style.display = "none";
+  try {
+    document.getElementById("punkDetails").style.display = "block";
+    document.getElementById("ownership").style.display = "block";
+    document.getElementById("progress").style.display = "none";
+    document.getElementById("trading").style.display = "none";
+    document.getElementById("tradecontainer").style.display = "none";
+    document.getElementById("ownershipcontainer").style.display = "block";
+    document.getElementById('sellProgress').style.display = "none";
+    document.getElementById('buyProgress').style.display = "none";
+    document.getElementById("tradeTitle").innerHTML = "Selling this NFT";
+    document.getElementById("walletselector").style.display = "none";
+  } catch (e) {
+    console.log('resetView error', e);
+    showError(e);
+  }
 }
 
 function isMyPunk(punk) {
@@ -21,17 +26,27 @@ function isMyPunk(punk) {
 }
 
 function showIOwnIt(punk) {
-  let myPunksLink = '';
-  if (justBought) myPunksLink = "Go to <a href='my.html'>My Punks</a> to see all your tokens";
+  try {
+    let myPunksLink = '';
+    if (justBought) myPunksLink = "Go to <a href='my.html'>My Punks</a> to see all your tokens";
 
-  document.getElementById('ownership').innerHTML = `
-    <p><b>You own it!</b> (address ${punk.owner})</p>
-    ${myPunksLink}
-  `;
+    document.getElementById('ownership').innerHTML = `
+      <p><b>You own it!</b> (address ${punk.owner})</p>
+      ${myPunksLink}
+    `;
+  } catch (e) {
+    console.log('showIOwnIt error', e);
+    showError(e);
+  }
 }
 
 function showSomeoneElseOwnsIt(punk) {
-  document.getElementById('ownership').innerHTML = `<h4>Owner - someone else: ${punk.owner}</h4>`;
+  try {
+    document.getElementById('ownership').innerHTML = `<h4>Owner - someone else: ${punk.owner}</h4>`;
+  } catch (e) {
+    console.log('showSomeoneElseOwnsIt error', e);
+    showError(e);
+  }
 }
 
 
@@ -52,99 +67,114 @@ let pageState = 0;
 let justBought = false;
 
 function displayPageState() {
-  console.log("pageState: ", pageState);
-  resetView();
+  try {
+    console.log("pageState: ", pageState);
+    resetView();
 
-  if (pageState == 0) {
-    document.getElementById("trading").style.display = "none";
-    document.getElementById('tradecontainer').style.display = "block";
-    showIOwnIt(punk);
-    showTradeSection();
-    // No action, user will click the button
-  }
-  else if (pageState == 1) {
-    document.getElementById("ownershipcontainer").style.display = "none";
-    document.getElementById("trading").style.display = "none";
-    document.getElementById('tradecontainer').style.display = "block";
-    document.getElementById('sellProgress').style.display = "block";
-    sellStep2();
-  }
-  else if ((pageState == 2) || (pageState == 3)) {
-    document.getElementById("ownershipcontainer").style.display = "none";
-    document.getElementById("trading").style.display = "none";
-    document.getElementById('tradecontainer').style.display = "block";
-    document.getElementById('sellProgress').style.display = "block";
-
-    if (pageState == 2) sellStep3();
-    if (pageState == 3) {
-      document.getElementById("askPrice").style.display = "block";
+    if (pageState === 0) {
+      document.getElementById("trading").style.display = "none";
+      document.getElementById('tradecontainer').style.display = "block";
+      showIOwnIt(punk);
+      showTradeSection();
+      // No action, user will click the button
     }
-  }
-  else if (pageState == 4) {
-    document.getElementById("ownershipcontainer").style.display = "none";
-    document.getElementById("trading").style.display = "block";
-    document.getElementById('tradecontainer').style.display = "block";
-    showCancelSection();
-  }
-  else if (pageState == 5) {
-    document.getElementById("trading").style.display = "none";
-    document.getElementById('tradecontainer').style.display = "none";
-    showSomeoneElseOwnsIt(punk);
-  }
-  else if (pageState == 6) {
-    document.getElementById("ownershipcontainer").style.display = "none";
-    document.getElementById("tradecontainer").style.display = "block";
-    document.getElementById("trading").style.display = "block";
-    document.getElementById("tradeTitle").innerHTML = "Buying this NFT";
-    showBuySection();
-  }
-  else if (pageState == 7) {
-    document.getElementById("ownershipcontainer").style.display = "none";
-    document.getElementById("trading").style.display = "none";
-    document.getElementById('tradecontainer').style.display = "block";
-    document.getElementById('buyProgress').style.display = "block";
-    document.getElementById("tradeTitle").innerHTML = "Buying this NFT";
-    buyStep2();
-  } else if (pageState == 8) {
-    document.getElementById("ownershipcontainer").style.display = "none";
-    document.getElementById("trading").style.display = "none";
-    document.getElementById('tradecontainer').style.display = "block";
-    document.getElementById('buyProgress').style.display = "block";
-    document.getElementById("buy1").classList.add("active");
-    document.getElementById("tradeTitle").innerHTML = "Buying this NFT";
-    buyStep3();
-  } else if (pageState == 9) {
-    document.getElementById("ownershipcontainer").style.display = "none";
-    document.getElementById("trading").style.display = "none";
-    document.getElementById('tradecontainer').style.display = "block";
-    document.getElementById('buyProgress').style.display = "block";
-    document.getElementById("buy1").classList.add("active");
-    document.getElementById("buy2").classList.add("active");
-    document.getElementById("tradeTitle").innerHTML = "Buying this NFT";
-    buyStep4();
-  }
+    else if (pageState === 1) {
+      document.getElementById("ownershipcontainer").style.display = "none";
+      document.getElementById("trading").style.display = "none";
+      document.getElementById('tradecontainer').style.display = "block";
+      document.getElementById('sellProgress').style.display = "block";
+      sellStep2();
+    }
+    else if ((pageState === 2) || (pageState === 3)) {
+      document.getElementById("ownershipcontainer").style.display = "none";
+      document.getElementById("trading").style.display = "none";
+      document.getElementById('tradecontainer').style.display = "block";
+      document.getElementById('sellProgress').style.display = "block";
 
-  if (pageState > 1) document.getElementById("sell1").classList.add("active");
-  if (pageState > 2) document.getElementById("sell2").classList.add("active");
-  if (pageState > 3) document.getElementById("sell3").classList.add("active");
+      if (pageState === 2) sellStep3();
+      if (pageState === 3) {
+        document.getElementById("askPrice").style.display = "block";
+      }
+    }
+    else if (pageState === 4) {
+      document.getElementById("ownershipcontainer").style.display = "none";
+      document.getElementById("trading").style.display = "block";
+      document.getElementById('tradecontainer').style.display = "block";
+      showCancelSection();
+    }
+    else if (pageState === 5) {
+      document.getElementById("trading").style.display = "none";
+      document.getElementById('tradecontainer').style.display = "none";
+      showSomeoneElseOwnsIt(punk);
+    }
+    else if (pageState === 6) {
+      document.getElementById("ownershipcontainer").style.display = "none";
+      document.getElementById("tradecontainer").style.display = "block";
+      document.getElementById("trading").style.display = "block";
+      document.getElementById("tradeTitle").innerHTML = "Buying this NFT";
+      showBuySection();
+    }
+    else if (pageState === 7) {
+      document.getElementById("ownershipcontainer").style.display = "none";
+      document.getElementById("trading").style.display = "none";
+      document.getElementById('tradecontainer').style.display = "block";
+      document.getElementById('buyProgress').style.display = "block";
+      document.getElementById("tradeTitle").innerHTML = "Buying this NFT";
+      buyStep2();
+    } else if (pageState === 8) {
+      document.getElementById("ownershipcontainer").style.display = "none";
+      document.getElementById("trading").style.display = "none";
+      document.getElementById('tradecontainer').style.display = "block";
+      document.getElementById('buyProgress').style.display = "block";
+      document.getElementById("buy1").classList.add("active");
+      document.getElementById("tradeTitle").innerHTML = "Buying this NFT";
+      buyStep3();
+    } else if (pageState === 9) {
+      document.getElementById("ownershipcontainer").style.display = "none";
+      document.getElementById("trading").style.display = "none";
+      document.getElementById('tradecontainer').style.display = "block";
+      document.getElementById('buyProgress').style.display = "block";
+      document.getElementById("buy1").classList.add("active");
+      document.getElementById("buy2").classList.add("active");
+      document.getElementById("tradeTitle").innerHTML = "Buying this NFT";
+      buyStep4();
+    }
+
+    if (pageState > 1) document.getElementById("sell1").classList.add("active");
+    if (pageState > 2) document.getElementById("sell2").classList.add("active");
+    if (pageState > 3) document.getElementById("sell3").classList.add("active");
+  } catch (e) {
+    console.log('displayPageState error', e);
+    showError(e);
+  }
 }
 
 async function checkBalance(n, owner) {
-  if (await n.getBalance(owner) == "0") throw `
+  try {
+    if (await n.getBalance(owner) == "0") throw `
     You need some Unique token balance in order to run a transaction.<br/>
     <br/>
     You can use our <a href='https://t.me/UniqueFaucetBot' target='_blank'>Telegram Unique Faucet Bot</a> to get a little Unique<br/>
   `;
+  } catch (e) {
+    console.log('checkBalance', e);
+    showError(e);
+  }
 }
 
 async function checkKusamaBalance(n, owner, amount) {
-  const bal = await n.getKusamaBalance(owner);
-  console.log("Kusama balance: ", bal);
-  console.log("Punk price: ", punk.price);
-  if (bal < amount) throw `
+  try {
+    const bal = await n.getKusamaBalance(owner);
+    console.log("Kusama balance: ", bal);
+    console.log("Punk price: ", punk.price);
+    if (bal < amount) throw `
     Your KSM balance is too low: ${bal}<br/>
     You need at least: ${amount} KSM<br/>
   `;
+  } catch (e) {
+    console.log('checkKusamaBalance', e);
+    showError(e);
+  }
 }
 
 function expandTradeSectionAndStart() {
@@ -158,102 +188,125 @@ function startBuy() {
 }
 
 function showTradeSection() {
-  document.getElementById("trading").style.display = "block";
-  const html = `
-  <p>
-    <button onclick='expandTradeSectionAndStart();' class="btn">Sell</button>
-  </p>
-  <p><b>Note:</b> 2% or 0.01 KSM fee applies to all sales (whichever is greater)</p>
-  <p>Also you can use the <a href="https://uniqueapps.usetech.com/#/nft">NFT Wallet</a> to find SubstraPunks collection (search for Collection <b>#4</b> there) and transfer your character to someone else. By the way, the transfers for SubstraPunks collection are free!</p>
-  `;
-  document.getElementById('trading').innerHTML = html;
+  try {
+    document.getElementById("trading").style.display = "block";
+    document.getElementById('trading').innerHTML = `
+      <p>
+        <button onclick='expandTradeSectionAndStart();' class="btn">Sell</button>
+      </p>
+      <p><b>Note:</b> 2% or 0.01 KSM fee applies to all sales (whichever is greater)</p>
+      <p>Also you can use the <a href="https://uniqueapps.usetech.com/#/nft">NFT Wallet</a> to find SubstraPunks collection (search for Collection <b>#4</b> there) and transfer your character to someone else. By the way, the transfers for SubstraPunks collection are free!</p>
+    `;
+  } catch (e) {
+    console.log('showTradeSection', e);
+    showError(e);
+  }
 }
 
 function showCancelSection() {
-  const html = `
-  <p><b>You own it!</b> (address ${punk.owner})</p><p>... and you have put it on sale.</p>
-  <p>
-    <button onclick='canceltx();' class="btn">Cancel Sale</button>
-    <button onclick='window.location="my.html"' class="btn">My Punks</button>
-  </p>
-  `;
-  document.getElementById('trading').innerHTML = html;
+  try {
+    document.getElementById('trading').innerHTML = `
+      <p>
+        <b>You own it!</b> (address ${punk.owner})</p><p>... and you have put it on sale.
+      </p>
+      <p>
+        <button onclick='canceltx();' class="btn">Cancel Sale</button>
+        <button onclick='window.location="my.html"' class="btn">My Punks</button>
+      </p>
+    `;
+  } catch (e) {
+    console.log('showCancelSection error', e);
+    showError(e);
+  }
 }
 
 function showBuySection() {
-  document.getElementById("walletselector").style.display = "block";
-
-  const html = `
-  <br/>
-  <p>It's for sale for ${punk.price} KSM, yay!</p>
-  <p>
-    <button onclick='startBuy();' class="btn">Buy - ${punk.price} KSM</button>
-  </p>
+  try {
+    document.getElementById("walletselector").style.display = "block";
+    document.getElementById('trading').innerHTML = `
+    <br/>
+    <p>It's for sale for ${punk.price} KSM, yay!</p>
+    <p>
+      <button onclick='startBuy();' class="btn">Buy - ${punk.price} KSM</button>
+    </p>
   `;
-  document.getElementById('trading').innerHTML = html;
+  } catch (e) {
+    console.log('showBuySection error', e);
+    showError(e);
+  }
 }
 
 
 
 async function getPunkInfo(punkId) {
-  // IDs, which start from 1.
-  let n = new nft();
-  punk = await n.loadPunkFromChain(punkId);
-  console.log(punk);
+  try {
+    // IDs, which start from 1.
+    let n = new nft();
 
-  if (!isNaN(punk.originalId)) {
-    let gender = document.getElementById('gender');
-    gender.innerHTML = punk.sex;
-  
-    let accHtml = '';
-    for (let i=0; i<punk.attributes.length; i++) {
-      accHtml += `<div class='col-md-4'><p>${punk.attributes[i]}</p></div>`;
-    }
-    document.getElementById('accessories').innerHTML = accHtml;
+    punk = await n.loadPunkFromChain(punkId);
 
-    let punkIsOnSale = false;
-    if (punk.owner == n.getVaultAddress()) {
-      punkIsOnSale = true;
-      const ask = await n.getTokenAsk(punkId);
-      console.log("ask: ", ask);
-      if (ask) {
-        punk.owner = ask.owner;
-        punk.price = ask.price;
-        pageState = 4;
-      } 
-      else {
-        // Get the owner from the deposit
-        punk.owner = await n.getDepositor(punkId);
-        if (punk.owner) pageState = 3;
-        else pageState = 2;
+    console.log(punk);
+
+    if (!isNaN(punk.originalId)) {
+      let gender = document.getElementById('gender');
+      gender.innerHTML = punk.sex;
+
+      let accHtml = '';
+
+      for (let i=0; i < punk.attributes.length; i++) {
+        accHtml += `<div class='col-md-4'><p>${punk.attributes[i]}</p></div>`;
       }
-    }
 
-    // Determine punk trading status (and state) and display corresponding section
-    if (punkIsOnSale) {
-      if (!isMyPunk(punk)) {
-        if (pageState == 4) pageState = 6;
-        else pageState = 5;
+      document.getElementById('accessories').innerHTML = accHtml;
+
+      let punkIsOnSale = false;
+
+      if (punk.owner == n.getVaultAddress()) {
+        punkIsOnSale = true;
+        const ask = await n.getTokenAsk(punkId);
+        console.log("ask: ", ask);
+
+        if (ask) {
+          punk.owner = ask.owner;
+          punk.price = ask.price;
+          pageState = 4;
+        }
+        else {
+          // Get the owner from the deposit
+          punk.owner = await n.getDepositor(punkId);
+          if (punk.owner) pageState = 3;
+          else pageState = 2;
+        }
       }
-    } else {
-      // Show the ownership
-      pageState = isMyPunk(punk) ? 0 : 5;
-    }
 
-  }
-  else {
-    let title = document.getElementById("title");
-    title.innerHTML = `Punk ${punkId} does not exist :(`;
+      // Determine punk trading status (and state) and display corresponding section
+      if (punkIsOnSale) {
+        if (!isMyPunk(punk)) {
+          if (pageState == 4) pageState = 6;
+          else pageState = 5;
+        }
+      } else {
+        // Show the ownership
+        pageState = isMyPunk(punk) ? 0 : 5;
+      }
+
+    }
+    else {
+      let title = document.getElementById("title");
+      title.innerHTML = `Punk ${punkId} does not exist :(`;
+    }
+  } catch (e) {
+    console.log('getPunkInfo error', e);
+    showError(e);
   }
 }
 
 async function sellStep2() {
-  document.getElementById('progress').style.display = "block";
-  document.getElementById('progress').innerHTML = "Mining transaction...";
-
-  let owner = punk.owner;
-
   try {
+    document.getElementById('progress').style.display = "block";
+    document.getElementById('progress').innerHTML = "Mining transaction...";
+
+    let owner = punk.owner;
     let n = new nft();
     await checkBalance(n, owner);
 
@@ -262,6 +315,7 @@ async function sellStep2() {
     pageState = 2;
   }
   catch (err) {
+    console.log('sellStep2 error', err);
     showError(err);
     pageState = 0;
   }
@@ -271,10 +325,9 @@ async function sellStep2() {
 }
 
 async function sellStep3() {
-  document.getElementById('progress').style.display = "block";
-  document.getElementById('progress').innerHTML = "Waiting for deposit to register in matching engine...";
-
   try {
+    document.getElementById('progress').style.display = "block";
+    document.getElementById('progress').innerHTML = "Waiting for deposit to register in matching engine...";
     let n = new nft();
     // Step #2: Wait for Vault transaction
     punk.owner = await n.waitForDeposit(punkId, addrList);
@@ -282,6 +335,7 @@ async function sellStep3() {
     else throw 'No connection to Unique node or market contract cannot be reached, try again later.';
   }
   catch (err) {
+    console.log('sellStep3 error', err);
     showError(err);
   }
   finally {
@@ -290,15 +344,15 @@ async function sellStep3() {
 }
 
 async function sellStep4() {
-  document.getElementById('progress').style.display = "block";
-  document.getElementById('progress').innerHTML = "Mining transaction...";
-  document.getElementById('askPrice').style.display = "none";
-
-  const price = document.getElementById('price').value;
-  console.log('price: ', price);
-  let owner = punk.owner;
-
   try {
+    document.getElementById('progress').style.display = "block";
+    document.getElementById('progress').innerHTML = "Mining transaction...";
+    document.getElementById('askPrice').style.display = "none";
+
+    const price = document.getElementById('price').value;
+    console.log('price: ', price);
+    let owner = punk.owner;
+
     let n = new nft();
     if ((parseFloat(price) < 0.01) || (parseFloat(price) > 10000)) throw `
       Sorry, price should be in the range between 0.001 and 10000 KSM. You have input: ${parseFloat(price)}
@@ -317,18 +371,23 @@ async function sellStep4() {
 }
 
 function showError(msg) {
-  errMsg = `<p style='color:red;'>${msg}</p>`;
-  document.getElementById('progress').style.display = "none";
-  document.getElementById('msg').innerHTML = errMsg;
-  document.getElementById('error').style.display = "block";
+  try {
+    errMsg = `<p style='color:red;'>${msg}</p>`;
+    document.getElementById('progress').style.display = "none";
+    document.getElementById('msg').innerHTML = errMsg;
+    document.getElementById('error').style.display = "block";
+  } catch (e) {
+    console.log('showError error', e);
+    showError(e);
+  }
 }
 
 async function canceltx() {
-  document.getElementById('tradecontainer').style.display = "block";
-  document.getElementById('trading').style.display = "none";
-  document.getElementById('progress').style.display = "block";
-
   try {
+    document.getElementById('tradecontainer').style.display = "block";
+    document.getElementById('trading').style.display = "none";
+    document.getElementById('progress').style.display = "block";
+
     let n = new nft();
     await checkBalance(n, punk.owner);
 
@@ -344,10 +403,9 @@ async function canceltx() {
 }
 
 async function buyStep2() {
-  document.getElementById('progress').style.display = "block";
-  let newOwner = document.getElementById("newowner").value;
-
   try {
+    document.getElementById('progress').style.display = "block";
+    let newOwner = document.getElementById("newowner").value;
     let n = new nft();
     await checkBalance(n, newOwner);
 
@@ -372,10 +430,10 @@ async function buyStep2() {
 }
 
 async function buyStep3() {
-  document.getElementById('progress').style.display = "block";
-  let newOwner = document.getElementById("newowner").value;
-
   try {
+    document.getElementById('progress').style.display = "block";
+    let newOwner = document.getElementById("newowner").value;
+
     let n = new nft();
 
     let deposited = 0;    
@@ -398,10 +456,10 @@ async function buyStep3() {
 
 
 async function buyStep4() {
-  document.getElementById('progress').style.display = "block";
-  let newOwner = document.getElementById("newowner").value;
-
   try {
+    document.getElementById('progress').style.display = "block";
+    let newOwner = document.getElementById("newowner").value;
+
     let n = new nft();
 
     // Buy
@@ -429,79 +487,103 @@ async function buyStep4() {
 
 
 function setPunkImage() {
-  let img = document.getElementById("punkImg");
-  img.src = `images/punks/image${punkId}.png`
+  try {
+    let img = document.getElementById("punkImg");
+    img.src = `images/punks/image${punkId}.png`
+  } catch (e) {
+    console.log('setPunkImage error', e);
+    showError(e);
+  }
 }
 function setTitle() {
-  let title = document.getElementById("title");
-  title.innerHTML = `SubstraPunk #${punkId}`;
+  try {
+    let title = document.getElementById("title");
+    title.innerHTML = `SubstraPunk #${punkId}`;
+  } catch (e) {
+    console.log('setTitle error', e);
+    showError(e);
+  }
 }
+
 function showExtensionWarning() {
   const msg = `
-  <h3>Please enable Polkadot{.js} browser extension and create or import an address!</h3>
-  <p>
-      For <a href="https://chrome.google.com/webstore/detail/polkadot%7Bjs%7D-extension/mopnmbcafieddcagagdcbnhejhlodfdd">Chrome</a><br>
-      For <a href="https://addons.mozilla.org/en-US/firefox/addon/polkadot-js-extension/">Firefox</a>
-  </p>
+    <h3>Please enable Polkadot{.js} browser extension and create or import an address!</h3>
+    <p>
+        For <a href="https://chrome.google.com/webstore/detail/polkadot%7Bjs%7D-extension/mopnmbcafieddcagagdcbnhejhlodfdd">Chrome</a><br>
+        For <a href="https://addons.mozilla.org/en-US/firefox/addon/polkadot-js-extension/">Firefox</a>
+    </p>
   `;
   showError(msg);
 }
 
 async function walletupdate() {
-  let address = document.getElementById("newowner").value;
-  setCookie("userSelectedAddress", address, 365);
+  try {
+    let address = document.getElementById("newowner").value;
+    setCookie("userSelectedAddress", address, 365);
 
-  // Show KSM balance
-  const n = new nft();
-  document.getElementById("ksmBalance").innerHTML = `KSM Balance: ...`;
-  const balance = await n.getKusamaBalance(address);
-  document.getElementById("ksmBalance").innerHTML = `KSM Balance: ${balance}`;
+    // Show KSM balance
+    const n = new nft();
+    document.getElementById("ksmBalance").innerHTML = `KSM Balance: ...`;
+    const balance = await n.getKusamaBalance(address);
+    document.getElementById("ksmBalance").innerHTML = `KSM Balance: ${balance}`;
+  } catch (e) {
+    console.log('walletupdate error', e);
+    showError(e);
+  }
 }
 
 window.onclick = function(event) {
-  if (event.target == document.getElementById("error")) {
-    document.getElementById("error").style.display = "none";
+  try {
+    if (event.target === document.getElementById("error")) {
+      document.getElementById("error").style.display = "none";
+    }
+  } catch (e) {
+    console.log('onclick error', e);
+    showError(e);
   }
-}
+};
 
 window.onload = async function() {
+  try {
+    let url = new URL(window.location);
+    punkId = parseInt(url.searchParams.get("id"));
 
-  let url = new URL(window.location);
-  punkId = parseInt(url.searchParams.get("id"));
+    setPunkImage();
+    setTitle();
 
-  setPunkImage();
-  setTitle();
+    let n = new nft();
+    let extensionPresent = await n.checkExtension();
+    if (!extensionPresent) {
+      showExtensionWarning();
+    } else {
+      marketContract = n.getMarketContract();
 
-  let n = new nft();
-  let extensionPresent = await n.checkExtension();
-  if (!extensionPresent) {
-    showExtensionWarning();
-  } else {
-    marketContract = n.getMarketContract();
+      // Populate addresses from extension
+      const accounts = await n.getWalletAddresses();
 
-    // Populate addresses from extension
-    const accounts = await n.getWalletAddresses();
+      let sel = document.getElementById('newowner');
+      for(let i=0; i<accounts.length; i++)
+      {
+        let addr = accounts[i];
+        addrList.push(addr.address);
+        var opt = document.createElement("option");
+        opt.value= addr.address;
+        opt.innerHTML = `${addr.meta.name} - ${addr.address}`;
+        sel.appendChild(opt);
+      }
 
-    let sel = document.getElementById('newowner');
-    for(let i=0; i<accounts.length; i++)
-    {
-      let addr = accounts[i];
-      addrList.push(addr.address);
-      var opt = document.createElement("option");
-      opt.value= addr.address;
-      opt.innerHTML = `${addr.meta.name} - ${addr.address}`;
-      sel.appendChild(opt);
+      let userSelectedAddress = getCookie('userSelectedAddress');
+      if (userSelectedAddress) {
+        sel.value = userSelectedAddress;
+      }
+
+      // Show punk info
+      await getPunkInfo(punkId);
     }
 
-    let userSelectedAddress = getCookie('userSelectedAddress');
-    if (userSelectedAddress) {
-      sel.value = userSelectedAddress;
-    }
-
-    // Show punk info
-    await getPunkInfo(punkId);
+    walletupdate();
+    displayPageState();
+  } catch (e) {
+    console.log('initialization error', e);
   }
-
-  walletupdate();
-  displayPageState();
-}
+};
