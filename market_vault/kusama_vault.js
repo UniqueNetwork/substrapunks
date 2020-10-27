@@ -8,7 +8,6 @@ const { exit } = require('process');
 BigNumber.config({ DECIMAL_PLACES: 12, ROUNDING_MODE: BigNumber.ROUND_DOWN, decimalSeparator: '.' });
 
 const logFile = "./operations_log";
-let txInProgress = false;
 
 function getTime() {
   var a = new Date();
@@ -85,7 +84,6 @@ async function scanKusamaBlock(api, blockNum) {
 function sendTxAsync(api, sender, recipient, amount) {
   return new Promise(async function(resolve, reject) {
     try {
-      txInProgress = true;
       const unsub = await api.tx.balances
         .transfer(recipient, amount)
         .signAndSend(sender, ({ events = [], status }) => {
@@ -104,37 +102,19 @@ function sendTxAsync(api, sender, recipient, amount) {
             console.log(`Transaction finalized at blockHash ${status.asFinalized}`);
             resolve();
             unsub();
-            txInProgress = false;
           } else {
             console.log(`Something went wrong with transaction. Status: ${status}`);
             log(`Quote qithdraw`, `ERROR: ${status}`);
             reject();
             unsub();
-            txInProgress = false;
           }
         });
     } catch (e) {
       console.log("Error: ", e);
       log(`Quote withdraw`, `ERROR: ${e.toString()}`);
       reject(e);
-      txInProgress = false;
     }
   });
-}
-
-// Handle at least one block every 10 seconds or die
-let lastWatchDogBlock = 0;
-let updateWatchdog = 0;
-function watchDog() {
-  setTimeout(() => {
-    if (updateWatchdog != lastWatchDogBlock) {
-      lastWatchDogBlock = updateWatchdog;
-      watchDog();
-    } else {
-      log('WatchDog', `Process frozen on block ${lastWatchDogBlock}`);
-      process.exit();
-    }
-  }, 10000);
 }
 
 async function handleKusama() {
@@ -149,15 +129,11 @@ async function handleKusama() {
   const finalizedHash = await api.rpc.chain.getFinalizedHead();
   const signedFinalizedBlock = await api.rpc.chain.getBlock(finalizedHash);
 
-  // Start the watchdog
-  watchDog();
-
   while (true) {
     try {
       if (lastKusamaBlock + 1 <= signedFinalizedBlock.block.header.number) {
         // Handle Kusama Deposits (by analysing block transactions)
         lastKusamaBlock++;
-        updateWatchdog = lastKusamaBlock;
         fs.writeFileSync("./block.json", JSON.stringify({ lastKusamaBlock: lastKusamaBlock, lastNftBlock: lastNftBlock }));
 
         log(`Handling kusama block ${lastKusamaBlock}`, "START");
@@ -176,21 +152,22 @@ async function handleKusama() {
   try {
     quoteWithdrawals = JSON.parse(fs.readFileSync("./quoteWithdrawals.json"));
   } catch (e) {}
-  for (let i=0; i<quoteWithdrawals.length; i++) {
-    await sendTxAsync(api, admin, quoteWithdrawals[i].address, quoteWithdrawals[i].amount);
-    log(`Quote withdraw #${quoteWithdrawals[i].number}: ${quoteWithdrawals[i].address.toString()} withdarwing amount ${quoteWithdrawals[i].amount}`, "END");
+
+  while (quoteWithdrawals.length > 0) {
+    let w = quoteWithdrawals.pop();
+    fs.writeFileSync("./quoteWithdrawals.json", JSON.stringify(quoteWithdrawals));
+    await sendTxAsync(api, admin, w.address, w.amount);
+    log(`Quote withdraw #${w.number}: ${w.address.toString()} withdarwing amount ${w.amount}`, "END");
   }
-  fs.writeFileSync("./quoteWithdrawals.json", "[]")
 
   // api.disconnect();
 }
 
-// Should not run longer than 30 seconds
+// Should not run longer than X seconds at a time
 function killTimer() {
   setTimeout(() => { 
-    if (!txInProgress) process.exit();
-    else killTimer();
-  }, 30000);
+    process.exit();
+  }, 60000);
 }
 
 async function main() {

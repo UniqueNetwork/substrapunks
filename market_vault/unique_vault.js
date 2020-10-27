@@ -12,7 +12,6 @@ const contractAbi = require("./market_metadata.json");
 
 const quoteId = 2; // KSM
 const logFile = "./operations_log";
-let txInProgress = false;
 
 function getTime() {
   var a = new Date();
@@ -64,7 +63,6 @@ function sendTransactionAsync(api, sender, transaction) {
   return new Promise(async function(resolve, reject) {
 
     try {
-      txInProgress = true;
       const unsub = await transaction
         .signAndSend(sender, ({ events = [], status }) => {
       
@@ -101,7 +99,6 @@ function sendTransactionAsync(api, sender, transaction) {
             log(`Transaction`, `FAILED`);
           }
           unsub();
-          txInProgress = false;
         }
         else //if (status.isUsurped) 
         {
@@ -110,14 +107,12 @@ function sendTransactionAsync(api, sender, transaction) {
 
           reject();
           unsub();
-          txInProgress = false;
         }
       });
     } catch (e) {
       console.log("Error: ", e);
       log(`Transaction`, `ERROR: ${e.toString()}`);
       reject(e);
-      txInProgress = false;
     }
   });
 
@@ -246,14 +241,16 @@ async function scanContract(api, admin) {
 
     // Send withdraw transaction
     try {
+      // Update before sending
+      lastNftWithdraw++;
+      fs.writeFileSync("./withdrawal_id.json", JSON.stringify({ lastQuoteWithdraw, lastNftWithdraw }));
+
       await sendNftTxAsync(api, admin, address, collection_id, token_id);
     } catch (e) {
       log(`NFT withdraw #${lastNftWithdraw+1}: ${address.toString()} withdrawing ${collection_id.toNumber()}-${token_id.toNumber()}`, "FAILED");
     }
     log(`NFT withdraw #${lastNftWithdraw+1}: ${address.toString()} withdrawing ${collection_id.toNumber()}-${token_id.toNumber()}`, "END");
 
-    lastNftWithdraw++;
-    fs.writeFileSync("./withdrawal_id.json", JSON.stringify({ lastQuoteWithdraw, lastNftWithdraw }));
   }
 
 }
@@ -312,9 +309,8 @@ async function handleUnique() {
 // Should not run longer than 30 seconds
 function killTimer() {
   setTimeout(() => { 
-    if (!txInProgress) process.exit();
-    else killTimer();
-  }, 30000);
+    process.exit();
+  }, 60000);
 }
 
 async function main() {
