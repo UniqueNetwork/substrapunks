@@ -107,7 +107,7 @@ window.onload = async function() {
    }
  } catch (e) {
    console.log('my page initialization error', e);
-   showError();
+   showError(e);
  }
 
 
