@@ -365,7 +365,7 @@ async function sellStep4() {
     `;
 
     // Step #3: Invoke ask method on market contract to set the price
-    await n.trade(punkId, price, owner)
+    await n.trade(punkId, price, owner);
     pageState = 4;
   }
   catch (err) {
@@ -378,7 +378,7 @@ async function sellStep4() {
 
 function showError(msg) {
   try {
-    errMsg = `<p style='color:red;'>${msg}</p>`;
+    const errMsg = `<p style='color:red;'>${msg}</p>`;
     document.getElementById('progress').style.display = "none";
     document.getElementById('msg').innerHTML = errMsg;
     document.getElementById('error').style.display = "block";
@@ -540,7 +540,7 @@ async function walletupdate() {
 
 window.onclick = function(event) {
   try {
-    if (event.target === document.getElementById("error")) {
+    if (event.target === document.getElementById("error") || event.target === document.getElementById("modal-error-hide-button")) {
       document.getElementById("error").style.display = "none";
     }
   } catch (e) {

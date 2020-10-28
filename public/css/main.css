@@ -216,5 +216,12 @@ pre {
   width: 80%;
 }
 
+.modal-content .hide-button {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  font-size: 45px;
+}
+
 
 /*# sourceMappingURL=unique.css.map */
