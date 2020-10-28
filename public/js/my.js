@@ -3,14 +3,22 @@ let addrList = []; // List of extension addresses
 
 
 function setPunkImage() {
-  let img = document.getElementById("punkImg");
-  img.src = `images/punks/image${punkId}.png`
+  try {
+    let img = document.getElementById("punkImg");
+    img.src = `images/punks/image${punkId}.png`
+  } catch (e) {
+    console.log('setPunkImage error', e);
+  }
 }
 
 function showError() {
-  var tokenListBlock = document.getElementById("tokenlist");
-  if (tokenListBlock) {
-    tokenListBlock.innerHTML = "Ups, something went wrong! Please, refresh this page!";
+  try {
+    const tokenListBlock = document.getElementById("tokenlist");
+    if (tokenListBlock) {
+      tokenListBlock.innerHTML = "Ups, something went wrong! Please, refresh this page!";
+    }
+  } catch (e) {
+    console.log('showError error', e);
   }
 }
 
@@ -99,7 +107,7 @@ window.onload = async function() {
      }
 
      if (addrList.length >= 1) {
-       showPunksFromAddresses();
+       showPunksFromAddresses().then();
      }
 
      // Show punk info
