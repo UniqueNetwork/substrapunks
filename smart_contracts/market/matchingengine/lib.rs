@@ -246,9 +246,6 @@ mod matchingengine {
             // Remove ask from everywhere
             self.remove_ask(collection_id, token_id, ask_id);
 
-            // Remove a deposit
-            let _ = self.nft_deposits.remove(&(collection_id, token_id));
-
             // Transfer token back to user through NFT Vault
             self.last_nft_withdraw_id.set(self.last_nft_withdraw_id.get() + 1);
             self.nft_withdraw_queue.insert(*self.last_nft_withdraw_id.get(), (user, collection_id, token_id));

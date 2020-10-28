@@ -1,6 +1,6 @@
 function getPunkCard(id, punk, my) {
 
-  let status = "Claimed";
+  let status = "Idle";
 
   if (punk.price) {
     if (my) {
