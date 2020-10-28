@@ -3,25 +3,30 @@ function getRandomInt(max) {
 }
 
 window.onload = async function() {
-  let n = new nft();
+ try {
+   let n = new nft();
 
-  // Fill random punks
-  let randompunks = document.getElementById('randompunks');
-  let randompunksHtml = "";
-  for (let i=0; i<12; i++) {
-    let id = getRandomInt(n.getPunkCount()) + 1;
-    const punk = await n.loadPunkFromChain(id);
+   // Fill random punks
+   let randompunks = document.getElementById('randompunks');
+   let randompunksHtml = "";
 
-    // Add price if punk is for sale
-    if (punk.owner == n.getVaultAddress()) {
-      const ask = await n.getTokenAsk(id);
-      if (ask) {
-        punk.owner = ask.owner;
-        punk.price = ask.price;
-      }
-    }
+   for (let i=0; i < 12; i++) {
+     let id = getRandomInt(n.getPunkCount()) + 1;
+     const punk = await n.loadPunkFromChain(id);
 
-    randompunksHtml += getPunkCard(id, punk);
-  }
-  randompunks.innerHTML = randompunksHtml;
-}
+     // Add price if punk is for sale
+     if (punk.owner === n.getVaultAddress()) {
+       const ask = await n.getTokenAsk(id);
+       if (ask) {
+         punk.owner = ask.owner;
+         punk.price = ask.price;
+       }
+     }
+
+     randompunksHtml += getPunkCard(id, punk);
+   }
+   randompunks.innerHTML = randompunksHtml;
+ } catch (e) {
+   console.log('home page initialization error', e);
+ }
+};
