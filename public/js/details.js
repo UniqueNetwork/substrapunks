@@ -361,7 +361,7 @@ async function sellStep4() {
 
     let n = new nft();
     if ((parseFloat(price) < 0.01) || (parseFloat(price) > 10000) || isNaN(parseFloat(price))) throw `
-      Sorry, price should be in the range between 0.001 and 10000 KSM. You have input: ${price}
+      Sorry, price should be in the range between 0.01 and 10000 KSM. You have input: ${price}
     `;
 
     // Step #3: Invoke ask method on market contract to set the price
