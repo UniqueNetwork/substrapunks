@@ -185,7 +185,10 @@ mod matchingengine {
 
             // make sure sender owns this deposit
             let deposit_owner = *self.nft_deposits.get(&(collection_id, token_id)).unwrap();
-            assert!(deposit_owner == self.env().caller());
+            assert_eq!(deposit_owner, self.env().caller());
+
+            // Remove a deposit
+            let _ = self.nft_deposits.remove(&(collection_id, token_id));
 
             // Place an ask (into asks with a new Ask ID)
             let ask_id = self.last_ask_id.get() + 1;
@@ -243,6 +246,9 @@ mod matchingengine {
             // Remove ask from everywhere
             self.remove_ask(collection_id, token_id, ask_id);
 
+            // Remove a deposit
+            let _ = self.nft_deposits.remove(&(collection_id, token_id));
+
             // Transfer token back to user through NFT Vault
             self.last_nft_withdraw_id.set(self.last_nft_withdraw_id.get() + 1);
             self.nft_withdraw_queue.insert(*self.last_nft_withdraw_id.get(), (user, collection_id, token_id));
@@ -278,7 +284,7 @@ mod matchingengine {
             }
 
             // Start an NFT withdraw from the vault
-            self.last_nft_withdraw_id.set(self.last_nft_withdraw_id.get() + 1);
+            self.last_nft_withdraw_id.set(*self.last_nft_withdraw_id.get() + 1);
             self.nft_withdraw_queue.insert(*self.last_nft_withdraw_id.get(), (self.env().caller().clone(), collection_id, token_id));
 
             // Start Quote withdraw from the vault for the seller
@@ -321,18 +327,19 @@ mod matchingengine {
             // Remove an ask (from asks)
             let _ = self.asks.remove(&ask_id);
 
-            // Remove ask from cache
-            let mut cache_index = 0;
-            for (c_id, t_id, _, _, _) in self.asks_cache.iter() {
-                if (*c_id == collection_id) && (*t_id == token_id) {
-                    break;
+            // Remove ask from cache only using push and pop 
+            // (BEWARE: swap_remove works incorrectly in Ink! 2.0)
+            let mut tmp: Vec<(u64, u64, u64, Balance, AccountId)> = Vec::new();
+            while !self.asks_cache.is_empty() {
+                let ask = self.asks_cache.pop().unwrap();
+                if (ask.0 != collection_id) || (ask.1 != token_id) {
+                    tmp.push(ask);
                 }
-                cache_index += 1;
             }
-            self.asks_cache.swap_remove(cache_index);
-
-            // Remove a deposit
-            let _ = self.nft_deposits.remove(&(collection_id, token_id));
+            while !tmp.is_empty() {
+                let ask = tmp.pop().unwrap();
+                self.asks_cache.push(ask);
+            }
         }
 
         fn vault_withdraw(&mut self, user: &AccountId, quote_id: u64, withdraw_balance: Balance) {
