@@ -155,16 +155,26 @@ async function scanNftBlock(api, admin, blockNum) {
   await signedBlock.block.extrinsics.forEach(async (ex, index) => {
     const { _isSigned, _meta, method: { args, method, section } } = ex;
     if ((section == "nft") && (method == "transfer") && (args[0] == config.adminAddressNft)) {
-      console.log(`NFT Transfer: ${args[0]} received (${args[1]}, ${args[2]})`);
-      log(`NFT deposit from ${ex.signer.toString()} id (${args[1]}, ${args[2]})`, "RECEIVED");
 
-      // Register NFT Deposit
-      const deposit = {
-        address: ex.signer.toString(),
-        collectionId: args[1],
-        tokenId: args[2]
-      };
-      nftDeposits.push(deposit);
+      // Check that transfer was actually successful:
+      let { Owner } = await api.query.nft.nftItemList(args[1], args[2]);
+      if (Owner == config.adminAddressNft) {
+        console.log(`NFT Transfer: ${args[0]} received (${args[1]}, ${args[2]})`);
+        log(`NFT deposit from ${ex.signer.toString()} id (${args[1]}, ${args[2]})`, "RECEIVED");
+  
+        // Register NFT Deposit
+        const deposit = {
+          address: ex.signer.toString(),
+          collectionId: args[1],
+          tokenId: args[2]
+        };
+        nftDeposits.push(deposit);
+      }
+      else {
+        console.log(`NFT Transfer: ${args[0]} received (${args[1]}, ${args[2]}) - FAILED (owner = ${Owner})`);
+        log(`NFT deposit from ${ex.signer.toString()} id (${args[1]}, ${args[2]})`, "FAILED");
+      }
+
     }
   });
 

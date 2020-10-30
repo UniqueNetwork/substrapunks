@@ -48,7 +48,8 @@ function showIOwnIt(punk) {
 
 function showSomeoneElseOwnsIt(punk) {
   try {
-    document.getElementById('ownership').innerHTML = `<h4>Owner - someone else: ${punk.owner}</h4>`;
+    if (punk.owner) document.getElementById('ownership').innerHTML = `<h4>Owner - someone else: ${punk.owner}</h4>`;
+    else document.getElementById('ownership').innerHTML = `This NFT is in Escrow. This is temporary status. You can refresh this page in ~30 seconds for more details.`;
   } catch (e) {
     console.log('showSomeoneElseOwnsIt error', e);
     showError(e);
@@ -156,31 +157,21 @@ function displayPageState() {
 }
 
 async function checkBalance(n, owner) {
-  try {
-    if (await n.getBalance(owner) == "0") throw `
+  if (await n.getBalance(owner) == "0") throw `
     You need some Unique token balance in order to run a transaction.<br/>
     <br/>
     You can use our <a href='https://t.me/UniqueFaucetBot' target='_blank'>Telegram Unique Faucet Bot</a> to get a little Unique<br/>
   `;
-  } catch (e) {
-    console.log('checkBalance', e);
-    showError(e);
-  }
 }
 
 async function checkKusamaBalance(n, owner, amount) {
-  try {
-    const bal = await n.getKusamaBalance(owner);
-    console.log("Kusama balance: ", bal);
-    console.log("Punk price: ", punk.price);
-    if (bal < amount) throw `
+  const bal = await n.getKusamaBalance(owner);
+  console.log("Kusama balance: ", bal);
+  console.log("Punk price: ", punk.price);
+  if (bal < amount) throw `
     Your KSM balance is too low: ${bal}<br/>
     You need at least: ${amount} KSM<br/>
   `;
-  } catch (e) {
-    console.log('checkKusamaBalance', e);
-    showError(e);
-  }
 }
 
 function expandTradeSectionAndStart() {

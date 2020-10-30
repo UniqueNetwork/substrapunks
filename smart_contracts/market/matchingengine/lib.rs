@@ -6,6 +6,8 @@ use ink_lang as ink;
 mod matchingengine {
     use ink_core::storage;
     use ink_prelude::vec::Vec;
+    use ink_core::env;
+    use ink_prelude::*;
 
     const MAX_ASKS_CACHE: u32 = 200;
     const MAX_TRADES_CACHE: u32 = 1000;

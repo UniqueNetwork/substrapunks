@@ -2,6 +2,7 @@ const { ApiPromise, WsProvider, Keyring } = require('api_v2');
 const delay = require('delay');
 const config = require('./config');
 const fs = require('fs');
+const util = require('util')
 
 var BigNumber = require('bignumber.js');
 const { exit } = require('process');
@@ -58,6 +59,7 @@ async function scanKusamaBlock(api, blockNum) {
 
   // Memo: If it fails here, check custom types
   const signedBlock = await api.rpc.chain.getBlock(blockHash);
+  const allRecords = await api.query.system.events.at(blockHash);
 
   // console.log(`Reading Block Transactions`);
   let quoteDeposits = [];
@@ -66,16 +68,30 @@ async function scanKusamaBlock(api, blockNum) {
     // console.log(`Section: ${section}, method: ${method} args: ${args[0]}`);
     if (method == "transferKeepAlive") method = "transfer";
     if ((section == "balances") && (method == "transfer") && (args[0] == config.adminAddressKusama)) {
-      console.log(`Transfer: ${args[0]} received ${args[1]} from ${ex.signer.toString()}`);
-      log(`Quote deposit from ${ex.signer.toString()} amount ${args[0]}`, "RECEIVED");
+      const events = allRecords
+        .filter(({ phase }) =>
+          phase.isApplyExtrinsic &&
+          phase.asApplyExtrinsic.eq(index)
+        )
+        .map(({ event }) => `${event.section}.${event.method}`);
 
-      // Register Quote Deposit
-      const deposit = {
-        address: ex.signer.toString(),
-        amount: args[1]
-      };
-      quoteDeposits.push(deposit);
-      fs.writeFileSync("./quoteDeposits.json", JSON.stringify(quoteDeposits));
+      if (events.includes('system.ExtrinsicSuccess')) {
+        console.log(`Transfer: ${args[0]} received ${args[1]} from ${ex.signer.toString()}`);
+        log(`Quote deposit from ${ex.signer.toString()} amount ${args[1]}`, "RECEIVED");
+  
+        // Register Quote Deposit
+        const deposit = {
+          address: ex.signer.toString(),
+          amount: args[1]
+        };
+        quoteDeposits.push(deposit);
+        fs.writeFileSync("./quoteDeposits.json", JSON.stringify(quoteDeposits));
+      }
+      else {
+        console.log(`Transfer: ${args[0]} received ${args[1]} from ${ex.signer.toString()} - FAILED`);
+        log(`Quote deposit from ${ex.signer.toString()} amount ${args[1]}`, "FAILED");
+      }
+  
     }
   });
 
