@@ -167,22 +167,26 @@ async function scanNftBlock(api, admin, blockNum) {
           collectionId: args[1],
           tokenId: args[2]
         };
-
-        try {
-          await registerNftDepositAsync(api, admin, deposit.address, deposit.collectionId, deposit.tokenId);
-          log(`NFT deposit from ${deposit.address} id (${deposit.collectionId}, ${deposit.tokenId})`, "REGISTERED");
-        } catch (e) {
-          log(`NFT deposit from ${deposit.address} id (${deposit.collectionId}, ${deposit.tokenId})`, "FAILED");
-        }
+        nftDeposits.push(deposit);
       }
       else {
-        console.log(`NFT Transfer: ${args[0]} received (${args[1]}, ${args[2]}) - FAILED (owner = ${Owner})`);
-        log(`NFT deposit from ${ex.signer.toString()} id (${args[1]}, ${args[2]})`, "FAILED");
+        console.log(`NFT Transfer: ${args[0]} received (${args[1]}, ${args[2]}) - FAILED TX (owner = ${Owner})`);
+        log(`NFT deposit from ${ex.signer.toString()} id (${args[1]}, ${args[2]})`, "FAILED TX");
       }
 
     }
   });
 
+  for (let i=0; i<nftDeposits.length; i++) {
+    try {
+      await registerNftDepositAsync(api, admin, nftDeposits[i].address, nftDeposits[i].collectionId, nftDeposits[i].tokenId);
+      console.log(`NFT deposit from ${nftDeposits[i].address} id (${nftDeposits[i].collectionId}, ${nftDeposits[i].tokenId}) REGISTERED`);
+      log(`NFT deposit from ${nftDeposits[i].address} id (${nftDeposits[i].collectionId}, ${nftDeposits[i].tokenId})`, "REGISTERED");
+    } catch (e) {
+      console.log(`NFT deposit from ${nftDeposits[i].address} id (${nftDeposits[i].collectionId}, ${nftDeposits[i].tokenId}) FAILED TO REGISTER`);
+      log(`NFT deposit from ${nftDeposits[i].address} id (${nftDeposits[i].collectionId}, ${nftDeposits[i].tokenId})`, "FAILED TO REGISTER");
+    }
+  }
 }
 
 async function sendNftTxAsync(api, sender, recipient, collection_id, token_id) {
