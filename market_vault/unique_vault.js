@@ -151,6 +151,7 @@ async function scanNftBlock(api, admin, blockNum) {
   const signedBlock = await api.rpc.chain.getBlock(blockHash);
 
   // console.log(`Reading Block Transactions`);
+  let nftDeposits = [];
   await signedBlock.block.extrinsics.forEach(async (ex, index) => {
     const { _isSigned, _meta, method: { args, method, section } } = ex;
     if ((section == "nft") && (method == "transfer") && (args[0] == config.adminAddressNft)) {
