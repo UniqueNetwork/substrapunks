@@ -151,7 +151,6 @@ async function scanNftBlock(api, admin, blockNum) {
   const signedBlock = await api.rpc.chain.getBlock(blockHash);
 
   // console.log(`Reading Block Transactions`);
-  let nftDeposits = [];
   await signedBlock.block.extrinsics.forEach(async (ex, index) => {
     const { _isSigned, _meta, method: { args, method, section } } = ex;
     if ((section == "nft") && (method == "transfer") && (args[0] == config.adminAddressNft)) {
@@ -168,7 +167,13 @@ async function scanNftBlock(api, admin, blockNum) {
           collectionId: args[1],
           tokenId: args[2]
         };
-        nftDeposits.push(deposit);
+
+        try {
+          await registerNftDepositAsync(api, admin, deposit.address, deposit.collectionId, deposit.tokenId);
+          log(`NFT deposit from ${deposit.address} id (${deposit.collectionId}, ${deposit.tokenId})`, "REGISTERED");
+        } catch (e) {
+          log(`NFT deposit from ${deposit.address} id (${deposit.collectionId}, ${deposit.tokenId})`, "FAILED");
+        }
       }
       else {
         console.log(`NFT Transfer: ${args[0]} received (${args[1]}, ${args[2]}) - FAILED (owner = ${Owner})`);
@@ -178,14 +183,6 @@ async function scanNftBlock(api, admin, blockNum) {
     }
   });
 
-  for (let i=0; i<nftDeposits.length; i++) {
-    try {
-      await registerNftDepositAsync(api, admin, nftDeposits[i].address, nftDeposits[i].collectionId, nftDeposits[i].tokenId);
-      log(`NFT deposit from ${nftDeposits[i].address} id (${nftDeposits[i].collectionId}, ${nftDeposits[i].tokenId})`, "REGISTERED");
-    } catch (e) {
-      log(`NFT deposit from ${nftDeposits[i].address} id (${nftDeposits[i].collectionId}, ${nftDeposits[i].tokenId})`, "FAILED");
-    }
-  }
 }
 
 async function sendNftTxAsync(api, sender, recipient, collection_id, token_id) {
