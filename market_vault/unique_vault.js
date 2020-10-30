@@ -176,7 +176,7 @@ async function scanNftBlock(api, admin, blockNum) {
       }
 
     }
-  }).then(() =>
+  }).then(async () =>
   {
       for (let i=0; i<nftDeposits.length; i++) {
         try {
