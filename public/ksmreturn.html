@@ -1,0 +1,93 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv=X-UA-Compatible content="IE=11">
+    <link rel="shortcut icon" type="image/png" href="images/favicon.png">
+    <title>SubstraPunks</title>
+    <meta name="description" content="10,000 unique collectible characters with proof of ownership stored on the NFT Substrate blockchain." />
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <!-- production -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/style1.css">
+
+    <script src="js/polkadot.js"></script>
+    <script src="js/cookies.js"></script>    
+    <script src="js/getPunkCard.js"></script>
+    <script src="js/ksmreturn.js"></script>
+</head>
+
+<body>
+
+<link rel="stylesheet" type="text/css" href="css/cryptopunk.css" charset="utf-8" ></link>
+
+<div class="main_content project">
+    <div class="container item_header image_block" style="margin-bottom: 24px;">
+        
+        <div class="row">
+            <div class="col-md-10 col-xs-12">
+                <p></p>
+                <!-- CMS category -->
+                <a href="https://uniqueapps.usetech.com/#/nft"><img src="images/logo.png" class="category_btn"></img></a>
+            </div>
+            <div class="header__menu">
+                <br/>
+                <ul>
+                    <li><a href="index.html">Buy</a></li>
+                    <li><a href="my.html">Sell</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-10 col-xs-12">
+                <!-- CMS title -->
+                <h1>My Punks</h1>
+            </div>
+
+        </div>
+
+
+    </div>
+    <div id="punkDetails" class='container text_block'>
+        <div class='row detail-row'>
+            <p>What is your Unique address?</p>
+            <select id='address' onchange='showAddressInfo()' class='btn' style='background-color: white; color: #ff04b4; max-width: 600px; border: 1px solid; border-radius: 3px;'></select>
+            <br/>
+            <br/>
+
+            <div class="col-md-12 text_block">
+                <div class="row" id="ksmdeposit"></div>
+                <div class="row" id="message"></div>
+                <button onclick='withdraw();' class="btn">Withdraw</button>
+            </div>
+            <div class='col-md-10 col-md-offset-1' id='progress' style='display:none;'>
+                <p>Mining transaction...</p>
+            </div>
+
+        </div>
+    </div>
+    <div id="extensionWarning" class='container text_block' style='display:none'>
+        <h3>Please enable Polkadot{.js} browser extension and create or import an address!</h3>
+        <p>
+            For <a href="https://chrome.google.com/webstore/detail/polkadot%7Bjs%7D-extension/mopnmbcafieddcagagdcbnhejhlodfdd">Chrome</a><br>
+            For <a href="https://addons.mozilla.org/en-US/firefox/addon/polkadot-js-extension/">Firefox</a>
+        </p>
+    </div>
+
+    <div id='error' class='modal'>
+        <div class="modal-content">
+            <h3>Something is not right</h3>
+            <div id="modal-error-hide-button" class="hide-button">&times;</div>
+            <br/>
+            <span id='msg'></span>
+        </div>
+    </div>
+   
+</div>
+
+</body>
+</html>

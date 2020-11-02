@@ -121,13 +121,19 @@ function sendTransactionAsync(api, sender, transaction) {
 async function registerQuoteDepositAsync(api, sender, depositorAddress, amount) {
   console.log(`${depositorAddress} deposited ${amount} in ${quoteId} currency`);
 
+  // Apply 0.01 KSM fee == 1e10 femto
+  let amountBN = new BigNumber(amount);
+  let fee = amountBN.multipliedBy(0.02);
+  if (fee < 1e10) fee = 1e10;
+  amountBN = amountBN.minus(fee);
+
   const abi = new Abi(api.registry, contractAbi);
 
   const value = 0;
   const maxgas = 1000000000000;
 
   const tx = api.tx.contracts
-        .call(config.marketContractAddress, value, maxgas, abi.messages.registerDeposit(quoteId, amount, depositorAddress));
+        .call(config.marketContractAddress, value, maxgas, abi.messages.registerDeposit(quoteId, amountBN.toString(), depositorAddress));
   await sendTransactionAsync(api, sender, tx);
 }
 
@@ -176,7 +182,7 @@ async function scanNftBlock(api, admin, blockNum) {
           console.log(`NFT deposit from ${deposit.address} id (${deposit.collectionId}, ${deposit.tokenId}) FAILED TO REGISTER`);
           log(`NFT deposit from ${deposit.address} id (${deposit.collectionId}, ${deposit.tokenId})`, "FAILED TO REGISTER");
         }
-        
+
       }
       else {
         console.log(`NFT Transfer: ${args[0]} received (${args[1]}, ${args[2]}) - FAILED TX (owner = ${Owner})`);
@@ -219,13 +225,7 @@ async function scanContract(api, admin) {
     console.log(`${address.toString()} withdrawing amount ${amount.toNumber()}`);
     log(`Quote withdraw #${lastQuoteWithdraw+1}: ${address.toString()} withdrawing amount ${amount.toNumber()}`, "START");
 
-    // Apply 0.01 KSM fee == 1e10 femto
-    amountBN = new BigNumber(amount);
-    let fee = amountBN.multipliedBy(0.02);
-    if (fee < 1e10) fee = 1e10;
-    amountBN = amountBN.minus(fee);
-    console.log(`${address.toString()} will receive ${amountBN.toString()}`);
-    log(`Quote withdraw #${lastQuoteWithdraw+1}: sending ${amountBN.toString()}`, "START");
+    let amountBN = new BigNumber(amount);
 
     // Send KSM withdraw transaction
     if (amountBN.isGreaterThanOrEqualTo(0)) {

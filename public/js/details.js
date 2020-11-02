@@ -191,7 +191,6 @@ function showTradeSection() {
       <p>
         <button onclick='expandTradeSectionAndStart();' class="btn">Sell</button>
       </p>
-      <p><b>Note:</b> 2% or 0.01 KSM fee applies to all sales (whichever is greater)</p>
       <p>Also you can use the <a href="https://uniqueapps.usetech.com/#/nft">NFT Wallet</a> to find SubstraPunks collection (search for Collection <b>#4</b> there) and transfer your character to someone else. By the way, the transfers for SubstraPunks collection are free!</p>
     `;
   } catch (e) {
@@ -217,14 +216,22 @@ function showCancelSection() {
   }
 }
 
+function getFee(price) {
+  let fee = price * 0.02;
+  if (fee < 0.01) fee = 0.01;
+  return fee;
+}
+
 function showBuySection() {
   try {
+    const fee = getFee(parseFloat(punk.price));
     document.getElementById("walletselector").style.display = "block";
     document.getElementById('trading').innerHTML = `
     <br/>
     <p>It's for sale for ${punk.price} KSM, yay!</p>
     <p>
-      <button onclick='startBuy();' class="btn">Buy - ${punk.price} KSM</button>
+      <button onclick='startBuy();' class="btn">Buy - ${parseFloat(punk.price) + fee} KSM</button>
+      <p>Fee: <b>${fee}</b>, Price: <b>${punk.price}</b></p>
     </p>
   `;
   } catch (e) {
@@ -298,6 +305,14 @@ async function getPunkInfo(punkId) {
   }
 }
 
+function updateProgress(msg) {
+  try {
+    document.getElementById('progress').innerHTML = `${msg}`;
+  } catch (e) {
+    showError(err);
+  }
+}
+
 async function sellStep2() {
   try {
     document.getElementById('progress').style.display = "block";
@@ -305,6 +320,7 @@ async function sellStep2() {
 
     let owner = punk.owner;
     let n = new nft();
+    n.registerTxObserver(updateProgress);
     await checkBalance(n, owner);
 
     // Transaction #1: Deposit NFT to the vault
@@ -326,6 +342,7 @@ async function sellStep3() {
     document.getElementById('progress').style.display = "block";
     document.getElementById('progress').innerHTML = "Waiting for deposit to register in matching engine...";
     let n = new nft();
+    n.registerTxObserver(updateProgress);
     // Step #2: Wait for Vault transaction
     punk.owner = await n.waitForDeposit(punkId, addrList);
     if (punk.owner) pageState = 3;
@@ -351,6 +368,7 @@ async function sellStep4() {
     let owner = punk.owner;
 
     let n = new nft();
+    n.registerTxObserver(updateProgress);
     if ((parseFloat(price) < 0.01) || (parseFloat(price) > 10000) || isNaN(parseFloat(price))) throw `
       Sorry, price should be in the range between 0.01 and 10000 KSM. You have input: ${price}
     `;
@@ -384,8 +402,10 @@ async function canceltx() {
     document.getElementById('tradecontainer').style.display = "block";
     document.getElementById('trading').style.display = "none";
     document.getElementById('progress').style.display = "block";
+    document.getElementById('progress').innerHTML = "Mining transaction...";
 
     let n = new nft();
+    n.registerTxObserver(updateProgress);
     await checkBalance(n, punk.owner);
 
     await n.cancelAsync(punkId, punk.owner);
@@ -404,13 +424,16 @@ async function buyStep2() {
     document.getElementById('progress').style.display = "block";
     let newOwner = document.getElementById("newowner").value;
     let n = new nft();
+    n.registerTxObserver(updateProgress);
     await checkBalance(n, newOwner);
 
     // Check if KSM deposit is needed and deposit
     const deposited = parseFloat(await n.getKsmBalance(newOwner));
     console.log("Deposited KSM: ", deposited);
     if (deposited < parseFloat(punk.price)) {
-      const needed = parseFloat(punk.price) - deposited;
+      const price = parseFloat(punk.price);
+      const fee = getFee(price);
+      const needed = price + fee - deposited;
       await checkKusamaBalance(n, newOwner, needed + 0.003);
       await n.sendKusamaBalance(newOwner, n.getVaultAddress(), needed);
     }
@@ -432,12 +455,17 @@ async function buyStep3() {
     let newOwner = document.getElementById("newowner").value;
 
     let n = new nft();
+    n.registerTxObserver(updateProgress);
 
-    let deposited = 0;    
-    while(true) {
+    let deposited = 0;
+    let block = 0;
+    while (true) {
       deposited = parseFloat(await n.getKsmBalance(newOwner));
-      if (deposited < parseFloat(punk.price)) await n.delay(6000);
-      else break;
+      if (deposited < parseFloat(punk.price)) {
+        updateProgress(`Waiting for deposit: ${block} of 3 block(s) passed`);
+        block++;
+        await n.delay(6000);
+      } else break;
     }
 
     pageState = 9;
@@ -458,24 +486,42 @@ async function buyStep4() {
     let newOwner = document.getElementById("newowner").value;
 
     let n = new nft();
+    n.registerTxObserver(updateProgress);
 
     // Buy
     await n.buyAsync(punkId, newOwner);
 
     // Wait for the token to arrive
+    let block = 0;
     while (true) {
+      updateProgress(`Waiting for escrow to return NFT: ${block} of up to 3 block(s) passed`);
       await getPunkInfo(punkId);
       if (punk.owner == newOwner) break;
-      await n.delay(3000);
+      await n.delay(6000);
+      block++;
     }
 
     pageState = 0;
     justBought = true;
   }
   catch (err) {
-    showError(err);
-    pageState = 6; // Go to the beginning of buy process
-  } 
+    showError(err + ' (this may happen when two people are trying to buy one NFT at the same time). When you close this window, you will be forwarded to the page where you can get your KSM back.');
+    pageState = 6;
+
+    // Forward to oops page when error window is closed
+    window.onclick = function(event) {
+      try {
+        if (event.target === document.getElementById("error") || event.target === document.getElementById("modal-error-hide-button")) {
+          document.getElementById("error").style.display = "none";
+          window.location = 'ksmreturn.html';
+        }
+      } catch (e) {
+        console.log('onclick error', e);
+        showError(e);
+      }
+    };
+    
+  }
   finally {
     await getPunkInfo(punkId);    
     displayPageState();
@@ -518,7 +564,7 @@ async function walletupdate() {
     let address = document.getElementById("newowner").value;
     setCookie("userSelectedAddress", address, 365);
 
-    // Show KSM balance
+    // Show KSM deposit
     const n = new nft();
     document.getElementById("ksmBalance").innerHTML = `KSM Balance: ...`;
     const balance = await n.getKusamaBalance(address);

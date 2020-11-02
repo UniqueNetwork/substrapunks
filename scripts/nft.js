@@ -14,12 +14,14 @@ const { wsEndpoint, wsEndpointKusama, collectionId, punksToImport, contractAddre
 const { web3Accounts, web3Enable, web3FromAddress } = require('@polkadot/extension-dapp');
 const { Abi, PromiseContract } = require('@polkadot/api-contract');
 const rtt = require("./runtime_types.json");
-const contractAbi = require("./metadata.json");
 const marketContractAbi = require("./market_metadata.json");
 const delay = require('delay');
 
 var BigNumber = require('bignumber.js');
 BigNumber.config({ DECIMAL_PLACES: 12, ROUNDING_MODE: BigNumber.ROUND_DOWN, decimalSeparator: '.' });
+
+const value = 0;
+const maxgas = 1000000000000;
 
 class nft {
 
@@ -68,8 +70,8 @@ class nft {
       // console.log("Kusama decimals: ", this.ksmDecimals);
 
 
-      const abi = new Abi(api.registry, marketContractAbi);
-      this.contractInstance = new PromiseContract(api, abi, marketContractAddress);
+      this.abi = new Abi(api.registry, marketContractAbi);
+      this.contractInstance = new PromiseContract(api, this.abi, marketContractAddress);
     }
 
     return this.api;
@@ -128,80 +130,61 @@ class nft {
     return await web3Accounts();
   }
 
-  claimAsync(punkId, claimerAddress) {
-
-    console.log(`Claiming punk ${punkId} in collection ${collectionId} by ${claimerAddress}`);
-
-    let that = this;
-  
-    return new Promise(async function(resolve, reject) {
-
-      try {
-        const api = await that.getApi();
-        const abi = new Abi(api.registry, contractAbi);
-      
-        const value = 0;
-        const maxgas = 1000000000000;
-      
-        console.log(Object.keys(abi.messages));
-
-        const injector = await web3FromAddress(claimerAddress);
-        api.setSigner(injector.signer);
-      
-        const unsub = await api.tx.contracts
-          .call(contractAddress, value, maxgas, abi.messages.claim(collectionId, punkId, claimerAddress))
-          .signAndSend(claimerAddress, (result) => {
-          console.log(`Current tx status is ${result.status}`);
-        
-          if (result.status.isInBlock) {
-            console.log(`Transaction included at blockHash ${result.status.asInBlock}`);
-            resolve();
-            unsub();
-          } else if (result.status.isFinalized) {
-            console.log(`Transaction finalized at blockHash ${result.status.asFinalized}`);
-            resolve();
-            unsub();
-          } else if (result.status.isUsurped) {
-            console.log(`Something went wrong with transaction. Status: ${result.status}`);
-            reject();
-            unsub();
-          }
-        });
-      } catch (e) {
-        console.log("Error: ", e);
-        reject(e);
-      }
-  
-    });
-
+  registerTxObserver(callback) {
+    this.txObserver = callback;
   }
 
-  depositAsync(punkId, ownerAddress) {
-    let that = this;
-  
+  notifyTxObserver(msg) {
+    if (this.txObserver)
+      this.txObserver(msg);
+  }
+
+  sendTransactionAsync(api, sender, transaction) {
+    const that = this;
     return new Promise(async function(resolve, reject) {
       try {
-        const api = await that.getApi();
-        const injector = await web3FromAddress(ownerAddress);
-
+        const injector = await web3FromAddress(sender);
         api.setSigner(injector.signer);
-      
-        const unsub = await api.tx.nft
-          .transfer(vaultAddress, collectionId, punkId, 0)
-          .signAndSend(ownerAddress, (result) => {
-          console.log(`Deposit: Current tx status is ${result.status}`);
+    
+        const unsub = await transaction
+          .signAndSend(sender, ({ events = [], status }) => {
         
-          if (result.status.isInBlock) {
-            console.log(`Deposit: Transaction included at blockHash ${result.status.asInBlock}`);
-            resolve();
+          if (status == 'Ready') {
+            // nothing to do
+            console.log(`Current tx status is Ready`);
+            that.notifyTxObserver("Mining transaction: Transaction is ready");
+          }
+          else if (JSON.parse(status).Broadcast) {
+            // nothing to do
+            console.log(`Current tx status is Broadcast`);
+            that.notifyTxObserver("Mining transaction: Broadcasting transaction to the network");
+          }
+          else if (status.isInBlock) {
+            console.log(`Transaction included at blockHash ${status.asInBlock}`);
+            that.notifyTxObserver("Mining transaction: Transaction was included in block, waiting for finalization");
+          } else if (status.isFinalized) {
+            console.log(`Transaction finalized at blockHash ${status.asFinalized}`);
+  
+            // Loop through Vec<EventRecord> to display all events
+            let success = false;
+            events.forEach(({ phase, event: { data, method, section } }) => {
+              console.log(`    ${phase}: ${section}.${method}:: ${data}`);
+              if (method == 'ExtrinsicSuccess') {
+                success = true;
+              }
+            });
+  
+            if (success) resolve();
+            else {
+              reject("Transaction failed");
+            }
             unsub();
-          } else if (result.status.isFinalized) {
-            console.log(`Deposit: Transaction finalized at blockHash ${result.status.asFinalized}`);
-            resolve();
-            unsub();
-          } else if (result.status.isUsurped) {
-            console.log(`Deposit: Something went wrong with transaction. Status: ${result.status}`);
-            reject();
+          }
+          else
+          {
+            console.log(`Something went wrong with transaction. Status: ${status}`);
+  
+            reject("Transaction failed");
             unsub();
           }
         });
@@ -209,8 +192,14 @@ class nft {
         console.log("Error: ", e);
         reject(e);
       }
-  
     });
+  
+  }
+  
+  async depositAsync(punkId, ownerAddress) {
+    const api = await this.getApi();
+    const tx = api.tx.nft.transfer(vaultAddress, collectionId, punkId, 0);
+    await this.sendTransactionAsync(api, ownerAddress, tx);
   }
 
   async delay(ms) {
@@ -219,7 +208,7 @@ class nft {
 
   async getDepositor(punkId, readerAddress) {
     const keyring = new Keyring({ type: 'sr25519' });
-    const result = await this.contractInstance.call('rpc', 'get_nft_deposit', 0, 1000000000000, collectionId, punkId).send(readerAddress);
+    const result = await this.contractInstance.call('rpc', 'get_nft_deposit', value, maxgas, collectionId, punkId).send(readerAddress);
     if (result.output) {
       const address = keyring.encodeAddress(result.output.toString()); 
       console.log("Deposit address: ", address);
@@ -233,12 +222,16 @@ class nft {
       await this.getApi();
     
       console.log("Waiting for deposit transaction", depositorAddressList);
+      let block = 0;
       while (true) {
         const address = await this.getDepositor(punkId, depositorAddressList[0]);
         if (depositorAddressList.includes(address)) {
+          this.notifyTxObserver(`Waiting for deposit: ${block} of 3 block(s) passed`);
           return address;
         } else {
-          await delay(5000);
+          this.notifyTxObserver(`Waiting for deposit: ${block} of 3 block(s) passed`);
+          block++;
+          await delay(6000);
         }
       };
 
@@ -249,47 +242,11 @@ class nft {
     return null;
   }
 
-  askAsync(punkId, price, ownerAddress) {
-    let that = this;
-  
-    return new Promise(async function(resolve, reject) {
-      try {
-        const api = await that.getApi();
-        const abi = new Abi(api.registry, marketContractAbi);
-      
-        const value = 0;
-        const maxgas = 1000000000000;
-      
-        console.log(Object.keys(abi.messages));
-
-        const injector = await web3FromAddress(ownerAddress);
-        api.setSigner(injector.signer);
-      
-        const unsub = await api.tx.contracts
-          .call(marketContractAddress, value, maxgas, abi.messages.ask(collectionId, punkId, 2, price))
-          .signAndSend(ownerAddress, (result) => {
-          console.log(`Ask: Current tx status is ${result.status}`);
-        
-          if (result.status.isInBlock) {
-            console.log(`Ask: Transaction included at blockHash ${result.status.asInBlock}`);
-            resolve();
-            unsub();
-          } else if (result.status.isFinalized) {
-            console.log(`Ask: Transaction finalized at blockHash ${result.status.asFinalized}`);
-            resolve();
-            unsub();
-          } else if (result.status.isUsurped) {
-            console.log(`Ask: Something went wrong with transaction. Status: ${result.status}`);
-            reject();
-            unsub();
-          }
-        });
-      } catch (e) {
-        console.log("Error: ", e);
-        reject(e);
-      }
-  
-    });
+  async askAsync(punkId, price, ownerAddress) {
+    const api = await this.getApi();
+    const tx = api.tx.contracts
+      .call(marketContractAddress, value, maxgas, this.abi.messages.ask(collectionId, punkId, 2, price));
+    await this.sendTransactionAsync(api, ownerAddress, tx);
   }
 
   async trade(punkId, price, ownerAddress) {
@@ -310,139 +267,31 @@ class nft {
     await this.askAsync(punkId, priceBN.toString(), ownerAddress);
   }
 
-  cancelAsync(punkId, ownerAddress) {
-    let that = this;
-  
-    return new Promise(async function(resolve, reject) {
-      try {
-        const api = await that.getApi();
-        const abi = new Abi(api.registry, marketContractAbi);
-      
-        const value = 0;
-        const maxgas = 1000000000000;
-      
-        console.log(Object.keys(abi.messages));
-
-        const injector = await web3FromAddress(ownerAddress);
-        api.setSigner(injector.signer);
-      
-        const unsub = await api.tx.contracts
-          .call(marketContractAddress, value, maxgas, abi.messages.cancel(collectionId, punkId))
-          .signAndSend(ownerAddress, (result) => {
-          console.log(`Cancel: Current tx status is ${result.status}`);
-        
-          if (result.status.isInBlock) {
-            console.log(`Cancel: Transaction included at blockHash ${result.status.asInBlock}`);
-            resolve();
-            unsub();
-          } else if (result.status.isFinalized) {
-            console.log(`Cancel: Transaction finalized at blockHash ${result.status.asFinalized}`);
-            resolve();
-            unsub();
-          } else if (result.status.isUsurped) {
-            console.log(`Cancel: Something went wrong with transaction. Status: ${result.status}`);
-            reject();
-            unsub();
-          }
-        });
-      } catch (e) {
-        console.log("Error: ", e);
-        reject(e);
-      }
-  
-    });
+  async cancelAsync(punkId, ownerAddress) {
+    const api = await this.getApi();
+    const tx = api.tx.contracts
+      .call(marketContractAddress, value, maxgas, this.abi.messages.cancel(collectionId, punkId));
+    await this.sendTransactionAsync(api, ownerAddress, tx);
   }
 
-  buyAsync(punkId, ownerAddress) {
-    let that = this;
-  
-    return new Promise(async function(resolve, reject) {
-      try {
-        const api = await that.getApi();
-        const abi = new Abi(api.registry, marketContractAbi);
-      
-        const value = 0;
-        const maxgas = 1000000000000;
-      
-        console.log(Object.keys(abi.messages));
-
-        const injector = await web3FromAddress(ownerAddress);
-        api.setSigner(injector.signer);
-      
-        const unsub = await api.tx.contracts
-          .call(marketContractAddress, value, maxgas, abi.messages.buy(collectionId, punkId))
-          .signAndSend(ownerAddress, (result) => {
-          console.log(`Buy: Current tx status is ${result.status}`);
-        
-          if (result.status.isInBlock) {
-            console.log(`Buy: Transaction included at blockHash ${result.status.asInBlock}`);
-            resolve();
-            unsub();
-          } else if (result.status.isFinalized) {
-            console.log(`Buy: Transaction finalized at blockHash ${result.status.asFinalized}`);
-            resolve();
-            unsub();
-          } else if (result.status.isUsurped) {
-            console.log(`Buy: Something went wrong with transaction. Status: ${result.status}`);
-            reject();
-            unsub();
-          }
-        });
-      } catch (e) {
-        console.log("Error: ", e);
-        reject(e);
-      }
-  
-    });
+  async buyAsync(punkId, ownerAddress) {
+    const api = await this.getApi();
+    const tx = api.tx.contracts
+      .call(marketContractAddress, value, maxgas, this.abi.messages.buy(collectionId, punkId));
+    await this.sendTransactionAsync(api, ownerAddress, tx);
   }
 
-  withdrawAsync(amount, ownerAddress) {
+  async withdrawAsync(amount, ownerAddress) {
+    // Convert to u128
+    const ksmexp = BigNumber(10).pow(this.ksmDecimals);
+    const balance = new BigNumber(amount);
+    const balanceToSend = balance.multipliedBy(ksmexp);
+    console.log("balanceToSend: ", balanceToSend.toString());
 
-    let that = this;
-  
-    return new Promise(async function(resolve, reject) {
-      try {
-        const api = await that.getApi();
-        const abi = new Abi(api.registry, marketContractAbi);
-
-        // Convert amount to "Weis"
-        let amountBN = new BigNumber((''+amount).replace(/,/g, '.'));
-        const ksmexp = BigNumber(10).pow(that.ksmDecimals);
-        amountBN = amountBN.multipliedBy(ksmexp);
-        
-        const value = 0;
-        const maxgas = 1000000000000;
-      
-        console.log(Object.keys(abi.messages));
-
-        const injector = await web3FromAddress(ownerAddress);
-        api.setSigner(injector.signer);
-      
-        const unsub = await api.tx.contracts
-          .call(marketContractAddress, value, maxgas, abi.messages.withdraw(2, amountBN.toString()))
-          .signAndSend(ownerAddress, (result) => {
-          console.log(`Withdraw: Current tx status is ${result.status}`);
-        
-          if (result.status.isInBlock) {
-            console.log(`Withdraw: Transaction included at blockHash ${result.status.asInBlock}`);
-            resolve();
-            unsub();
-          } else if (result.status.isFinalized) {
-            console.log(`Withdraw: Transaction finalized at blockHash ${result.status.asFinalized}`);
-            resolve();
-            unsub();
-          } else if (result.status.isUsurped) {
-            console.log(`Withdraw: Something went wrong with transaction. Status: ${result.status}`);
-            reject();
-            unsub();
-          }
-        });
-      } catch (e) {
-        console.log("Error: ", e);
-        reject(e);
-      }
-  
-    });
+    const api = await this.getApi();
+    const tx = api.tx.contracts
+      .call(marketContractAddress, value, maxgas, this.abi.messages.withdraw(2, balanceToSend.toString()));
+    await this.sendTransactionAsync(api, ownerAddress, tx);
   }
 
   async getBalance(addr) {
@@ -466,37 +315,10 @@ class nft {
 
     console.log("balanceToSend: ", balanceToSend.toString());
 
-    return new Promise(async function(resolve, reject) {
-      try {
-        const injector = await web3FromAddress(sender);
-        api.setSigner(injector.signer);
-
-        const unsub = await api.tx.balances
-          .transfer(recepient, balanceToSend.toString())
-          .signAndSend(sender, (result) => {
-            console.log(`Kusama transfer: Current tx status is ${result.status}`);
-        
-            if (result.status.isInBlock) {
-              console.log(`Kusama transfer: Transaction included at blockHash ${result.status.asInBlock}`);
-              resolve();
-              unsub();
-              } else if (result.status.isFinalized) {
-              console.log(`Kusama transfer: Transaction finalized at blockHash ${result.status.asFinalized}`);
-              resolve();
-              unsub();
-            } else if (result.status.isUsurped) {
-              console.log(`Kusama transfer: Something went wrong with transaction. Status: ${result.status}`);
-              reject();
-              unsub();
-            }
-          });
-      } catch (e) {
-        console.log("Kusama transfer: Error: ", e);
-        reject(e);
-      }
-    });
+    const tx = api.tx.balances
+      .transfer(recepient, balanceToSend.toString());
+    await this.sendTransactionAsync(api, sender, tx);
   }
-
 
   async getAddressTokens(addr) {
     const api = await this.getApi();
@@ -513,7 +335,7 @@ class nft {
   async getKsmBalance(addr) {
     try {
       await this.getApi();
-      const result = await this.contractInstance.call('rpc', 'get_balance', 0, 1000000000000, 2).send(addr);
+      const result = await this.contractInstance.call('rpc', 'get_balance', value, maxgas, 2).send(addr);
       if (result.output) {
         return this.ksmToFixed(result.output.toString());
       }
@@ -529,7 +351,7 @@ class nft {
     let nfts = [];
     await this.getApi();
 
-    const asksResult = await this.contractInstance.call('rpc', 'get_asks_cache', 0, 1000000000000).send(addr);
+    const asksResult = await this.contractInstance.call('rpc', 'get_asks_cache', value, maxgas).send(addr);
     const asks = asksResult.output.elems;
   
     for (let i=0; i<asks.length; i++) {
@@ -550,7 +372,7 @@ class nft {
     let nfts = [];
     await this.getApi();
 
-    const asksResult = await this.contractInstance.call('rpc', 'get_asks_cache', 0, 1000000000000).send(addr);
+    const asksResult = await this.contractInstance.call('rpc', 'get_asks_cache', value, maxgas).send(addr);
     const asks = asksResult.output.elems;
   
     for (let i=0; i<asks.length; i++) {
@@ -570,11 +392,11 @@ class nft {
     const keyring = new Keyring({ type: 'sr25519' });
     await this.getApi();
     
-    const askIdResult = await this.contractInstance.call('rpc', 'get_ask_id_by_token', 0, 1000000000000, collectionId, tokenId).send(marketContractAddress);
+    const askIdResult = await this.contractInstance.call('rpc', 'get_ask_id_by_token', value, maxgas, collectionId, tokenId).send(marketContractAddress);
     if (askIdResult.output) {
       const askId = askIdResult.output.toNumber();
       console.log("Token Ask ID: ", askId);
-      const askResult = await this.contractInstance.call('rpc', 'get_ask_by_id', 0, 1000000000000, askId).send(marketContractAddress);
+      const askResult = await this.contractInstance.call('rpc', 'get_ask_by_id', value, maxgas, askId).send(marketContractAddress);
       if (askResult.output) {
         const askOwnerAddress = keyring.encodeAddress(askResult.output[4].toString());
         console.log("Ask owner: ", askOwnerAddress);
