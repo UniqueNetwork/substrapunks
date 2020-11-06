@@ -437,17 +437,20 @@ async function buyStep2() {
     // Check if KSM deposit is needed and deposit
     const deposited = parseFloat(await n.getKsmBalance(newOwner));
     console.log("Deposited KSM: ", deposited);
-    if (deposited < parseFloat(punk.price)) {
-      const price = parseFloat(punk.price);
-      const fee = getFee(price);
-      const needed = price + fee - deposited;
+    const price = parseFloat(punk.price);
+    const fee = getFee(price);
+    const needed = price + fee - deposited;
+    if (needed > 0) {
       await checkKusamaBalance(n, newOwner, needed + 0.003);
+
+      console.log(`Deposit from ${newOwner} to ${n.getVaultAddress()}`);
       await n.sendKusamaBalance(newOwner, n.getVaultAddress(), needed);
     }
 
     pageState = 8;
   }
   catch (err) {
+    console.log(err);
     showError(err);
     pageState = 6;
   }
@@ -470,7 +473,7 @@ async function buyStep3() {
       deposited = parseFloat(await n.getKsmBalance(newOwner));
       if (deposited < parseFloat(punk.price)) {
         updateProgress(`Waiting for deposit: ${block} of 3 block(s) passed`);
-        block++;
+        if (block < 3) block++;
         await n.delay(6000);
       } else break;
     }

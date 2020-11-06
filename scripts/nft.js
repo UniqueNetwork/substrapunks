@@ -230,7 +230,7 @@ class nft {
           return address;
         } else {
           this.notifyTxObserver(`Waiting for deposit: ${block} of 3 block(s) passed`);
-          block++;
+          if (block < 3) block++;
           await delay(6000);
         }
       };
@@ -285,7 +285,7 @@ class nft {
     // Convert to u128
     const ksmexp = BigNumber(10).pow(this.ksmDecimals);
     const balance = new BigNumber(amount);
-    const balanceToSend = balance.multipliedBy(ksmexp);
+    const balanceToSend = balance.multipliedBy(ksmexp).integerValue(BigNumber.ROUND_DOWN);
     console.log("balanceToSend: ", balanceToSend.toString());
 
     const api = await this.getApi();
@@ -310,7 +310,7 @@ class nft {
     // Convert to u128
     const ksmexp = BigNumber(10).pow(this.ksmDecimals);
     const balance = new BigNumber(amount);
-    const balanceToSend = balance.multipliedBy(ksmexp);
+    const balanceToSend = balance.multipliedBy(ksmexp).integerValue(BigNumber.ROUND_DOWN);;
     const api = await this.getKusamaApi();
 
     console.log("balanceToSend: ", balanceToSend.toString());
