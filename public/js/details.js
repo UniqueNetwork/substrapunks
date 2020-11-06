@@ -442,8 +442,6 @@ async function buyStep2() {
     const needed = price + fee - deposited;
     if (needed > 0) {
       await checkKusamaBalance(n, newOwner, needed + 0.003);
-
-      console.log(`Deposit from ${newOwner} to ${n.getVaultAddress()}`);
       await n.sendKusamaBalance(newOwner, n.getVaultAddress(), needed);
     }
 
