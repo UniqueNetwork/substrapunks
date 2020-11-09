@@ -331,7 +331,7 @@ async function handleUnique() {
 function killTimer() {
   setTimeout(() => { 
     process.exit();
-  }, 60000);
+  }, 120000);
 }
 
 async function main() {
