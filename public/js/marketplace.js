@@ -15,7 +15,7 @@ async function showTokensForSale() {
     const marketNfts = await n.getRecentAsks(addrList[0]);
 
     let listhtml = "";
-    for (let i=0; i<marketNfts.length; i++) {
+    for (let i=marketNfts.length-1; i>=0; i--) {
       const id = marketNfts[i].id;
       const punk = await n.loadPunkFromChain(id);
       punk["price"] = marketNfts[i].price;
