@@ -348,15 +348,16 @@ class nft {
   }
 
   getAskCache() {
-    const url = "ipfs-gateway.usetech.com/ipns/QmTL7GbCKW8qZbe8i2ZzckCgTuw8ztTJKWmeZYEQEMG4KS";
-  
+    const url = "ipfs-gateway.usetech.com";
+    const path = "/ipns/QmTL7GbCKW8qZbe8i2ZzckCgTuw8ztTJKWmeZYEQEMG4KS";
+    
     const options = {
       hostname: url,
       port: 443,
-      path: "",
+      path: path,
       method: 'GET',
       headers: {
-         'Content-Type': 'application/json',
+         'Content-Type': 'application/json'
        }
     }
   
