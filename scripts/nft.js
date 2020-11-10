@@ -16,6 +16,7 @@ const { Abi, PromiseContract } = require('@polkadot/api-contract');
 const rtt = require("./runtime_types.json");
 const marketContractAbi = require("./market_metadata.json");
 const delay = require('delay');
+const https = require('https');
 
 var BigNumber = require('bignumber.js');
 BigNumber.config({ DECIMAL_PLACES: 12, ROUNDING_MODE: BigNumber.ROUND_DOWN, decimalSeparator: '.' });
@@ -346,18 +347,52 @@ class nft {
     return 0;
   }
 
-  async getAddressTokensOnMarket(addr) {
-    const keyring = new Keyring({ type: 'sr25519' });
-    let nfts = [];
-    await this.getApi();
-
-    const asksResult = await this.contractInstance.call('rpc', 'get_asks_cache', value, maxgas).send(addr);
-    const asks = asksResult.output.elems;
+  getAskCache() {
+    const url = "ipfs-gateway.usetech.com/ipns/QmTL7GbCKW8qZbe8i2ZzckCgTuw8ztTJKWmeZYEQEMG4KS";
   
-    for (let i=0; i<asks.length; i++) {
-      const tokenId = asks[i][1].toNumber();
-      const tokenPrice = this.ksmToFixed(asks[i][3].toString());
-      const tokenOwner = keyring.encodeAddress(asks[i][4].toString());
+    const options = {
+      hostname: url,
+      port: 443,
+      path: "",
+      method: 'GET',
+      headers: {
+         'Content-Type': 'application/json',
+       }
+    }
+  
+    return new Promise(function(resolve, reject) {
+        const req = https.request(options, (res) => {
+          let body = '';
+  
+          res.on('data', (d) => {
+            body += d;
+          });
+  
+          res.on('end', () => {
+            resolve(JSON.parse(body));
+          });
+        })
+  
+        req.on('error', (error) => {
+          reject(error);
+        })
+  
+        req.end();
+    });
+  }
+
+  async getAddressTokensOnMarket(addr) {
+    let nfts = [];
+
+    // Get asks cache from IPFS
+    const asks = JSON.parse(await this.getAskCache());
+
+    for (const [key, ask] of Object.entries(asks)) {
+      const tokenId = key.substring(key.indexOf("-") + 1);
+      console.log(tokenId, ask);
+
+      const tokenPrice = ask.price;
+      const tokenOwner = ask.address;
       if (tokenOwner == addr) {
         nfts.push({id: tokenId, price: tokenPrice});
         console.log("Found token: ", tokenId);
@@ -367,20 +402,18 @@ class nft {
     return nfts;
   }
 
-  async getRecentAsks(addr) {
-    const keyring = new Keyring({ type: 'sr25519' });
+  async getRecentAsks() {
     let nfts = [];
-    await this.getApi();
 
-    const asksResult = await this.contractInstance.call('rpc', 'get_asks_cache', value, maxgas).send(addr);
-    const asks = asksResult.output.elems;
-  
-    for (let i=0; i<asks.length; i++) {
-      const tokenId = asks[i][1].toNumber();
-      const tokenPrice = this.ksmToFixed(asks[i][3].toString());
-      const tokenOwner = keyring.encodeAddress(asks[i][4].toString());
+    // Get asks cache from IPFS
+    const asks = JSON.parse(await this.getAskCache());
 
-      nfts.push({id: tokenId, price: tokenPrice, owner: tokenOwner});
+    for (const [key, ask] of Object.entries(asks)) {
+      const tokenId = key.substring(key.indexOf("-") + 1);
+      console.log(tokenId, ask);
+
+      const tokenPrice = ask.price;
+      nfts.push({id: tokenId, price: tokenPrice});
       console.log("Found token: ", tokenId);
     }
 

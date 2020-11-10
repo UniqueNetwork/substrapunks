@@ -9,6 +9,9 @@ do
     else
         echo "Asks file changed (${cid}), publishing."
         ipfs name publish --key=asks $cid
+        ipfs pin rm $oldcid
+        ipfs repo gc
     fi
+
     oldcid=$cid
 done
