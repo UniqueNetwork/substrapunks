@@ -12,6 +12,7 @@ const contractAbi = require("./market_metadata.json");
 
 const quoteId = 2; // KSM
 const logFile = "./operations_log";
+const asksFile = "./asks.json";
 
 const blackList = [ 7395, 1745, 8587, 573, 4732, 3248, 6986, 7202, 6079, 1732, 6494, 7553, 6840, 4541, 2102, 3503, 6560, 4269, 2659, 3912, 3470, 6290, 5811, 5209, 8322, 1813, 7771, 2578, 2661, 2983, 2119, 3310, 1547, 1740, 3187, 8194, 4651, 6188, 2167, 3487, 3106, 6070, 3446, 2407, 5870, 3745, 6389, 3246, 9385, 9680, 6457, 8462, 2350, 3927, 2269, 8485, 6198, 6787, 2047, 2197, 2379, 2466, 2558, 2682, 2759, 2979, 4232, 4273, 8187, 8190, 2935, 2673, 5228, 7683, 2075, 9845, 1645, 3198, 7490, 3192, 7907, 3167, 858, 239, 7613, 2790, 7043, 5536, 8277, 1134, 6378, 2416, 2373, 2240, 3952, 5017, 4999, 5986, 3159, 6155, 9329, 6445, 2117, 3935, 6091, 7841, 8725, 5194, 5744, 8120, 5930, 578, 6171, 6930, 2180, 6212, 5963, 7097, 8774, 5233, 7978, 2938, 2364, 1823, 1840, 8672, 5616, 737, 6122, 8769, 615, 9729, 3489, 427, 9883, 8678, 6579, 1776, 7061, 873, 5324, 2390, 6187, 9517, 2321, 3390, 3180, 6692, 2129, 9854, 1572, 7412, 3966, 1302, 1145, 1067, 3519, 7387, 8314, 648, 219, 2055, 825, 1195
 ];
@@ -276,6 +277,61 @@ async function scanContract(api, admin) {
 
 }
 
+function ksmToFixed(amount) {
+  const ksmDecimals = 12;
+  const ksmexp = BigNumber(10).pow(ksmDecimals);
+  const balance = new BigNumber(amount);
+  return balance.div(ksmexp).toFixed();
+}
+
+async function loadAsks(api) {
+
+  const abi = new Abi(api.registry, contractAbi);
+  const contractInstance = new PromiseContract(api, abi, config.marketContractAddress);
+
+  // TODO: Make this a dynamic list.
+  const collectionId = 4;
+
+  const nfts = await api.query.nft.addressTokens(collectionId, config.adminAddressNft);
+
+  //////////////////////////////////////////////////////
+  // Get price for each token (if available yet)
+
+  // First, get the saved file. If price is saved there, it did not change if token is still available.
+  let cachedasks = {};
+  try {
+    cachedasks = JSON.parse(fs.readFileSync(asksFile));
+  }
+  catch (e) {
+    console.log("No asks file, starting asks cache over");
+  }
+  
+  let asks = {};
+  for (let i=0; i<nfts.length; i++) {
+    const tokenId = nfts[i].toString();
+    const key = `${collectionId}-${tokenId}`;
+
+    let price = cachedasks[key];
+    if (price) {
+      console.log(`Using cached price for ${key} = ${price}`);
+    }
+    else {
+      process.stdout.write(`Retrieving price for ${key}... `);
+
+      const askIdResult = await contractInstance.call('rpc', 'get_ask_id_by_token', 0, 1000000000000, collectionId, tokenId).send(config.adminAddressNft);
+      const askId = askIdResult.output;
+      const askResult = await contractInstance.call('rpc', 'get_ask_by_id', 0, 1000000000000, askId).send(config.adminAddressNft);
+      const [_colId, _tokId, _quote, priceBN, _seller] = askResult.output;
+      price = ksmToFixed(priceBN);
+      
+      console.log(price);
+    }
+    asks[key] = price;
+  }
+
+  fs.writeFileSync(asksFile, JSON.stringify(asks));
+}
+
 async function handleUnique() {
 
   // Get the start block
@@ -285,44 +341,50 @@ async function handleUnique() {
   const keyring = new Keyring({ type: 'sr25519' });
   const admin = keyring.addFromUri(config.adminSeed);
 
-  const finalizedHashNft = await api.rpc.chain.getFinalizedHead();
-  const signedFinalizedBlockNft = await api.rpc.chain.getBlock(finalizedHashNft);
+  // const finalizedHashNft = await api.rpc.chain.getFinalizedHead();
+  // const signedFinalizedBlockNft = await api.rpc.chain.getBlock(finalizedHashNft);
 
-  while (true) {
-    try {
-      if (lastNftBlock + 1 <= signedFinalizedBlockNft.block.header.number) {
+  // while (true) {
+  //   try {
+  //     if (lastNftBlock + 1 <= signedFinalizedBlockNft.block.header.number) {
 
-        // Handle NFT Deposits (by analysing block transactions)
-        lastNftBlock++;
-        fs.writeFileSync("./block.json", JSON.stringify({ lastKusamaBlock: lastKusamaBlock, lastNftBlock: lastNftBlock }));
-        log(`Handling nft block ${lastNftBlock}`, "START");
-        await scanNftBlock(api, admin, lastNftBlock);
-        log(`Handling nft block ${lastNftBlock}`, "END");
-      } else break;
+  //       // Handle NFT Deposits (by analysing block transactions)
+  //       lastNftBlock++;
+  //       fs.writeFileSync("./block.json", JSON.stringify({ lastKusamaBlock: lastKusamaBlock, lastNftBlock: lastNftBlock }));
+  //       log(`Handling nft block ${lastNftBlock}`, "START");
+  //       await scanNftBlock(api, admin, lastNftBlock);
+  //       log(`Handling nft block ${lastNftBlock}`, "END");
+  //     } else break;
 
-    } catch (ex) {
-      console.log(ex);
-      await delay(1000);
-    }
-  }
+  //   } catch (ex) {
+  //     console.log(ex);
+  //     await delay(1000);
+  //   }
+  // }
 
-  // Handle Withdrawals (by getting them from market contracts)
-  await scanContract(api, admin);
+  // // Handle Withdrawals (by getting them from market contracts)
+  // await scanContract(api, admin);
 
-  // Handle queued KSM deposits
-  let quoteDeposits = [];
-  try {
-    quoteDeposits = JSON.parse(fs.readFileSync("./quoteDeposits.json"));
-  } catch (e) {}
-  for (let i=0; i<quoteDeposits.length; i++) {
-    try {
-      await registerQuoteDepositAsync(api, admin, quoteDeposits[i].address, quoteDeposits[i].amount);
-      log(`Quote deposit from ${quoteDeposits[i].address} amount ${quoteDeposits[i].amount}`, "REGISTERED");
-    } catch (e) {
-      log(`Quote deposit from ${quoteDeposits[i].address} amount ${quoteDeposits[i].amount}`, "FAILED");
-    }
-  }
-  fs.writeFileSync("./quoteDeposits.json", "[]")
+  // // Handle queued KSM deposits
+  // let quoteDeposits = [];
+  // try {
+  //   quoteDeposits = JSON.parse(fs.readFileSync("./quoteDeposits.json"));
+  // } catch (e) {}
+  // for (let i=0; i<quoteDeposits.length; i++) {
+  //   try {
+  //     await registerQuoteDepositAsync(api, admin, quoteDeposits[i].address, quoteDeposits[i].amount);
+  //     log(`Quote deposit from ${quoteDeposits[i].address} amount ${quoteDeposits[i].amount}`, "REGISTERED");
+  //   } catch (e) {
+  //     log(`Quote deposit from ${quoteDeposits[i].address} amount ${quoteDeposits[i].amount}`, "FAILED");
+  //   }
+  // }
+  // fs.writeFileSync("./quoteDeposits.json", "[]")
+
+  // Prepare JSON file with asks for IPNS publishing
+  await loadAsks(api);
+
+
+
 
   api.disconnect();
 }

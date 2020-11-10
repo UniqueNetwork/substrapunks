@@ -2,6 +2,7 @@ node_modules
 market_vault/node_modules
 market_vault/block.json
 market_vault/withdrawal_id.json
+market_vault/asks.json
 market_vault/*.csv
 market_vault/config.js
 scripts/config.js
