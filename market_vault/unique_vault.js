@@ -310,8 +310,6 @@ async function loadAsks(api) {
   let asks = {};
   for (let i=0; i<nfts.length; i++) {
     const tokenId = nfts[i].toString();
-    if (tokenId != "4178") continue;
-
     const key = `${collectionId}-${tokenId}`;
     if (cachedasks[key]) {
       let {price, address} = cachedasks[key];
