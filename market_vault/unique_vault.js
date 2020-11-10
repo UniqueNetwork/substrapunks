@@ -329,7 +329,7 @@ async function loadAsks(api) {
         if (askResult && askResult.output) {
           const [_colId, _tokId, _quote, priceBN, address] = askResult.output;
           price = ksmToFixed(priceBN);
-          console.log(`Price set: ${price}, sold by ${keyring.encodeAddress(address.toString())}`);
+          console.log(`Price set for ${key}: ${price}, sold by ${keyring.encodeAddress(address.toString())}`);
           asks[key] = {
             price: price,
             address: keyring.encodeAddress(address.toString())
