@@ -27,7 +27,6 @@ const maxgas = 1000000000000;
 class nft {
 
   isOwned(punk) {
-    console.log(`Comparing owner ${punk.Owner} to contract address: ${contractAddress}`);
     return (contractAddress != punk.Owner);
   }
 
@@ -386,17 +385,15 @@ class nft {
     let nfts = [];
 
     // Get asks cache from IPFS
-    const asks = JSON.parse(await this.getAskCache());
+    const asks = await this.getAskCache();
 
     for (const [key, ask] of Object.entries(asks)) {
       const tokenId = key.substring(key.indexOf("-") + 1);
-      console.log(tokenId, ask);
 
       const tokenPrice = ask.price;
       const tokenOwner = ask.address;
       if (tokenOwner == addr) {
         nfts.push({id: tokenId, price: tokenPrice});
-        console.log("Found token: ", tokenId);
       }
     }
 
@@ -407,15 +404,13 @@ class nft {
     let nfts = [];
 
     // Get asks cache from IPFS
-    const asks = JSON.parse(await this.getAskCache());
+    const asks = await this.getAskCache();
 
     for (const [key, ask] of Object.entries(asks)) {
       const tokenId = key.substring(key.indexOf("-") + 1);
-      console.log(tokenId, ask);
 
       const tokenPrice = ask.price;
-      nfts.push({id: tokenId, price: tokenPrice});
-      console.log("Found token: ", tokenId);
+      nfts.push({id: tokenId, price: tokenPrice, owner: ask.address});
     }
 
     return nfts;

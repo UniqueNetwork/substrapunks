@@ -17,10 +17,11 @@ async function showTokensForSale() {
     let listhtml = "";
     for (let i=marketNfts.length-1; i>=0; i--) {
       const id = marketNfts[i].id;
-      const punk = await n.loadPunkFromChain(id);
+      const punk = {
+        price: marketNfts[i].price,
+        isOwned: true
+      }
       punk["price"] = marketNfts[i].price;
-      console.log("Owner: ", marketNfts[i].owner);
-      console.log("Addr list: ", addrList, addrList.includes(marketNfts[i].owner));
       listhtml += getPunkCard(id, punk, addrList.includes(marketNfts[i].owner));
       document.getElementById("tokenlist").innerHTML = listhtml;
     }

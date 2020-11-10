@@ -343,11 +343,10 @@ async function loadAsks(api) {
         console.log("no ask yet");
       }
     }
-
-    // Save every addition
-    fs.writeFileSync(asksFile, JSON.stringify(asks));
   }
 
+  // Save asks cache
+  fs.writeFileSync(asksFile, JSON.stringify(asks));
 }
 
 async function handleUnique() {
@@ -408,7 +407,7 @@ async function handleUnique() {
 function killTimer() {
   setTimeout(() => { 
     process.exit();
-  }, 120000);
+  }, 240000);
 }
 
 async function main() {

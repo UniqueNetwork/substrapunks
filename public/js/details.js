@@ -206,7 +206,7 @@ function showCancelSection() {
   try {
     document.getElementById('trading').innerHTML = `
       <p>
-        <b>You own it!</b> (address ${punk.owner})</p><p>... and you have put it on sale.
+        <b>You own it!</b> (address ${punk.owner})</p><p>... and you have put it on sale. Give it a few minutes to appear in the <a href='index.html'>Marketplace</a>.
       </p>
       <p>
         <button onclick='canceltx();' class="btn">Cancel Sale</button>

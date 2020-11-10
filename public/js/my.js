@@ -15,7 +15,7 @@ function showError() {
   try {
     const tokenListBlock = document.getElementById("tokenlist");
     if (tokenListBlock) {
-      tokenListBlock.innerHTML = "Ups, something went wrong! Please, refresh this page!";
+      tokenListBlock.innerHTML = "Oops, something went wrong! Please, refresh this page!";
     }
   } catch (e) {
     console.log('showError error', e);
@@ -46,7 +46,10 @@ async function showPunksFromAddresses() {
 
     for (let i = marketNfts.length - 1; i >= 0; i--) {
       const id = marketNfts[i].id;
-      const punk = await n.loadPunkFromChain(id);
+      const punk = {
+        price: marketNfts[i].price,
+        isOwned: true
+      }
       punk["price"] = marketNfts[i].price;
       listhtml += getPunkCard(id, punk, true);
       document.getElementById("tokenlist").innerHTML = listhtml;
@@ -54,7 +57,9 @@ async function showPunksFromAddresses() {
 
     for (let i = nfts.length-1; i >=0 ; i--) {
       const id = nfts[i];
-      const punk = await n.loadPunkFromChain(id);
+      const punk = {
+        isOwned: true
+      }
       listhtml += getPunkCard(id, punk, false);
       document.getElementById("tokenlist").innerHTML = listhtml;
     }
