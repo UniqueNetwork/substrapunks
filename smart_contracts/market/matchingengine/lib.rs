@@ -5,12 +5,6 @@ use ink_lang as ink;
 #[ink::contract(version = "0.1.0")]
 mod matchingengine {
     use ink_core::storage;
-    use ink_prelude::vec::Vec;
-    use ink_core::env;
-    use ink_prelude::*;
-
-    const MAX_ASKS_CACHE: u32 = 200;
-    const MAX_TRADES_CACHE: u32 = 1000;
 
     #[ink(storage)]
     struct MatchingEngine {
@@ -59,17 +53,8 @@ mod matchingengine {
         /// Ask index: Helps find the ask by the colectionId + tokenId
         asks_by_token: storage::HashMap<(u64, u64), u128>,
 
-        /// Ask cache: Helps find all recent asks
-        asks_cache: storage::Vec<(u64, u64, u64, Balance, AccountId)>,
-
         /// Last Ask ID
         last_ask_id: storage::Value<u128>,
-
-        /////////////////////////////////////////////////////////////////////////////////
-        // Trades
-
-        /// Completed trades: (collectionId, tokenId, quote_id, price, seller, buyer)
-        trades: storage::Vec<(u64, u64, u64, Balance, AccountId, AccountId)>,
     }
 
     impl MatchingEngine {
@@ -185,27 +170,23 @@ mod matchingengine {
         #[ink(message)]
         fn ask(&mut self, collection_id: u64, token_id: u64, quote_id: u64, price: Balance) {
 
-            // make sure sender owns this deposit
+            // make sure sender owns this deposit (if not called by the admin)
             let deposit_owner = *self.nft_deposits.get(&(collection_id, token_id)).unwrap();
-            assert_eq!(deposit_owner, self.env().caller());
+            if self.env().caller() != *self.owner.get() {
+                assert_eq!(deposit_owner, self.env().caller());
+            }
 
             // Remove a deposit
             let _ = self.nft_deposits.remove(&(collection_id, token_id));
 
             // Place an ask (into asks with a new Ask ID)
             let ask_id = self.last_ask_id.get() + 1;
-            let ask = (collection_id, token_id, quote_id, price, self.env().caller().clone());
+            let ask = (collection_id, token_id, quote_id, price, deposit_owner.clone());
             self.last_ask_id.set(ask_id);
             self.asks.insert(ask_id, ask.clone());
 
             // Record that token is being sold by this user (in asks_by_token) in reverse lookup index
             self.asks_by_token.insert((collection_id, token_id), ask_id);
-
-            // Add to ask cache
-            self.asks_cache.push(ask);
-            if self.asks_cache.len() > MAX_ASKS_CACHE {
-                self.asks_cache.pop();
-            }
         }
 
         /// Get last ask ID
@@ -226,16 +207,6 @@ mod matchingengine {
             *self.asks_by_token.get(&(collection_id, token_id)).unwrap()
         }
 
-        /// Get asks cache
-        #[ink(message)]
-        fn get_asks_cache(&self) -> Vec<(u64, u64, u64, Balance, AccountId)> {
-            let mut asks: Vec<(u64, u64, u64, Balance, AccountId)> = Vec::new();
-            for ask in self.asks_cache.iter() {
-                asks.push((*ask).clone());
-            }
-            asks
-        }
-
         /// Cancel an ask
         #[ink(message)]
         fn cancel(&mut self, collection_id: u64, token_id: u64) {
@@ -243,7 +214,9 @@ mod matchingengine {
             // Ensure that sender owns this ask
             let ask_id = *self.asks_by_token.get(&(collection_id, token_id)).unwrap();
             let (_, _, _, _, user) = *self.asks.get(&ask_id).unwrap();
-            assert_eq!(self.env().caller(), user);
+            if self.env().caller() != *self.owner.get() {
+                assert_eq!(self.env().caller(), user);
+            }
 
             // Remove ask from everywhere
             self.remove_ask(collection_id, token_id, ask_id);
@@ -274,14 +247,6 @@ mod matchingengine {
             // Remove ask from everywhere
             self.remove_ask(collection_id, token_id, ask_id);
 
-            // Register the trade (actual transfers are made by the vault)
-            // (collectionId, tokenId, quote_id, price, seller, buyer)
-            let trade = (collection_id, token_id, quote_id, price, seller.clone(), self.env().caller().clone());
-            self.trades.push(trade);
-            if self.trades.len() > MAX_TRADES_CACHE {
-                self.trades.pop();
-            }
-
             // Start an NFT withdraw from the vault
             self.last_nft_withdraw_id.set(*self.last_nft_withdraw_id.get() + 1);
             self.nft_withdraw_queue.insert(*self.last_nft_withdraw_id.get(), (self.env().caller().clone(), collection_id, token_id));
@@ -292,16 +257,6 @@ mod matchingengine {
             // Update totals
             let total = *self.total_traded.get(&quote_id).unwrap();
             self.total_traded.insert(quote_id, total + price);
-        }
-
-        /// Get historic trades
-        #[ink(message)]
-        fn get_trades(&self) -> Vec<(u64, u64, u64, Balance, AccountId, AccountId)> {
-            let mut trades: Vec<(u64, u64, u64, Balance, AccountId, AccountId)> = Vec::new();
-            for trade in self.trades.iter() {
-                trades.push((*trade).clone());
-            }
-            trades
         }
 
         /// Panic if the sender is not the contract owner
@@ -325,20 +280,6 @@ mod matchingengine {
 
             // Remove an ask (from asks)
             let _ = self.asks.remove(&ask_id);
-
-            // Remove ask from cache only using push and pop 
-            // (BEWARE: swap_remove works incorrectly in Ink! 2.0)
-            let mut tmp: Vec<(u64, u64, u64, Balance, AccountId)> = Vec::new();
-            while !self.asks_cache.is_empty() {
-                let ask = self.asks_cache.pop().unwrap();
-                if (ask.0 != collection_id) || (ask.1 != token_id) {
-                    tmp.push(ask);
-                }
-            }
-            while !tmp.is_empty() {
-                let ask = tmp.pop().unwrap();
-                self.asks_cache.push(ask);
-            }
         }
 
         fn vault_withdraw(&mut self, user: &AccountId, quote_id: u64, withdraw_balance: Balance) {
