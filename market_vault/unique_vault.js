@@ -160,7 +160,8 @@ async function registerNftDepositAsync(api, sender, depositorAddress, collection
 }
 
 async function scanNftBlock(api, admin, blockNum) {
-  console.log(`Scanning Block #${blockNum}`);
+
+  if (blockNum % 100 == 0) console.log(`Scanning Block #${blockNum}`);
   const blockHash = await api.rpc.chain.getBlockHash(blockNum);
 
   // Memo: If it fails here, check custom types
@@ -329,7 +330,7 @@ async function loadAsks(api) {
         if (askResult && askResult.output) {
           const [_colId, _tokId, _quote, priceBN, address] = askResult.output;
           price = ksmToFixed(priceBN);
-          console.log(price);
+          console.log(`price: ${price}, sold by ${address}`);
           asks[key] = {
             price: price,
             address: keyring.encodeAddress(address.toString())

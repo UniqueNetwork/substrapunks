@@ -54,7 +54,7 @@ async function getKusamaConnection() {
 }
 
 async function scanKusamaBlock(api, blockNum) {
-  console.log(`Scanning Block #${blockNum}`);
+  if (blockNum % 100 == 0) console.log(`Scanning Block #${blockNum}`);
   const blockHash = await api.rpc.chain.getBlockHash(blockNum);
 
   // Memo: If it fails here, check custom types
