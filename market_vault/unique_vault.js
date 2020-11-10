@@ -320,7 +320,7 @@ async function loadAsks(api) {
       }
     }
     else {
-      process.stdout.write(`Retrieving price for ${key}... `);
+      // process.stdout.write(`Retrieving price for ${key}... `);
 
       const askIdResult = await contractInstance.call('rpc', 'get_ask_id_by_token', 0, 1000000000000, collectionId, tokenId).send(config.adminAddressNft);
       if (askIdResult && askIdResult.output) {
@@ -329,18 +329,18 @@ async function loadAsks(api) {
         if (askResult && askResult.output) {
           const [_colId, _tokId, _quote, priceBN, address] = askResult.output;
           price = ksmToFixed(priceBN);
-          console.log(`price: ${price}, sold by ${keyring.encodeAddress(address.toString())}`);
+          console.log(`Price set: ${price}, sold by ${keyring.encodeAddress(address.toString())}`);
           asks[key] = {
             price: price,
             address: keyring.encodeAddress(address.toString())
           }
         }
         else {
-          console.log("no price yet");
+          // console.log("no price yet");
         }
       }
       else {
-        console.log("no ask yet");
+        // console.log("no ask yet");
       }
     }
   }
