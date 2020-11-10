@@ -343,9 +343,11 @@ async function loadAsks(api) {
         console.log("no ask yet");
       }
     }
+
+    // Save every addition
+    fs.writeFileSync(asksFile, JSON.stringify(asks));
   }
 
-  fs.writeFileSync(asksFile, JSON.stringify(asks));
 }
 
 async function handleUnique() {
