@@ -288,6 +288,7 @@ async function loadAsks(api) {
 
   const abi = new Abi(api.registry, contractAbi);
   const contractInstance = new PromiseContract(api, abi, config.marketContractAddress);
+  const keyring = new Keyring({ type: 'sr25519' });
 
   // TODO: Make this a dynamic list.
   const collectionId = 4;
@@ -309,12 +310,16 @@ async function loadAsks(api) {
   let asks = {};
   for (let i=0; i<nfts.length; i++) {
     const tokenId = nfts[i].toString();
-    const key = `${collectionId}-${tokenId}`;
+    if (tokenId != "4178") continue;
 
-    let price = cachedasks[key];
-    if (price) {
+    const key = `${collectionId}-${tokenId}`;
+    if (cachedasks[key]) {
+      let {price, address} = cachedasks[key];
       console.log(`Using cached price for ${key} = ${price}`);
-      asks[key] = price;
+      asks[key] = {
+        price: price,
+        address: address
+      }
     }
     else {
       process.stdout.write(`Retrieving price for ${key}... `);
@@ -324,10 +329,13 @@ async function loadAsks(api) {
         const askId = askIdResult.output;
         const askResult = await contractInstance.call('rpc', 'get_ask_by_id', 0, 1000000000000, askId).send(config.adminAddressNft);
         if (askResult && askResult.output) {
-          const [_colId, _tokId, _quote, priceBN, _seller] = askResult.output;
+          const [_colId, _tokId, _quote, priceBN, address] = askResult.output;
           price = ksmToFixed(priceBN);
           console.log(price);
-          asks[key] = price;
+          asks[key] = {
+            price: price,
+            address: keyring.encodeAddress(address.toString())
+          }
         }
         else {
           console.log("no price yet");
