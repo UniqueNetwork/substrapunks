@@ -314,7 +314,6 @@ async function loadAsks(api) {
     const key = `${collectionId}-${tokenId}`;
     if (cachedasks[key]) {
       let {price, address} = cachedasks[key];
-      console.log(`Using cached price for ${key} = ${price}`);
       asks[key] = {
         price: price,
         address: address
