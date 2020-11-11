@@ -201,6 +201,9 @@ async function scanNftBlock(api, admin, blockNum) {
       }
 
     }
+    else if ((section == "contracts") && (method == "call")) {
+      console.log(`Contract call:`, args);
+    }
   }
 
 
