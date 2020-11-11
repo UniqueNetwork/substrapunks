@@ -202,7 +202,12 @@ async function scanNftBlock(api, admin, blockNum) {
 
     }
     else if ((section == "contracts") && (method == "call")) {
-      console.log(`Contract call:`, args);
+      try {
+        console.log(`Contract call: ${args[0].toString()}, ${args[1].toString()}, ${args[2].toString()}, ${args[3].toString()}`);
+      }
+      catch (e) {
+        console.log(e);
+      }
     }
   }
 
