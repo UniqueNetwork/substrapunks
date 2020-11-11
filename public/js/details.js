@@ -220,6 +220,7 @@ function showCancelSection() {
 }
 
 function getFee(price) {
+  if (price <= 0.001) return 0;
   let fee = price * 0.02;
   if (fee < 0.01) fee = 0.01;
   return fee;
@@ -438,9 +439,11 @@ async function buyStep2() {
     const deposited = parseFloat(await n.getKsmBalance(newOwner));
     console.log("Deposited KSM: ", deposited);
     const price = parseFloat(punk.price);
-    const fee = getFee(price);
-    const needed = price + fee - deposited;
-    if (needed > 0) {
+    const feeFull = getFee(price);
+    const feePaid = getFee(deposited);
+    if (deposited < price) {
+      const fee = feeFull - feePaid;
+      const needed = price + fee - deposited;
       await checkKusamaBalance(n, newOwner, needed + 0.003);
       await n.sendKusamaBalance(newOwner, n.getVaultAddress(), needed);
     }

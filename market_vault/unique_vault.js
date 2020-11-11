@@ -204,6 +204,20 @@ async function scanNftBlock(api, admin, blockNum) {
     else if ((section == "contracts") && (method == "call")) {
       try {
         console.log(`Contract call: ${args[0].toString()}, ${args[1].toString()}, ${args[2].toString()}, ${args[3].toString()}`);
+
+        // Buy 3457 (0D81):
+        // Block hash:   0x3a88c2efd7d7131f43f7771c3e50a98cd90cf9b1e8b83ed890207f98ea93495a
+        // Block number: 1,384,383
+        // Data:         0x261a70280400000000000000810d000000000000
+
+        // Withdraw NFT/Amount
+        // 0xb3f7898ecbda75ddf8f6cea3f584c9c46fb0fe7fbb645804c89261014b78ff22
+        // 1,384,398
+        // 0xe80efa690400000000000000860f0000…88e769c8628cc58d53fbe7f6fbc52b3e
+
+        // Register NFT 4744 (0x1288 = 8812 LE) deposit
+        // 0xe80efa6904000000000000008812000000000000d81f689c5d4aef49114017168ed953595ead394faa5acfd8877702693157620a
+
       }
       catch (e) {
         console.log(e);
