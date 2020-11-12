@@ -310,7 +310,7 @@ class nft {
     // Convert to u128
     const ksmexp = BigNumber(10).pow(this.ksmDecimals);
     const balance = new BigNumber(amount);
-    const balanceToSend = balance.multipliedBy(ksmexp).integerValue(BigNumber.ROUND_DOWN);;
+    const balanceToSend = balance.multipliedBy(ksmexp).integerValue(BigNumber.ROUND_DOWN);
     const api = await this.getKusamaApi();
 
     console.log("balanceToSend: ", balanceToSend.toString());
