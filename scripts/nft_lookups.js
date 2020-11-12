@@ -53,7 +53,8 @@ async function getRegisteredEscrowBalance(addr) {
 }
 
 async function main() {
-  const addr = "5HBh79strNrkf8ANbc7q7U73jgt4ayDX5hry7wnKSECtCEwi";
+  // const addr = "5HBh79strNrkf8ANbc7q7U73jgt4ayDX5hry7wnKSECtCEwi";
+  const addr = "5H92NmUsAvVRpc6UC38SnU2RDX1fMyxAxzLL65uvqAFBynkH";
   await getRegisteredEscrowBalance(addr);
 }
 

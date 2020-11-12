@@ -128,7 +128,7 @@ async function registerQuoteDepositAsync(api, sender, depositorAddress, amount) 
   // Apply 0.01 KSM fee == 1e10 femto
   let amountBN = new BigNumber(amount);
   let fee = amountBN.multipliedBy(0.02);
-  if (fee < 1e10) fee = 1e10;
+  // if (fee < 1e10) fee = 1e10;
   amountBN = amountBN.minus(fee);
 
   const abi = new Abi(api.registry, contractAbi);

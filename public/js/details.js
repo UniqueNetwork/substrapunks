@@ -222,8 +222,8 @@ function showCancelSection() {
 function getFee(price) {
   if (price <= 0.001) return 0;
   let fee = price * 0.02;
-  if (fee < 0.01) fee = 0.01;
-  return fee;
+  // if (fee < 0.01) fee = 0.01;
+  return Math.round(fee * 1000) / 1000;
 }
 
 function showBuySection() {
