@@ -223,19 +223,30 @@ function getFee(price) {
   if (price <= 0.001) return 0;
   let fee = price * 0.02;
   // if (fee < 0.01) fee = 0.01;
-  return Math.round(fee * 1000) / 1000;
+  return fee;
+}
+
+function roundNum(num) {
+  let roundedNum = '' + Math.round(num * 1000) / 1000;
+  const dec = roundedNum.indexOf('.');
+  if ((dec >= 0) && (roundedNum.length >= dec+4)) {
+    roundedNum = roundedNum.substr(0, dec+4);
+  }
+
+  return roundedNum;
 }
 
 function showBuySection() {
   try {
-    const fee = getFee(parseFloat(punk.price));
+    let fee = getFee(parseFloat(punk.price));
+
     document.getElementById("walletselector").style.display = "block";
     document.getElementById('trading').innerHTML = `
     <br/>
     <p>It's for sale for ${punk.price} KSM, yay!</p>
     <p>
-      <button onclick='startBuy();' class="btn">Buy - ${parseFloat(punk.price) + fee} KSM</button>
-      <p>Fee: <b>${fee}</b>, Price: <b>${punk.price}</b></p>
+      <button onclick='startBuy();' class="btn">Buy - ${roundNum(parseFloat(punk.price) + fee)} KSM</button>
+      <p>Fee: <b>${roundNum(fee)}</b>, Price: <b>${punk.price}</b></p>
     </p>
   `;
   } catch (e) {
