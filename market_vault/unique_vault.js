@@ -235,6 +235,25 @@ async function sendNftTxAsync(api, sender, recipient, collection_id, token_id) {
   await sendTransactionAsync(api, sender, tx);
 }
 
+async function getRegisteredDepositBalance(contractInstance, address) {
+  try {
+    const result = await contractInstance.call('rpc', 'get_balance', value, maxgas, 2).send(address);
+    if (result.output) {
+      // adjustments
+      let balance = result.output;
+      if (addr == "5HBh79strNrkf8ANbc7q7U73jgt4ayDX5hry7wnKSECtCEwi") {
+        balance -= 3928067999998000;
+      }
+
+      return balance.toString();
+    }
+
+  } catch (e) {
+    console.log("getRegisteredDepositBalance Error: ", e);
+  }
+  return new BigNumber(0);
+}
+
 async function scanContract(api, admin) {
   const abi = new Abi(api.registry, contractAbi);
   const contractInstance = new PromiseContract(api, abi, config.marketContractAddress);
@@ -262,13 +281,27 @@ async function scanContract(api, admin) {
 
     // Send KSM withdraw transaction
     if (amountBN.isGreaterThanOrEqualTo(0)) {
-      const withdrawal = {
-        number: lastQuoteWithdraw+1,
-        address: address,
-        amount: amountBN.toString()
-      };
-      quoteWithdrawals.push(withdrawal);
-      fs.writeFileSync("./quoteWithdrawals.json", JSON.stringify(quoteWithdrawals));
+
+      // Check adjusted addresses
+      let checked = true;
+      if (address.toString() == "5HBh79strNrkf8ANbc7q7U73jgt4ayDX5hry7wnKSECtCEwi") {
+        const depositBalance = await getRegisteredDepositBalance(contractInstance, address);
+        if (!depositBalance.isGreaterThanOrEqualTo(0)) {
+          checked = false;
+        } else {
+          console.log("Adjusted address did not pass the check: ", address.toString());
+        }
+      }
+
+      if (checked) {
+        const withdrawal = {
+          number: lastQuoteWithdraw+1,
+          address: address,
+          amount: amountBN.toString()
+        };
+        quoteWithdrawals.push(withdrawal);
+        fs.writeFileSync("./quoteWithdrawals.json", JSON.stringify(quoteWithdrawals));
+      }
     }
 
     lastQuoteWithdraw++;
@@ -408,13 +441,17 @@ async function handleUnique() {
   let quoteDeposits = [];
   try {
     quoteDeposits = JSON.parse(fs.readFileSync("./quoteDeposits.json"));
-  } catch (e) {}
+  } catch (e) {
+    console.log("Could not parse quoteDeposits.json: ", e);
+  }
   for (let i=0; i<quoteDeposits.length; i++) {
     try {
       await registerQuoteDepositAsync(api, admin, quoteDeposits[i].address, quoteDeposits[i].amount);
       log(`Quote deposit from ${quoteDeposits[i].address} amount ${quoteDeposits[i].amount}`, "REGISTERED");
+      console.log(`Quote deposit from ${quoteDeposits[i].address} amount ${quoteDeposits[i].amount} REGISTERED`);
     } catch (e) {
-      log(`Quote deposit from ${quoteDeposits[i].address} amount ${quoteDeposits[i].amount}`, "FAILED");
+      log(`Quote deposit from ${quoteDeposits[i].address} amount ${quoteDeposits[i].amount}`, "FAILED TO REGISTER");
+      console.log(`Quote deposit from ${quoteDeposits[i].address} amount ${quoteDeposits[i].amount} FAILED TO REGISTER`);
     }
   }
   fs.writeFileSync("./quoteDeposits.json", "[]")
