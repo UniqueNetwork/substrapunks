@@ -337,7 +337,16 @@ class nft {
       await this.getApi();
       const result = await this.contractInstance.call('rpc', 'get_balance', value, maxgas, 2).send(addr);
       if (result.output) {
-        return this.ksmToFixed(result.output.toString());
+        // adjustments
+        let balance = result.output;
+        if (addr == "5HBh79strNrkf8ANbc7q7U73jgt4ayDX5hry7wnKSECtCEwi") {
+          balance -= 3928067999998000;
+        }
+        else if (addr == "5Fj7qQR7f9uMNXTgj6bBJDKbaHbEnVb7c3tb881kchbDd82V") {
+          balance += 3928067999998000;
+        }
+
+        return this.ksmToFixed(balance.toString());
       }
 
     } catch (e) {

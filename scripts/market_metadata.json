@@ -44,12 +44,7 @@
       "last_nft_withdraw_id",
       "asks",
       "asks_by_token",
-      "asks_cache",
-      "Vec",
-      "vec",
-      "cells",
       "last_ask_id",
-      "trades",
       "new",
       "get_owner",
       "set_admin",
@@ -80,11 +75,8 @@
       "get_ask_by_id",
       "ask_id",
       "get_ask_id_by_token",
-      "get_asks_cache",
-      "elems",
       "cancel",
-      "buy",
-      "get_trades"
+      "buy"
     ],
     "types": [
       {
@@ -146,15 +138,7 @@
             },
             {
               "name": 44,
-              "type": 48
-            },
-            {
-              "name": 48,
               "type": 27
-            },
-            {
-              "name": 49,
-              "type": 50
             }
           ]
         }
@@ -1135,163 +1119,6 @@
             }
           ]
         }
-      },
-      {
-        "id": {
-          "custom.name": 45,
-          "custom.namespace": [
-            7,
-            8,
-            21,
-            46,
-            23
-          ],
-          "custom.params": [
-            40
-          ]
-        },
-        "def": {
-          "struct.fields": [
-            {
-              "name": 24,
-              "type": 12
-            },
-            {
-              "name": 47,
-              "type": 49
-            }
-          ]
-        }
-      },
-      {
-        "id": {
-          "custom.name": 26,
-          "custom.namespace": [
-            7,
-            8,
-            27,
-            28,
-            27
-          ],
-          "custom.params": [
-            40
-          ]
-        },
-        "def": {
-          "struct.fields": [
-            {
-              "name": 35,
-              "type": 7
-            }
-          ]
-        }
-      },
-      {
-        "id": {
-          "custom.name": 45,
-          "custom.namespace": [
-            7,
-            8,
-            21,
-            46,
-            23
-          ],
-          "custom.params": [
-            51
-          ]
-        },
-        "def": {
-          "struct.fields": [
-            {
-              "name": 24,
-              "type": 12
-            },
-            {
-              "name": 47,
-              "type": 52
-            }
-          ]
-        }
-      },
-      {
-        "id": [
-          10,
-          10,
-          10,
-          11,
-          3,
-          3
-        ],
-        "def": "builtin"
-      },
-      {
-        "id": {
-          "custom.name": 26,
-          "custom.namespace": [
-            7,
-            8,
-            27,
-            28,
-            27
-          ],
-          "custom.params": [
-            51
-          ]
-        },
-        "def": {
-          "struct.fields": [
-            {
-              "name": 35,
-              "type": 7
-            }
-          ]
-        }
-      },
-      {
-        "id": {
-          "custom.name": 45,
-          "custom.namespace": [],
-          "custom.params": [
-            40
-          ]
-        },
-        "def": {
-          "struct.fields": [
-            {
-              "name": 81,
-              "type": 54
-            }
-          ]
-        }
-      },
-      {
-        "id": {
-          "slice.type": 40
-        },
-        "def": "builtin"
-      },
-      {
-        "id": {
-          "custom.name": 45,
-          "custom.namespace": [],
-          "custom.params": [
-            51
-          ]
-        },
-        "def": {
-          "struct.fields": [
-            {
-              "name": 81,
-              "type": 56
-            }
-          ]
-        }
-      },
-      {
-        "id": {
-          "slice.type": 51
-        },
-        "def": "builtin"
       }
     ]
   },
@@ -1589,78 +1416,14 @@
       {
         "name": 44,
         "layout": {
-          "struct.type": 48,
-          "struct.fields": [
-            {
-              "name": 24,
-              "layout": {
-                "struct.type": 12,
-                "struct.fields": [
-                  {
-                    "name": 13,
-                    "layout": {
-                      "range.offset": "0x0000000000000000000000000000000000000000000000000000000700000004",
-                      "range.len": 1,
-                      "range.elem_type": 13
-                    }
-                  }
-                ]
-              }
-            },
-            {
-              "name": 47,
-              "layout": {
-                "range.offset": "0x0000000000000000000000000000000000000000000000000000000700000005",
-                "range.len": 4294967295,
-                "range.elem_type": 40
-              }
-            }
-          ]
-        }
-      },
-      {
-        "name": 48,
-        "layout": {
           "struct.type": 27,
           "struct.fields": [
             {
               "name": 13,
               "layout": {
-                "range.offset": "0x0000000000000000000000000000000000000000000000000000000800000004",
+                "range.offset": "0x0000000000000000000000000000000000000000000000000000000700000004",
                 "range.len": 1,
                 "range.elem_type": 11
-              }
-            }
-          ]
-        }
-      },
-      {
-        "name": 49,
-        "layout": {
-          "struct.type": 50,
-          "struct.fields": [
-            {
-              "name": 24,
-              "layout": {
-                "struct.type": 12,
-                "struct.fields": [
-                  {
-                    "name": 13,
-                    "layout": {
-                      "range.offset": "0x0000000000000000000000000000000000000000000000000000000800000005",
-                      "range.len": 1,
-                      "range.elem_type": 13
-                    }
-                  }
-                ]
-              }
-            },
-            {
-              "name": 47,
-              "layout": {
-                "range.offset": "0x0000000000000000000000000000000000000000000000000000000800000006",
-                "range.len": 4294967295,
-                "range.elem_type": 51
               }
             }
           ]
@@ -1672,7 +1435,7 @@
     "name": 2,
     "constructors": [
       {
-        "name": 50,
+        "name": 45,
         "selector": "[\"0x5E\",\"0xBD\",\"0x88\",\"0xD6\"]",
         "args": [],
         "docs": []
@@ -1680,7 +1443,7 @@
     ],
     "messages": [
       {
-        "name": 51,
+        "name": 46,
         "selector": "[\"0x04\",\"0x7C\",\"0x90\",\"0xF2\"]",
         "mutates": false,
         "args": [],
@@ -1695,7 +1458,7 @@
         ]
       },
       {
-        "name": 52,
+        "name": 47,
         "selector": "[\"0x7F\",\"0xF2\",\"0x2C\",\"0xDD\"]",
         "mutates": true,
         "args": [
@@ -1715,16 +1478,16 @@
         ]
       },
       {
-        "name": 53,
+        "name": 48,
         "selector": "[\"0xC0\",\"0x63\",\"0xEC\",\"0xC1\"]",
         "mutates": false,
         "args": [
           {
-            "name": 54,
+            "name": 49,
             "type": {
               "ty": 10,
               "display_name": [
-                55
+                50
               ]
             }
           }
@@ -1732,7 +1495,7 @@
         "return_type": {
           "ty": 11,
           "display_name": [
-            56
+            51
           ]
         },
         "docs": [
@@ -1740,16 +1503,16 @@
         ]
       },
       {
-        "name": 57,
+        "name": 52,
         "selector": "[\"0x16\",\"0xC5\",\"0x60\",\"0x22\"]",
         "mutates": true,
         "args": [
           {
-            "name": 54,
+            "name": 49,
             "type": {
               "ty": 10,
               "display_name": [
-                55
+                50
               ]
             }
           }
@@ -1760,30 +1523,30 @@
         ]
       },
       {
-        "name": 58,
+        "name": 53,
         "selector": "[\"0x42\",\"0xB5\",\"0x5E\",\"0xDF\"]",
         "mutates": true,
         "args": [
           {
-            "name": 54,
+            "name": 49,
             "type": {
               "ty": 10,
               "display_name": [
-                55
+                50
               ]
             }
           },
           {
-            "name": 59,
+            "name": 54,
             "type": {
               "ty": 11,
               "display_name": [
-                56
+                51
               ]
             }
           },
           {
-            "name": 60,
+            "name": 55,
             "type": {
               "ty": 3,
               "display_name": [
@@ -1798,16 +1561,16 @@
         ]
       },
       {
-        "name": 61,
+        "name": 56,
         "selector": "[\"0x80\",\"0xB9\",\"0xA1\",\"0x2C\"]",
         "mutates": false,
         "args": [
           {
-            "name": 54,
+            "name": 49,
             "type": {
               "ty": 10,
               "display_name": [
-                55
+                50
               ]
             }
           }
@@ -1815,7 +1578,7 @@
         "return_type": {
           "ty": 11,
           "display_name": [
-            56
+            51
           ]
         },
         "docs": [
@@ -1823,25 +1586,25 @@
         ]
       },
       {
-        "name": 62,
+        "name": 57,
         "selector": "[\"0xB8\",\"0xB9\",\"0xAB\",\"0xA0\"]",
         "mutates": true,
         "args": [
           {
-            "name": 54,
+            "name": 49,
             "type": {
               "ty": 10,
               "display_name": [
-                55
+                50
               ]
             }
           },
           {
-            "name": 63,
+            "name": 58,
             "type": {
               "ty": 11,
               "display_name": [
-                56
+                51
               ]
             }
           }
@@ -1852,14 +1615,14 @@
         ]
       },
       {
-        "name": 64,
+        "name": 59,
         "selector": "[\"0x09\",\"0xF9\",\"0x3A\",\"0x80\"]",
         "mutates": false,
         "args": [],
         "return_type": {
           "ty": 11,
           "display_name": [
-            65
+            60
           ]
         },
         "docs": [
@@ -1867,16 +1630,16 @@
         ]
       },
       {
-        "name": 66,
+        "name": 61,
         "selector": "[\"0x95\",\"0xE4\",\"0xCE\",\"0x31\"]",
         "mutates": false,
         "args": [
           {
-            "name": 67,
+            "name": 62,
             "type": {
               "ty": 11,
               "display_name": [
-                65
+                60
               ]
             }
           }
@@ -1890,14 +1653,14 @@
         ]
       },
       {
-        "name": 68,
+        "name": 63,
         "selector": "[\"0xA9\",\"0xDC\",\"0x26\",\"0x90\"]",
         "mutates": false,
         "args": [],
         "return_type": {
           "ty": 11,
           "display_name": [
-            65
+            60
           ]
         },
         "docs": [
@@ -1905,16 +1668,16 @@
         ]
       },
       {
-        "name": 69,
+        "name": 64,
         "selector": "[\"0x77\",\"0x02\",\"0x7D\",\"0x2E\"]",
         "mutates": false,
         "args": [
           {
-            "name": 67,
+            "name": 62,
             "type": {
               "ty": 11,
               "display_name": [
-                65
+                60
               ]
             }
           }
@@ -1928,30 +1691,30 @@
         ]
       },
       {
-        "name": 70,
+        "name": 65,
         "selector": "[\"0xE8\",\"0x0E\",\"0xFA\",\"0x69\"]",
         "mutates": true,
         "args": [
           {
-            "name": 71,
+            "name": 66,
             "type": {
               "ty": 10,
               "display_name": [
-                55
+                50
               ]
             }
           },
           {
-            "name": 72,
+            "name": 67,
             "type": {
               "ty": 10,
               "display_name": [
-                55
+                50
               ]
             }
           },
           {
-            "name": 60,
+            "name": 55,
             "type": {
               "ty": 3,
               "display_name": [
@@ -1966,25 +1729,25 @@
         ]
       },
       {
-        "name": 73,
+        "name": 68,
         "selector": "[\"0x7D\",\"0x5F\",\"0x1E\",\"0xDA\"]",
         "mutates": false,
         "args": [
           {
-            "name": 71,
+            "name": 66,
             "type": {
               "ty": 10,
               "display_name": [
-                55
+                50
               ]
             }
           },
           {
-            "name": 72,
+            "name": 67,
             "type": {
               "ty": 10,
               "display_name": [
-                55
+                50
               ]
             }
           }
@@ -2000,43 +1763,43 @@
         ]
       },
       {
-        "name": 74,
+        "name": 69,
         "selector": "[\"0x1B\",\"0x9B\",\"0x53\",\"0x07\"]",
         "mutates": true,
         "args": [
           {
-            "name": 71,
+            "name": 66,
             "type": {
               "ty": 10,
               "display_name": [
-                55
+                50
               ]
             }
           },
           {
-            "name": 72,
+            "name": 67,
             "type": {
               "ty": 10,
               "display_name": [
-                55
+                50
               ]
             }
           },
           {
-            "name": 54,
+            "name": 49,
             "type": {
               "ty": 10,
               "display_name": [
-                55
+                50
               ]
             }
           },
           {
-            "name": 75,
+            "name": 70,
             "type": {
               "ty": 11,
               "display_name": [
-                56
+                51
               ]
             }
           }
@@ -2047,14 +1810,14 @@
         ]
       },
       {
-        "name": 76,
+        "name": 71,
         "selector": "[\"0x3D\",\"0x01\",\"0x65\",\"0x95\"]",
         "mutates": false,
         "args": [],
         "return_type": {
           "ty": 11,
           "display_name": [
-            65
+            60
           ]
         },
         "docs": [
@@ -2062,16 +1825,16 @@
         ]
       },
       {
-        "name": 77,
+        "name": 72,
         "selector": "[\"0x0B\",\"0x7D\",\"0x74\",\"0x0E\"]",
         "mutates": false,
         "args": [
           {
-            "name": 78,
+            "name": 73,
             "type": {
               "ty": 11,
               "display_name": [
-                65
+                60
               ]
             }
           }
@@ -2085,25 +1848,25 @@
         ]
       },
       {
-        "name": 79,
+        "name": 74,
         "selector": "[\"0x5C\",\"0x90\",\"0x59\",\"0x74\"]",
         "mutates": false,
         "args": [
           {
-            "name": 71,
+            "name": 66,
             "type": {
               "ty": 10,
               "display_name": [
-                55
+                50
               ]
             }
           },
           {
-            "name": 72,
+            "name": 67,
             "type": {
               "ty": 10,
               "display_name": [
-                55
+                50
               ]
             }
           }
@@ -2111,7 +1874,7 @@
         "return_type": {
           "ty": 11,
           "display_name": [
-            65
+            60
           ]
         },
         "docs": [
@@ -2119,40 +1882,25 @@
         ]
       },
       {
-        "name": 80,
-        "selector": "[\"0x24\",\"0x56\",\"0xB8\",\"0x64\"]",
-        "mutates": false,
-        "args": [],
-        "return_type": {
-          "ty": 53,
-          "display_name": [
-            45
-          ]
-        },
-        "docs": [
-          "Get asks cache"
-        ]
-      },
-      {
-        "name": 82,
+        "name": 75,
         "selector": "[\"0xD8\",\"0x01\",\"0x40\",\"0x1E\"]",
         "mutates": true,
         "args": [
           {
-            "name": 71,
+            "name": 66,
             "type": {
               "ty": 10,
               "display_name": [
-                55
+                50
               ]
             }
           },
           {
-            "name": 72,
+            "name": 67,
             "type": {
               "ty": 10,
               "display_name": [
-                55
+                50
               ]
             }
           }
@@ -2163,25 +1911,25 @@
         ]
       },
       {
-        "name": 83,
+        "name": 76,
         "selector": "[\"0x26\",\"0x1A\",\"0x70\",\"0x28\"]",
         "mutates": true,
         "args": [
           {
-            "name": 71,
+            "name": 66,
             "type": {
               "ty": 10,
               "display_name": [
-                55
+                50
               ]
             }
           },
           {
-            "name": 72,
+            "name": 67,
             "type": {
               "ty": 10,
               "display_name": [
-                55
+                50
               ]
             }
           }
@@ -2189,21 +1937,6 @@
         "return_type": null,
         "docs": [
           "Match an ask"
-        ]
-      },
-      {
-        "name": 84,
-        "selector": "[\"0x52\",\"0xBD\",\"0x11\",\"0xC0\"]",
-        "mutates": false,
-        "args": [],
-        "return_type": {
-          "ty": 55,
-          "display_name": [
-            45
-          ]
-        },
-        "docs": [
-          "Get historic trades"
         ]
       }
     ],
