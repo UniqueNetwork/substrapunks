@@ -204,6 +204,14 @@ async function scanNftBlock(api, admin, blockNum) {
       try {
         console.log(`Contract call: ${args[0].toString()}, ${args[1].toString()}, ${args[2].toString()}, ${args[3].toString()}`);
 
+        const data = args[3].toString();
+        if (data.includes("261a7028")) {
+          const tokenId = data[28] + data[29] + data[26] + data[27];
+          const id = Buffer.from(tokenId, 'hex').readIntBE(0, 2).toString();
+          console.log(`${ex.signer.toString()} bought ${id} in block ${blockNum} hash: ${blockHash}`);
+          log(`${ex.signer.toString()} bought ${id} in block ${blockNum} hash: ${blockHash}`, "SUCCESS");
+        }
+
         // Buy 3457 (0D81):
         // Block hash:   0x3a88c2efd7d7131f43f7771c3e50a98cd90cf9b1e8b83ed890207f98ea93495a
         // Block number: 1,384,383

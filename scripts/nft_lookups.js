@@ -52,10 +52,21 @@ async function getRegisteredEscrowBalance(addr) {
   api.disconnect();
 }
 
+
+
 async function main() {
+  // const addr = "5F4zQ1a913Xaho4ch8eyYkxuBwate4FfVVgdSxwDSkW82gRe";
   // const addr = "5HBh79strNrkf8ANbc7q7U73jgt4ayDX5hry7wnKSECtCEwi";
-  const addr = "5H92NmUsAvVRpc6UC38SnU2RDX1fMyxAxzLL65uvqAFBynkH";
-  await getRegisteredEscrowBalance(addr);
+  // const addr = "5H92NmUsAvVRpc6UC38SnU2RDX1fMyxAxzLL65uvqAFBynkH";
+  // await getRegisteredEscrowBalance(addr);
+
+
+  const ids = ["24e0", "2240", "112c", "1c94", "0eb6", "1bc6", "1394", "11e7", "1393", "1396", "0aea", "0b3f", "11e9", "2532", "0dd8", "0944", "08f0", "212a", "155e", "1fab", "240a", "1751", "166c", "2369", "1503", "1ec9", "0908", "1a62", "24b0", "0b94"]
+  for (let i=0; i<ids.length; i++) {
+    const id = Buffer.from(ids[i], 'hex').readIntBE(0, 2).toString();
+    console.log(id);
+  }
+
 }
 
 main().catch(console.error).finally(() => process.exit());
