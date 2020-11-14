@@ -347,6 +347,8 @@ function ksmToFixed(amount) {
   return balance.div(ksmexp).toFixed();
 }
 
+const attributes = ["Black Lipstick","Red Lipstick","Smile","Teeth Smile","Purple Lipstick","Nose Ring","Asian Eyes","Sun Glasses","Red Glasses","Round Eyes","Left Earring","Right Earring","Two Earrings","Brown Beard","Mustache-Beard","Mustache","Regular Beard","Up Hair","Down Hair","Mahawk","Red Mahawk","Orange Hair","Bubble Hair","Emo Hair","Thin Hair","Bald","Blonde Hair","Caret Hair","Pony Tails","Cigar","Pipe"];
+
 async function loadPunkFromChain(api, collectionId, punkId) {
 
   const item = await api.query.nft.nftItemList(collectionId, punkId);
