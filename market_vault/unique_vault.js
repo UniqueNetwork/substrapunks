@@ -347,6 +347,23 @@ function ksmToFixed(amount) {
   return balance.div(ksmexp).toFixed();
 }
 
+async function loadPunkFromChain(api, collectionId, punkId) {
+
+  const item = await api.query.nft.nftItemList(collectionId, punkId);
+
+  let attrArray = [];
+  for (let i=0; i<7; i++) {
+    if (item.Data[i+3] != 255)
+      attrArray.push(attributes[item.Data[i+3]]);
+  }
+
+  return {
+    sex: (item.Data[2] == 1) ? "Female" : "Male",
+    attributes: attrArray,
+  };
+}
+
+
 async function loadAsks(api) {
 
   const abi = new Abi(api.registry, contractAbi);
@@ -389,12 +406,15 @@ async function loadAsks(api) {
         const askId = askIdResult.output;
         const askResult = await contractInstance.call('rpc', 'get_ask_by_id', 0, 1000000000000, askId).send(config.adminAddressNft);
         if (askResult && askResult.output) {
-          const [_colId, _tokId, _quote, priceBN, address] = askResult.output;
+          const [colId, tokId, _quote, priceBN, address] = askResult.output;
+          const punk = await loadPunkFromChain(api, colId, tokId);
           price = ksmToFixed(priceBN);
-          console.log(`Price set for ${key}: ${price}, sold by ${keyring.encodeAddress(address.toString())}`);
+          console.log(`Price set for ${key}: ${price} KSM, listed by ${keyring.encodeAddress(address.toString())}`);
           asks[key] = {
             price: price,
-            address: keyring.encodeAddress(address.toString())
+            address: keyring.encodeAddress(address.toString()),
+            sex: punk.sex,
+            attributes: punk.attributes
           }
         }
         else {
