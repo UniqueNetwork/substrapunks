@@ -394,11 +394,8 @@ async function loadAsks(api) {
     const tokenId = nfts[i].toString();
     const key = `${collectionId}-${tokenId}`;
     if (cachedasks[key]) {
-      let {price, address} = cachedasks[key];
-      asks[key] = {
-        price: price,
-        address: address
-      }
+      let cashed = cachedasks[key];
+      asks[key] = cashed;
     }
     else {
       // process.stdout.write(`Retrieving price for ${key}... `);
