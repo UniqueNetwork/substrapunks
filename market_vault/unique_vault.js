@@ -491,8 +491,10 @@ async function handleUnique() {
 // Should not run longer than 30 seconds
 function killTimer() {
   setTimeout(() => { 
+    log(`Exiting by timeout`, "EXIT");
+    console.log(`Exiting by timeout`);
     process.exit();
-  }, 240000);
+  }, 300000);
 }
 
 async function main() {
