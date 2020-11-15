@@ -419,7 +419,13 @@ class nft {
       const tokenId = key.substring(key.indexOf("-") + 1);
 
       const tokenPrice = ask.price;
-      nfts.push({id: tokenId, price: tokenPrice, owner: ask.address});
+      nfts.push({
+        id: tokenId, 
+        price: tokenPrice, 
+        owner: ask.address,
+        sex: ask.sex,
+        attributes: ask.attributes
+      });
     }
 
     return nfts;

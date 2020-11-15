@@ -224,5 +224,19 @@ pre {
   cursor: pointer;
 }
 
+.filter {
+  display: none;
+  position: relative;
+  z-index: 1;
+  top: 0;
+  bottom: 150px;
+  left: 0;
+  right: 150px;
+  transition: opacity 1s ease-out;
+}
+
+.filter td {
+  padding-right: 50px; vertical-align: top;
+}
 
 /*# sourceMappingURL=unique.css.map */

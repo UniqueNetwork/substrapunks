@@ -46,6 +46,73 @@
         <div class="row">
             <div class="col-md-10 col-xs-12">
                 <h1>Marketplace</h1>
+                <p style='cursor:pointer' onclick="expandFilter();"><img src='images/filter.png'></img>&nbsp;Filter</p>
+                <div id="filterBox" class='filter'>
+                    <table>
+                        <tr>
+                            <td>
+                                <h5>Traits</h5>
+                                <input type="checkbox" id="traitcount1" onchange="applyFilter()">&nbsp;1-traiters</input><br>
+                                <input type="checkbox" id="traitcount2" onchange="applyFilter()">&nbsp;2-traiters</input><br>
+                                <input type="checkbox" id="traitcount3" onchange="applyFilter()">&nbsp;3-traiters</input><br>
+                                <input type="checkbox" id="traitcount4" onchange="applyFilter()">&nbsp;4-traiters</input><br>
+                                <input type="checkbox" id="traitcount5" onchange="applyFilter()">&nbsp;5-traiters</input><br>
+                                <input type="checkbox" id="traitcount6" onchange="applyFilter()">&nbsp;6-traiters</input><br>
+                                <input type="checkbox" id="traitcount7" onchange="applyFilter()">&nbsp;7-traiters</input><br>
+                            </td>
+                            <td>
+                                <h5>Mouth</h5>
+                                <input type="checkbox" id="trait1" onchange="applyFilter()">&nbsp;Black Lipstick</input><br>
+                                <input type="checkbox" id="trait2" onchange="applyFilter()">&nbsp;Red Lipstick</input><br>
+                                <input type="checkbox" id="trait3" onchange="applyFilter()">&nbsp;Smile</input><br>
+                                <input type="checkbox" id="trait4" onchange="applyFilter()">&nbsp;Teeth Smile</input><br>
+                                <input type="checkbox" id="trait5" onchange="applyFilter()">&nbsp;Purple Lipstick</input><br>
+                                <h5>Rings</h5>
+                                <input type="checkbox" id="trait6" onchange="applyFilter()">&nbsp;Nose Ring</input><br>
+                                <input type="checkbox" id="trait7" onchange="applyFilter()">&nbsp;Left Earring</input><br>
+                                <input type="checkbox" id="trait8" onchange="applyFilter()">&nbsp;Right Earring</input><br>
+                                <input type="checkbox" id="trait9" onchange="applyFilter()">&nbsp;Two Earrings</input><br>
+                            </td>
+                            <td>
+                                <h5>Eyes</h5>
+                                <input type="checkbox" id="trait10" onchange="applyFilter()">&nbsp;Asian Eyes</input><br>
+                                <input type="checkbox" id="trait11" onchange="applyFilter()">&nbsp;Sun Glasses</input><br>
+                                <input type="checkbox" id="trait12" onchange="applyFilter()">&nbsp;Red Glasses</input><br>
+                                <input type="checkbox" id="trait13" onchange="applyFilter()">&nbsp;Round Eyes</input><br>
+                                <h5>Facial Hair</h5>
+                                <input type="checkbox" id="trait14" onchange="applyFilter()">&nbsp;Brown Beard</input><br>
+                                <input type="checkbox" id="trait15" onchange="applyFilter()">&nbsp;Mustache-Beard</input><br>
+                                <input type="checkbox" id="trait16" onchange="applyFilter()">&nbsp;Mustache</input><br>
+                                <input type="checkbox" id="trait17" onchange="applyFilter()">&nbsp;Regular Beard</input><br>
+                            </td>
+                            <td>
+                                <h5>Hair</h5>
+                                <input type="checkbox" id="trait18" onchange="applyFilter()">&nbsp;Up Hair</input><br>
+                                <input type="checkbox" id="trait19" onchange="applyFilter()">&nbsp;Down Hair</input><br>
+                                <input type="checkbox" id="trait20" onchange="applyFilter()">&nbsp;Mahawk</input><br>
+                                <input type="checkbox" id="trait21" onchange="applyFilter()">&nbsp;Red Mahawk</input><br>
+                                <input type="checkbox" id="trait22" onchange="applyFilter()">&nbsp;Orange Hair</input><br>
+                                <input type="checkbox" id="trait23" onchange="applyFilter()">&nbsp;Bubble Hair</input><br>
+                                <input type="checkbox" id="trait24" onchange="applyFilter()">&nbsp;Emo Hair</input><br>
+                                <input type="checkbox" id="trait25" onchange="applyFilter()">&nbsp;Thin Hair</input><br>
+                                <input type="checkbox" id="trait26" onchange="applyFilter()">&nbsp;Bald</input><br>
+                                <input type="checkbox" id="trait27" onchange="applyFilter()">&nbsp;Blonde Hair</input><br>
+                                <input type="checkbox" id="trait28" onchange="applyFilter()">&nbsp;Caret Hair</input><br>
+                                <input type="checkbox" id="trait29" onchange="applyFilter()">&nbsp;Pony Tails</input><br>
+                            </td>
+                            <td>
+                                <h5>Bad Habits</h5>
+                                <input type="checkbox" id="trait30" onchange="applyFilter()">&nbsp;Cigar</input><br>
+                                <input type="checkbox" id="trait31" onchange="applyFilter()">&nbsp;Pipe</input><br>
+                                <h5>Sex</h5>
+                                <input type="checkbox" id="sexf" onchange="applyFilter()">&nbsp;Female</input><br>
+                                <input type="checkbox" id="sexm" onchange="applyFilter()">&nbsp;Male</input><br>
+                            </td>
+                        </tr>
+                    </table>
+                    <button onclick="expandFilter()">Close</button>
+                </div>
+                <hr/>
                 <div class="row" id='tokenlist'>
                     Loading data from blockchain...
                 </div>
