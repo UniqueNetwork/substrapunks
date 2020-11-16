@@ -192,7 +192,7 @@ function killTimer() {
   setTimeout(() => { 
     console.log("Exiting by timeout");
     process.exit();
-  }, 120000);
+  }, 300000);
 }
 
 async function main() {
