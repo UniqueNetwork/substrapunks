@@ -63,6 +63,12 @@ async function scanKusamaBlock(api, blockNum) {
 
   // console.log(`Reading Block Transactions`);
   let quoteDeposits = [];
+  try {
+    quoteDeposits = JSON.parse(fs.readFileSync("./quoteDeposits.json"));
+  } catch (e) {
+    console.log("Could not parse quoteDeposits.json: ", e);
+  }
+
   await signedBlock.block.extrinsics.forEach(async (ex, index) => {
     let { _isSigned, _meta, method: { args, method, section } } = ex;
     // console.log(`Section: ${section}, method: ${method} args: ${args[0]}`);
@@ -167,7 +173,9 @@ async function handleKusama() {
   let quoteWithdrawals = [];
   try {
     quoteWithdrawals = JSON.parse(fs.readFileSync("./quoteWithdrawals.json"));
-  } catch (e) {}
+  } catch (e) {
+    console.log("Error parsing quoteWithdrawals.json: ", e);
+  }
 
   while (quoteWithdrawals.length > 0) {
     let w = quoteWithdrawals.pop();
@@ -182,6 +190,7 @@ async function handleKusama() {
 // Should not run longer than X seconds at a time
 function killTimer() {
   setTimeout(() => { 
+    console.log("Exiting by timeout");
     process.exit();
   }, 120000);
 }

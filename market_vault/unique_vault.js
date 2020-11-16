@@ -271,6 +271,12 @@ async function scanContract(api, admin) {
 
   // Process Quote withdraws
   let quoteWithdrawals = [];
+  try {
+    quoteWithdrawals = JSON.parse(fs.readFileSync("./quoteWithdrawals.json"));
+  } catch (e) {
+    console.log("Error parsing quoteWithdrawals.json: ", e);
+  }
+
   while (lastContractQuoteWithdrawId > lastQuoteWithdraw) {
     // Get the withdraw amount and address
     const result3 = await contractInstance.call('rpc', 'get_withdraw_by_id', 0, 1000000000000, lastQuoteWithdraw+1).send(admin.address);
@@ -465,17 +471,22 @@ async function handleUnique() {
   } catch (e) {
     console.log("Could not parse quoteDeposits.json: ", e);
   }
-  for (let i=0; i<quoteDeposits.length; i++) {
+
+  if (quoteDeposits.length == 0)
+    fs.writeFileSync("./quoteDeposits.json", "[]")
+  
+  while (quoteDeposits.length > 0) {
+    let d = quoteDeposits.pop();
     try {
-      await registerQuoteDepositAsync(api, admin, quoteDeposits[i].address, quoteDeposits[i].amount);
-      log(`Quote deposit from ${quoteDeposits[i].address} amount ${quoteDeposits[i].amount}`, "REGISTERED");
-      console.log(`Quote deposit from ${quoteDeposits[i].address} amount ${quoteDeposits[i].amount} REGISTERED`);
+      fs.writeFileSync("./quoteDeposits.json", JSON.stringify(quoteDeposits));
+      await registerQuoteDepositAsync(api, admin, d.address, d.amount);
+      log(`Quote deposit from ${d.address} amount ${d.amount}`, "REGISTERED");
+      console.log(`Quote deposit from ${d.address} amount ${d.amount} REGISTERED`);
     } catch (e) {
-      log(`Quote deposit from ${quoteDeposits[i].address} amount ${quoteDeposits[i].amount}`, "FAILED TO REGISTER");
-      console.log(`Quote deposit from ${quoteDeposits[i].address} amount ${quoteDeposits[i].amount} FAILED TO REGISTER`);
+      log(`Quote deposit from ${d.address} amount ${d.amount}`, "FAILED TO REGISTER");
+      console.log(`Quote deposit from ${d.address} amount ${d.amount} FAILED TO REGISTER`);
     }
   }
-  fs.writeFileSync("./quoteDeposits.json", "[]")
 
   // Prepare JSON file with asks for IPNS publishing
   await loadAsks(api);
