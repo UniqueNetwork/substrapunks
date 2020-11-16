@@ -6,7 +6,9 @@ market_vault/asks.json
 market_vault/quoteDeposits.json
 market_vault/quoteWithdrawals.json
 market_vault/*.csv
+market_vault/*.txt
 market_vault/config.js
+market_vault/asks*.json
 scripts/config.js
 scripts/generated_faces
 smart_contract/calls/target
