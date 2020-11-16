@@ -246,12 +246,7 @@ async function getRegisteredDepositBalance(contractInstance, address) {
   try {
     const result = await contractInstance.call('rpc', 'get_balance', value, maxgas, 2).send(address);
     if (result.output) {
-      // adjustments
       let balance = result.output;
-      if (addr == "5HBh79strNrkf8ANbc7q7U73jgt4ayDX5hry7wnKSECtCEwi") {
-        balance -= 3928067999998000;
-      }
-
       return balance.toString();
     }
 
