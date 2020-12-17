@@ -6,6 +6,10 @@ use ink_lang as ink;
 mod matchingengine {
     use ink_storage::{
         collections::HashMap as HashMap,
+        traits::{
+            PackedLayout,
+            SpreadLayout,
+        },
     };
 
     /// Event emitted when a token is sold
@@ -19,6 +23,19 @@ mod matchingengine {
         coll_token_id: u128,
         #[ink(topic)]
         price: Balance,
+    }
+
+    /// Withdraw types.
+    #[derive(scale::Encode, scale::Decode, Clone, Copy, SpreadLayout, PackedLayout)]
+    #[cfg_attr(
+        feature = "std",
+        derive(scale_info::TypeInfo, ink_storage::traits::StorageLayout)
+    )]
+    pub enum WithdrawType {
+        /// Withdraw by seller after successful trade
+        WithdrawMatched,
+        /// Withdraw after cancelled or errored trade
+        WithdrawUnused,
     }
 
     #[ink(storage)]
@@ -45,7 +62,7 @@ mod matchingengine {
         total_traded: HashMap<u64, Balance>,
 
         /// Vault withdraw ledger
-        withdraw_queue: HashMap<u128, (AccountId, Balance)>,
+        withdraw_queue: HashMap<u128, (AccountId, Balance, WithdrawType)>,
 
         /// Last withdraw id
         last_withdraw_id: u128,
@@ -144,7 +161,7 @@ mod matchingengine {
         /// User: Withdraw funds
         #[ink(message)]
         pub fn withdraw(&mut self, quote_id: u64, withdraw_balance: Balance) {
-            self.vault_withdraw(&self.env().caller(), quote_id, withdraw_balance);
+            self.vault_withdraw(&self.env().caller(), quote_id, withdraw_balance, WithdrawType::WithdrawUnused);
         }
 
         /// Get last withdraw id
@@ -155,7 +172,7 @@ mod matchingengine {
 
         /// Get withdraw by id
         #[ink(message)]
-        pub fn get_withdraw_by_id(&self, id: u128) -> (AccountId, Balance) {
+        pub fn get_withdraw_by_id(&self, id: u128) -> (AccountId, Balance, WithdrawType) {
             *self.withdraw_queue.get(&id).unwrap()
         }
 
@@ -273,7 +290,7 @@ mod matchingengine {
             self.nft_withdraw_queue.insert(self.last_nft_withdraw_id, (self.env().caller().clone(), collection_id, token_id));
 
             // Start Quote withdraw from the vault for the seller
-            self.vault_withdraw(&seller, quote_id, price);
+            self.vault_withdraw(&seller, quote_id, price, WithdrawType::WithdrawMatched);
 
             // Update totals
             let total = *self.total_traded.get(&quote_id).unwrap();
@@ -312,7 +329,7 @@ mod matchingengine {
             let _ = self.asks.take(&ask_id);
         }
 
-        fn vault_withdraw(&mut self, user: &AccountId, quote_id: u64, withdraw_balance: Balance) {
+        fn vault_withdraw(&mut self, user: &AccountId, quote_id: u64, withdraw_balance: Balance, withdraw_type: WithdrawType) {
             // Make sure the user has enough
             let initial_balance = self.balance_of_or_zero(quote_id, user);
             assert!(initial_balance >= withdraw_balance);
@@ -324,7 +341,7 @@ mod matchingengine {
             self.last_withdraw_id = self.last_withdraw_id + 1;
 
             // Start a withdraw from the vault
-            self.withdraw_queue.insert(self.last_withdraw_id, ((*user).clone(), withdraw_balance));
+            self.withdraw_queue.insert(self.last_withdraw_id, ((*user).clone(), withdraw_balance, withdraw_type));
         }
 
     }
