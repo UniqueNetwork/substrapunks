@@ -8,6 +8,19 @@ mod matchingengine {
         collections::HashMap as HashMap,
     };
 
+    /// Event emitted when a token is sold
+    #[ink(event)]
+    pub struct Sold {
+        #[ink(topic)]
+        seller: Option<AccountId>,
+        #[ink(topic)]
+        buyer: Option<AccountId>,
+        #[ink(topic)]
+        coll_token_id: u128,
+        #[ink(topic)]
+        price: Balance,
+    }
+
     #[ink(storage)]
     pub struct MatchingEngine {
         /// Contract owner
@@ -265,6 +278,15 @@ mod matchingengine {
             // Update totals
             let total = *self.total_traded.get(&quote_id).unwrap();
             self.total_traded.insert(quote_id, total + price);
+
+            // Emit Sold event
+            let ctid : u128 = (collection_id as u128) * 0x100000000 + (token_id as u128);
+            Self::env().emit_event(Sold {
+                seller: Some(seller),
+                buyer: Some(self.env().caller()),
+                coll_token_id: ctid,
+                price: price,
+            });
         }
 
         /// Panic if the sender is not the contract owner
