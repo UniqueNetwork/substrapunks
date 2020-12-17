@@ -25,6 +25,30 @@ mod matchingengine {
         price: Balance,
     }
 
+    /// Event emitted when a quote withdraw is needed
+    #[ink(event)]
+    pub struct WithdrawQuote {
+        #[ink(topic)]
+        address: Option<AccountId>,
+        #[ink(topic)]
+        quote_id: u64,
+        #[ink(topic)]
+        amount: Balance,
+        #[ink(topic)]
+        withdraw_type: WithdrawType,
+    }
+
+    /// Event emitted when an NFT withdraw is needed
+    #[ink(event)]
+    pub struct WithdrawNFT {
+        #[ink(topic)]
+        address: Option<AccountId>,
+        #[ink(topic)]
+        collection_id: u64,
+        #[ink(topic)]
+        token_id: u64,
+    }
+
     /// Withdraw types.
     #[derive(scale::Encode, scale::Decode, Clone, Copy, SpreadLayout, PackedLayout)]
     #[cfg_attr(
@@ -61,20 +85,8 @@ mod matchingengine {
         /// Total trades counter (resettable)
         total_traded: HashMap<u64, Balance>,
 
-        /// Vault withdraw ledger
-        withdraw_queue: HashMap<u128, (AccountId, Balance, WithdrawType)>,
-
-        /// Last withdraw id
-        last_withdraw_id: u128,
-
         /// Recorded NFT deposits
         nft_deposits: HashMap<(u64, u64), AccountId>,
-
-        /// NFT Vault withdraw ledger
-        nft_withdraw_queue: HashMap<u128, (AccountId, u64, u64)>,
-
-        /// Last NFT withdraw index
-        last_nft_withdraw_id: u128,
 
         /////////////////////////////////////////////////////////////////////////////////
         // Asks
@@ -101,11 +113,7 @@ mod matchingengine {
                 admin: AccountId::default(),
                 quote_balance: HashMap::new(),
                 total_traded,
-                withdraw_queue: HashMap::new(),
-                last_withdraw_id: 0,
                 nft_deposits: HashMap::new(),
-                nft_withdraw_queue: HashMap::new(),
-                last_nft_withdraw_id: 0,
                 asks: HashMap::new(),
                 asks_by_token: HashMap::new(),
                 last_ask_id: 0,
@@ -162,30 +170,6 @@ mod matchingengine {
         #[ink(message)]
         pub fn withdraw(&mut self, quote_id: u64, withdraw_balance: Balance) {
             self.vault_withdraw(&self.env().caller(), quote_id, withdraw_balance, WithdrawType::WithdrawUnused);
-        }
-
-        /// Get last withdraw id
-        #[ink(message)]
-        pub fn get_last_withdraw_id(&self) -> u128 {
-            self.last_withdraw_id
-        }
-
-        /// Get withdraw by id
-        #[ink(message)]
-        pub fn get_withdraw_by_id(&self, id: u128) -> (AccountId, Balance, WithdrawType) {
-            *self.withdraw_queue.get(&id).unwrap()
-        }
-
-        /// Get last NFT withdraw id
-        #[ink(message)]
-        pub fn get_last_nft_withdraw_id(&self) -> u128 {
-            self.last_nft_withdraw_id
-        }
-
-        /// Get NFT withdraw by id
-        #[ink(message)]
-        pub fn get_nft_withdraw_by_id(&self, id: u128) -> (AccountId, u64, u64) {
-            *self.nft_withdraw_queue.get(&id).unwrap()
         }
 
         /// Admin: Tell the market about a successful NFT deposit
@@ -259,9 +243,12 @@ mod matchingengine {
             // Remove ask from everywhere
             self.remove_ask(collection_id, token_id, ask_id);
 
-            // Transfer token back to user through NFT Vault
-            self.last_nft_withdraw_id = self.last_nft_withdraw_id + 1;
-            self.nft_withdraw_queue.insert(self.last_nft_withdraw_id, (user, collection_id, token_id));
+            // Transfer token back to user through NFT Vault (Emit WithdrawNFT event)
+            Self::env().emit_event(WithdrawNFT {
+                address: Some(user.clone()),
+                collection_id,
+                token_id,
+            });
         }
 
         /// Match an ask
@@ -285,9 +272,12 @@ mod matchingengine {
             // Remove ask from everywhere
             self.remove_ask(collection_id, token_id, ask_id);
 
-            // Start an NFT withdraw from the vault
-            self.last_nft_withdraw_id = self.last_nft_withdraw_id + 1;
-            self.nft_withdraw_queue.insert(self.last_nft_withdraw_id, (self.env().caller().clone(), collection_id, token_id));
+            // Transfer NFT token to buyer through NFT Vault (Emit WithdrawNFT event)
+            Self::env().emit_event(WithdrawNFT {
+                address: Some(self.env().caller().clone()),
+                collection_id,
+                token_id,
+            });
 
             // Start Quote withdraw from the vault for the seller
             self.vault_withdraw(&seller, quote_id, price, WithdrawType::WithdrawMatched);
@@ -337,11 +327,15 @@ mod matchingengine {
             // Update user's quote balance
             self.quote_balance.insert((quote_id, (*user).clone()), initial_balance - withdraw_balance);
 
-            // Increase last withdraw index
-            self.last_withdraw_id = self.last_withdraw_id + 1;
-
             // Start a withdraw from the vault
-            self.withdraw_queue.insert(self.last_withdraw_id, ((*user).clone(), withdraw_balance, withdraw_type));
+            // Emit WithdrawQuote event
+            Self::env().emit_event(WithdrawQuote {
+                address: Some((*user).clone()),
+                quote_id: quote_id,
+                amount: withdraw_balance,
+                withdraw_type: withdraw_type
+            });
+
         }
 
     }
