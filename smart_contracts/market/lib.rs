@@ -6,43 +6,48 @@ use ink_lang as ink;
 mod matchingengine {
     use ink_storage::{
         collections::HashMap as HashMap,
-        traits::{
-            PackedLayout,
-            SpreadLayout,
-        },
     };
 
-    /// Event emitted when a token is sold
-    #[ink(event)]
-    pub struct Sold {
-        #[ink(topic)]
-        seller: Option<AccountId>,
-        #[ink(topic)]
-        buyer: Option<AccountId>,
-        #[ink(topic)]
-        coll_token_id: u128,
-        #[ink(topic)]
-        price: Balance,
-    }
+    // Event emitted when a token is sold
+    // #[ink(event)]
+    // pub struct Sold {
+    //     #[ink(topic)]
+    //     seller: AccountId,
+    //     #[ink(topic)]
+    //     buyer: AccountId,
+    //     #[ink(topic)]
+    //     coll_token_id: u128,
+    //     #[ink(topic)]
+    //     price: Balance,
+    // }
 
-    /// Event emitted when a quote withdraw is needed
+    /// Event emitted when a quote withdraw is needed on a match
     #[ink(event)]
-    pub struct WithdrawQuote {
+    pub struct WithdrawQuoteMatched {
         #[ink(topic)]
-        address: Option<AccountId>,
+        address: AccountId,
         #[ink(topic)]
         quote_id: u64,
         #[ink(topic)]
         amount: Balance,
+    }
+
+    /// Event emitted when a unused quote withdraw is needed
+    #[ink(event)]
+    pub struct WithdrawQuoteUnused {
         #[ink(topic)]
-        withdraw_type: WithdrawType,
+        address: AccountId,
+        #[ink(topic)]
+        quote_id: u64,
+        #[ink(topic)]
+        amount: Balance,
     }
 
     /// Event emitted when an NFT withdraw is needed
     #[ink(event)]
     pub struct WithdrawNFT {
         #[ink(topic)]
-        address: Option<AccountId>,
+        address: AccountId,
         #[ink(topic)]
         collection_id: u64,
         #[ink(topic)]
@@ -50,11 +55,6 @@ mod matchingengine {
     }
 
     /// Withdraw types.
-    #[derive(scale::Encode, scale::Decode, Clone, Copy, SpreadLayout, PackedLayout)]
-    #[cfg_attr(
-        feature = "std",
-        derive(scale_info::TypeInfo, ink_storage::traits::StorageLayout)
-    )]
     pub enum WithdrawType {
         /// Withdraw by seller after successful trade
         WithdrawMatched,
@@ -110,7 +110,7 @@ mod matchingengine {
 
             Self {
                 owner: Self::env().caller(),
-                admin: AccountId::default(),
+                admin: Self::env().caller(),
                 quote_balance: HashMap::new(),
                 total_traded,
                 nft_deposits: HashMap::new(),
@@ -118,7 +118,6 @@ mod matchingengine {
                 asks_by_token: HashMap::new(),
                 last_ask_id: 0,
             }
-
         }
 
         /// Returns the contract owner
@@ -245,7 +244,7 @@ mod matchingengine {
 
             // Transfer token back to user through NFT Vault (Emit WithdrawNFT event)
             Self::env().emit_event(WithdrawNFT {
-                address: Some(user.clone()),
+                address: user,
                 collection_id,
                 token_id,
             });
@@ -274,7 +273,7 @@ mod matchingengine {
 
             // Transfer NFT token to buyer through NFT Vault (Emit WithdrawNFT event)
             Self::env().emit_event(WithdrawNFT {
-                address: Some(self.env().caller().clone()),
+                address: self.env().caller().clone(),
                 collection_id,
                 token_id,
             });
@@ -287,13 +286,13 @@ mod matchingengine {
             self.total_traded.insert(quote_id, total + price);
 
             // Emit Sold event
-            let ctid : u128 = (collection_id as u128) * 0x100000000 + (token_id as u128);
-            Self::env().emit_event(Sold {
-                seller: Some(seller),
-                buyer: Some(self.env().caller()),
-                coll_token_id: ctid,
-                price: price,
-            });
+            // let ctid : u128 = (collection_id as u128) * 0x100000000 + (token_id as u128);
+            // Self::env().emit_event(Sold {
+            //     seller,
+            //     buyer: self.env().caller().clone(),
+            //     coll_token_id: ctid,
+            //     price: price,
+            // });
         }
 
         /// Panic if the sender is not the contract owner
@@ -327,17 +326,49 @@ mod matchingengine {
             // Update user's quote balance
             self.quote_balance.insert((quote_id, (*user).clone()), initial_balance - withdraw_balance);
 
-            // Start a withdraw from the vault
-            // Emit WithdrawQuote event
-            Self::env().emit_event(WithdrawQuote {
-                address: Some((*user).clone()),
-                quote_id: quote_id,
-                amount: withdraw_balance,
-                withdraw_type: withdraw_type
-            });
+            // Start a withdraw from the vault (Emit WithdrawQuote event)
+            match withdraw_type {
+                WithdrawType::WithdrawMatched => {
+                    Self::env().emit_event(WithdrawQuoteMatched {
+                        address: *user,
+                        quote_id: quote_id,
+                        amount: withdraw_balance,
+                    });
+                }
 
+                WithdrawType::WithdrawUnused => {
+                    Self::env().emit_event(WithdrawQuoteUnused {
+                        address: *user,
+                        quote_id: quote_id,
+                        amount: withdraw_balance,
+                    });
+                }
+            }
         }
 
     }
+
+
+    #[cfg(test)]
+    mod tests {
+        /// Imports all the definitions from the outer scope so we can use them here.
+        use super::*;
+
+        /// We test if the default constructor does its job.
+        #[test]
+        fn new_works() {
+            let matcher = MatchingEngine::new();
+            // assert_eq!(matcher.get_last_ask_id(), 0);
+        }
+
+        // We test a simple use case of our contract.
+        // #[test]
+        // fn it_works() {
+        //     let mut flipper = Flipper::new(false);
+        //     assert_eq!(flipper.get(), false);
+        //     flipper.flip();
+        //     assert_eq!(flipper.get(), true);
+        // }
+    }    
 }
 
