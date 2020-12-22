@@ -609,48 +609,50 @@ window.onclick = function(event) {
 };
 
 window.onload = async function() {
-  try {
-    let url = new URL(window.location);
-    punkId = parseInt(url.searchParams.get("id"));
-
-    setPunkImage();
-    setTitle();
-
-    let n = new nft();
-    let extensionPresent = await n.checkExtension();
-    if (!extensionPresent) {
-      showExtensionWarning();
-    } else {
-      marketContract = n.getMarketContract();
-
-      // Populate addresses from extension
-      const accounts = await n.getWalletAddresses();
-
-      let sel = document.getElementById('newowner');
-      for(let i=0; i<accounts.length; i++)
-      {
-        let addr = accounts[i];
-        addrList.push(addr.address);
-        var opt = document.createElement("option");
-        opt.value= addr.address;
-        opt.innerHTML = `${addr.meta.name} - ${addr.address}`;
-        sel.appendChild(opt);
+  setTimeout(async () => {
+    try {
+      let url = new URL(window.location);
+      punkId = parseInt(url.searchParams.get("id"));
+  
+      setPunkImage();
+      setTitle();
+  
+      let n = new nft();
+      let extensionPresent = await n.checkExtension();
+      if (!extensionPresent) {
+        showExtensionWarning();
+      } else {
+        marketContract = n.getMarketContract();
+  
+        // Populate addresses from extension
+        const accounts = await n.getWalletAddresses();
+  
+        let sel = document.getElementById('newowner');
+        for(let i=0; i<accounts.length; i++)
+        {
+          let addr = accounts[i];
+          addrList.push(addr.address);
+          var opt = document.createElement("option");
+          opt.value= addr.address;
+          opt.innerHTML = `${addr.meta.name} - ${addr.address}`;
+          sel.appendChild(opt);
+        }
+  
+        let userSelectedAddress = getCookie('userSelectedAddress');
+        if (userSelectedAddress) {
+          sel.value = userSelectedAddress;
+        }
+  
+        // Show punk info
+        await getPunkInfo(punkId);
+  
+        if (blackList.includes(punkId)) showError("This NFT was blacklisted from this marketplace due to fraudlent activities. It will not be possible to buy or sell it.");
       }
-
-      let userSelectedAddress = getCookie('userSelectedAddress');
-      if (userSelectedAddress) {
-        sel.value = userSelectedAddress;
-      }
-
-      // Show punk info
-      await getPunkInfo(punkId);
-
-      if (blackList.includes(punkId)) showError("This NFT was blacklisted from this marketplace due to fraudlent activities. It will not be possible to buy or sell it.");
+  
+      walletupdate();
+      displayPageState();
+    } catch (e) {
+      console.log('initialization error', e);
     }
-
-    walletupdate();
-    displayPageState();
-  } catch (e) {
-    console.log('initialization error', e);
-  }
+  }, 1000);
 };
