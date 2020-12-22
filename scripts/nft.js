@@ -119,7 +119,15 @@ class nft {
   }
 
   async checkExtension() {
-    await web3Enable('substrapunks');
+    for (let i=0; i<1; i++) {
+      const extensions = await web3Enable('substrapunks');
+      // Repeat if extension is not found
+      if (extensions.length === 0) {
+        await delay(2000);
+      }
+      else break;
+    }
+
     const allAccounts = await web3Accounts();
 
     if (allAccounts.length == 0) return false;
