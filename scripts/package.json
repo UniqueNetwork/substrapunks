@@ -19,7 +19,7 @@
     "@polkadot/api-contract": "1.28.1",
     "@polkadot/extension-dapp": "0.34.1",
     "api_v1": "npm:@polkadot/api@1.28.1",
-    "api_v2": "npm:@polkadot/api@2.5.1",
+    "api_v2": "npm:@polkadot/api@3.6.4",
     "bignumber.js": "^9.0.0",
     "body-parser": "^1.18.3",
     "delay": "^4.4.0",
