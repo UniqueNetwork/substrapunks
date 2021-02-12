@@ -22,7 +22,7 @@
     "delay": "^4.4.0",
     "fs": "^0.0.1-security",
     "api_v1": "npm:@polkadot/api@1.28.1",
-    "api_v2": "npm:@polkadot/api@3.6.4",
+    "api_v2": "npm:@polkadot/api@3.8.1",
     "api_contracts": "npm:@polkadot/api-contract@1.28.1",
     "util": "^0.12.3"
   },
