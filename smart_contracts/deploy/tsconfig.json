@@ -1,0 +1,22 @@
+{
+  "exclude": [
+    "node_modules",
+    "node_modules/**/*",
+    "**/node_modules/**/*"
+  ],
+  "compilerOptions": {
+    "target": "ES2020",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "module": "commonjs",
+    "sourceMap": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "strict": true
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "lib": ["es2017"]
+}
