@@ -1,5 +1,5 @@
 {
-  "name": "MatcherDeployment",
+  "name": "matcher-deployment",
   "version": "1.0.0",
   "description": "Deployment script for matcher contract",
   "main": "",
@@ -40,5 +40,8 @@
       "contract",
       "artifacts"
     ]
-  }
+  },
+  "workspaces": [
+    "."
+  ]
 }
