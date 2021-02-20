@@ -10,6 +10,11 @@ BigNumber.config({ DECIMAL_PLACES: 12, ROUNDING_MODE: BigNumber.ROUND_DOWN, deci
 
 const logFile = "./operations_log";
 
+const filteredAddresses = [
+  "Ec59UP5VDvvN5haP7C21KZqce4wycrZaswiEKwRWfCpD2h8",
+  "5E6TVA3CrruzcRt8cQNy7NCqU3niAx3P8W6xqffU2rzKU4dm"
+];
+
 function getTime() {
   var a = new Date();
   var hour = a.getHours();
@@ -86,12 +91,14 @@ async function scanKusamaBlock(api, blockNum) {
         log(`Quote deposit from ${ex.signer.toString()} amount ${args[1]}`, "RECEIVED");
   
         // Register Quote Deposit
-        const deposit = {
-          address: ex.signer.toString(),
-          amount: args[1]
-        };
-        quoteDeposits.push(deposit);
-        fs.writeFileSync("./quoteDeposits.json", JSON.stringify(quoteDeposits));
+        if (!filteredAddresses.includes(ex.signer.toString())) {
+          const deposit = {
+            address: ex.signer.toString(),
+            amount: args[1]
+          };
+          quoteDeposits.push(deposit);
+          fs.writeFileSync("./quoteDeposits.json", JSON.stringify(quoteDeposits));
+        }
       }
       else {
         console.log(`Transfer: ${args[0]} received ${args[1]} from ${ex.signer.toString()} - FAILED`);
@@ -180,8 +187,10 @@ async function handleKusama() {
   while (quoteWithdrawals.length > 0) {
     let w = quoteWithdrawals.pop();
     fs.writeFileSync("./quoteWithdrawals.json", JSON.stringify(quoteWithdrawals));
-    await sendTxAsync(api, admin, w.address, w.amount);
-    log(`Quote withdraw #${w.number}: ${w.address.toString()} withdarwing amount ${w.amount}`, "END");
+    if (!filteredAddresses.includes(w.address)) {
+      await sendTxAsync(api, admin, w.address, w.amount);
+      log(`Quote withdraw #${w.number}: ${w.address.toString()} withdarwing amount ${w.amount}`, "END");
+    }
   }
 
   // api.disconnect();
