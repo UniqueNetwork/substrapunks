@@ -180,6 +180,7 @@ async function handleKusama() {
   while (quoteWithdrawals.length > 0) {
     let w = quoteWithdrawals.pop();
     fs.writeFileSync("./quoteWithdrawals.json", JSON.stringify(quoteWithdrawals));
+    // 
     await sendTxAsync(api, admin, w.address, w.amount);
     log(`Quote withdraw #${w.number}: ${w.address.toString()} withdarwing amount ${w.amount}`, "END");
   }

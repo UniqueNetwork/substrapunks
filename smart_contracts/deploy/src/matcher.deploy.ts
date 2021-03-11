@@ -40,17 +40,25 @@ function instantiateContract(alice: IKeyringPair, blueprint: Blueprint) : Promis
 }
 
 async function deployMatcherContract(api: ApiPromise): Promise<Contract> {
-  const metadata = JSON.parse(fs.readFileSync('../market/target/metadata.json').toString('utf-8'));
+  const keyring = new Keyring({ type: 'sr25519' });
+  const deployer = keyring.addFromUri(`tunnel hair company air cage velvet egg crunch height fetch resource estate`);
+  // const deployer = keyring.addFromUri(`//Alice`);
+
+  const bal = await api.query.system.account(deployer.address);
+  console.log(deployer.address);
+  console.log(bal.data.free.toString());
+
+
+  const metadata = JSON.parse(fs.readFileSync('../market/target/ink/metadata.json').toString('utf-8'));
   const abi = new Abi(metadata);
 
-  const keyring = new Keyring({ type: 'sr25519' });
-  const deployer = keyring.addFromUri(`//Alice`);
 
-  const wasm = fs.readFileSync('../market/target/matcher.wasm');
+  const wasm = fs.readFileSync('../market/target/ink/matcher.wasm');
 
   const code = new CodePromise(api, abi, wasm);
 
   const blueprint = await deployBlueprint(deployer, code);
+  console.log('bluebprint: ', blueprint);
   const contract = (await instantiateContract(deployer, blueprint))['contract'] as Contract;
 
   return contract;

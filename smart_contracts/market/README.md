@@ -2,8 +2,8 @@
 
 ## Building
 
-Cargo contract 0.8.0 or newer is required
+Cargo contract 0.9.1 or newer is required
 
 ```
-cargo +nightly-2020-10-01 contract build
+cargo +nightly-2020-03-01 contract build
 ```
