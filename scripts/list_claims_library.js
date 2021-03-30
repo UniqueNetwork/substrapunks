@@ -1,6 +1,8 @@
 const { ApiPromise, WsProvider, Keyring } = require('api_v1');
 const config = require('./config');
 const rtt = require("./runtime_types.json");
+const { hexToU8a } = require('@polkadot/util');
+const { decodeAddress, encodeAddress } = require('@polkadot/util-crypto');
 const fs = require('fs');
 
 const getUniqueConnection = async function () {
@@ -35,34 +37,37 @@ const scanNftBlock = async function (api, blockNum) {
   // console.log(`Reading Block Transactions`);
   
   await signedBlock.block.extrinsics.forEach(async (ex, index) => {    
-    const { _isSigned, _meta, method: { args, method, section } } = ex;        
+    const { _isSigned, _meta, method: { args, method, section, signer } } = ex;        
     if ((section == "nft") && (method == "transfer") && (args[0] == config.adminAddressNft)) {
       console.log(`#${blockNum}`);
       let { Owner } = await api.query.nft.nftItemList(args[1], args[2]);      
-      if (Owner == config.adminAddressNft) {
-        console.log(`NFT Transfer: ${args[0]} received (${args[1]}, ${args[2]})`);
-        const deposit = {
-          address: ex.signer.toString(),
-          collectionId: args[1],
-          tokenId: args[2]
-        };
-      } else {
-        console.log(`NFT Transfer: ${args[0]} received (${args[1]}, ${args[2]}) - FAILED TX (owner = ${Owner})`)
-      }
+      const data = args[3].toString();        
+      const tokenId = data[28] + data[29] + data[26] + data[27];
+      console.log(`Number block: #${blockNum}`);
+      console.log(`Contract call: ${data}`);
+      console.log(`Method: ${method}`);
+      console.log(`Section: ${section}`);
+      console.log(`Collection ID: ${args[3].toString().replace('0x','').slice(8,16).replace(/0/g,'')}`);             
+      console.log(`Signer / Address: ${ex.signer.toString()}`);
+      console.log(`Token ID: ${tokenId}`);
+      console.log(`id: ${Buffer.from(tokenId, 'hex').readIntBE(0, 2).toString()}`);
+      console.log(`Owner: ${Owner}`);
     } else if ((section == "contracts") && (method == "call")) {
-      console.log(`#${blockNum}`);
-      console.log(`Contract call: ${args[0].toString()}, ${args[1].toString()}, ${args[2].toString()}, ${args[3].toString()}`);      
-            
-      const data = args[3].toString();
-      console.log('data->' ,data);
-      console.log('ext->',
-        JSON.stringify(ex, null, 2)
-      )
-    }
-  });  
+      const data = args[3].toString();        
+      const tokenId = data[28] + data[29] + data[26] + data[27];
+      console.log(`Number block: #${blockNum}`);
+      console.log(`Contract call: ${data}`);
+      console.log(`Method: ${method}`);
+      console.log(`Section: ${section}`);
+      console.log(`Collection ID: ${args[3].toString().replace('0x','').slice(8,16).replace(/0/g,'')}`);             
+      console.log(`Signer / Address: ${ex.signer.toString()}`);
+      console.log(`Token ID: ${tokenId}`);
+      console.log(`id: ${Buffer.from(tokenId, 'hex').readIntBE(0, 2).toString()}`);
+    };    
+  });
 }
 
 module.exports = {
   getUniqueConnection,
-  scanNftBlock
+  scanNftBlock,
 }

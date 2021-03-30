@@ -3,11 +3,12 @@ const delay = require('delay');
 
 async function handleUnique() {
   const api = await getUniqueConnection();  
-  let lastNftBlock = 510100;
+  let lastNftBlock = 510190;
   
   const finalizedHashNft = await api.rpc.chain.getFinalizedHead();
   const signedFinalizedBlockNft = await api.rpc.chain.getBlock(finalizedHashNft);
   
+
   while (true) {
     try {
       if (lastNftBlock + 1 <= signedFinalizedBlockNft.block.header.number) {
