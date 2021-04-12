@@ -14,7 +14,9 @@ const filteredAddresses = [
   "Ec59UP5VDvvN5haP7C21KZqce4wycrZaswiEKwRWfCpD2h8",
   "5E6TVA3CrruzcRt8cQNy7NCqU3niAx3P8W6xqffU2rzKU4dm",
   "CjwjaELA4xon7sUPY6giaLvyYaxDkUfbkQ9w4LG65WbwHkM",
-  "5CEL5FtTXhwt2U42cqHdpcyvpxJiR5fV9NZQYQ4JcHJ7CLcB"
+  "5CEL5FtTXhwt2U42cqHdpcyvpxJiR5fV9NZQYQ4JcHJ7CLcB",
+  "GnjFRpef4ebEdtTHz6CzicHrkWuMbYvrjozJvHSVpxQMHvw",
+  "5GH7b7Un2hdfUz51XHHA6mFHiAEfYvjkQMyEvG1V22jucBL3"
 ];
 
 function getTime() {
