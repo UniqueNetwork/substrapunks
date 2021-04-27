@@ -1,12 +1,12 @@
 const { ApiPromise, WsProvider, Keyring } = require('api_v1');
-const { ApiPromise: ApiPromiseKsm, WsProvider: WsProviderKsm } = require('api_v2');
-const attributes = require('./attributes').attributes;
+//const { ApiPromise: ApiPromiseKsm, WsProvider: WsProviderKsm } = require('api_v2');
+//const attributes = require('./attributes').attributes;
 const { wsEndpoint, wsEndpointKusama, collectionId, punksToImport, contractAddress, marketContractAddress, vaultAddress } = require("./browser_config.json");
 
-const { web3Accounts, web3Enable, web3FromAddress } = require('@polkadot/extension-dapp');
+// const { web3Accounts, web3Enable, web3FromAddress } = require('@polkadot/extension-dapp');
 const { Abi, PromiseContract } = require('@polkadot/api-contract');
 const rtt = require("./runtime_types.json");
-const contractAbi = require("./metadata.json");
+// const contractAbi = require("./metadata.json");
 const marketContractAbi = require("./market_metadata.json");
 const delay = require('delay');
 
@@ -44,42 +44,42 @@ class testMarket {
     return this.api;
   }
 
-  depositAsync(punkId, ownerAddress) {
-    let that = this;
+  // depositAsync(punkId, ownerAddress) {
+  //   let that = this;
   
-    return new Promise(async function(resolve, reject) {
-      try {
-        const api = await that.getApi();
-        const injector = await web3FromAddress(ownerAddress);
+  //   return new Promise(async function(resolve, reject) {
+  //     try {
+  //       const api = await that.getApi();
+  //       const injector = await web3FromAddress(ownerAddress);
 
-        api.setSigner(injector.signer);
+  //       api.setSigner(injector.signer);
       
-        const unsub = await api.tx.nft
-          .transfer(vaultAddress, collectionId, punkId, 0)
-          .signAndSend(ownerAddress, (result) => {
-          console.log(`Deposit: Current tx status is ${result.status}`);
+  //       const unsub = await api.tx.nft
+  //         .transfer(vaultAddress, collectionId, punkId, 0)
+  //         .signAndSend(ownerAddress, (result) => {
+  //         console.log(`Deposit: Current tx status is ${result.status}`);
         
-          if (result.status.isInBlock) {
-            console.log(`Deposit: Transaction included at blockHash ${result.status.asInBlock}`);
-            resolve();
-            unsub();
-          } else if (result.status.isFinalized) {
-            console.log(`Deposit: Transaction finalized at blockHash ${result.status.asFinalized}`);
-            resolve();
-            unsub();
-          } else if (result.status.isUsurped) {
-            console.log(`Deposit: Something went wrong with transaction. Status: ${result.status}`);
-            reject();
-            unsub();
-          }
-        });
-      } catch (e) {
-        console.log("Error: ", e);
-        reject(e);
-      }
+  //         if (result.status.isInBlock) {
+  //           console.log(`Deposit: Transaction included at blockHash ${result.status.asInBlock}`);
+  //           resolve();
+  //           unsub();
+  //         } else if (result.status.isFinalized) {
+  //           console.log(`Deposit: Transaction finalized at blockHash ${result.status.asFinalized}`);
+  //           resolve();
+  //           unsub();
+  //         } else if (result.status.isUsurped) {
+  //           console.log(`Deposit: Something went wrong with transaction. Status: ${result.status}`);
+  //           reject();
+  //           unsub();
+  //         }
+  //       });
+  //     } catch (e) {
+  //       console.log("Error: ", e);
+  //       reject(e);
+  //     }
   
-    });
-  }
+  //   });
+  // }
 
   async delay(ms) {
     await delay(ms);
@@ -96,48 +96,48 @@ class testMarket {
     return null;
   }
 
-  askAsync(punkId, price, ownerAddress) {
-    let that = this;
+  // askAsync(punkId, price, ownerAddress) {
+  //   let that = this;
   
-    return new Promise(async function(resolve, reject) {
-      try {
-        const api = await that.getApi();
-        const abi = new Abi(api.registry, marketContractAbi);
+  //   return new Promise(async function(resolve, reject) {
+  //     try {
+  //       const api = await that.getApi();
+  //       const abi = new Abi(api.registry, marketContractAbi);
       
-        const value = 0;
-        const maxgas = 1000000000000;
+  //       const value = 0;
+  //       const maxgas = 1000000000000;
       
-        console.log(Object.keys(abi.messages));
+  //       console.log(Object.keys(abi.messages));
 
-        const injector = await web3FromAddress(ownerAddress);
-        api.setSigner(injector.signer);
+  //       const injector = await web3FromAddress(ownerAddress);
+  //       api.setSigner(injector.signer);
       
-        const unsub = await api.tx.contracts
-          .call(marketContractAddress, value, maxgas, abi.messages.ask(collectionId, punkId, 2, price))
-          .signAndSend(ownerAddress, (result) => {
-          console.log(`Ask: Current tx status is ${result.status}`);
+  //       const unsub = await api.tx.contracts
+  //         .call(marketContractAddress, value, maxgas, abi.messages.ask(collectionId, punkId, 2, price))
+  //         .signAndSend(ownerAddress, (result) => {
+  //         console.log(`Ask: Current tx status is ${result.status}`);
         
-          if (result.status.isInBlock) {
-            console.log(`Ask: Transaction included at blockHash ${result.status.asInBlock}`);
-            resolve();
-            unsub();
-          } else if (result.status.isFinalized) {
-            console.log(`Ask: Transaction finalized at blockHash ${result.status.asFinalized}`);
-            resolve();
-            unsub();
-          } else if (result.status.isUsurped) {
-            console.log(`Ask: Something went wrong with transaction. Status: ${result.status}`);
-            reject();
-            unsub();
-          }
-        });
-      } catch (e) {
-        console.log("Error: ", e);
-        reject(e);
-      }
+  //         if (result.status.isInBlock) {
+  //           console.log(`Ask: Transaction included at blockHash ${result.status.asInBlock}`);
+  //           resolve();
+  //           unsub();
+  //         } else if (result.status.isFinalized) {
+  //           console.log(`Ask: Transaction finalized at blockHash ${result.status.asFinalized}`);
+  //           resolve();
+  //           unsub();
+  //         } else if (result.status.isUsurped) {
+  //           console.log(`Ask: Something went wrong with transaction. Status: ${result.status}`);
+  //           reject();
+  //           unsub();
+  //         }
+  //       });
+  //     } catch (e) {
+  //       console.log("Error: ", e);
+  //       reject(e);
+  //     }
   
-    });
-  }
+  //   });
+  // }
 
   async trade(punkId, price, ownerAddress) {
     console.log(`Selling punk ${punkId} in collection ${collectionId} for ${price}`);
@@ -157,140 +157,140 @@ class testMarket {
     await this.askAsync(punkId, priceBN.toString(), ownerAddress);
   }
 
-  cancelAsync(punkId, ownerAddress) {
-    let that = this;
+  // cancelAsync(punkId, ownerAddress) {
+  //   let that = this;
   
-    return new Promise(async function(resolve, reject) {
-      try {
-        const api = await that.getApi();
-        const abi = new Abi(api.registry, marketContractAbi);
+  //   return new Promise(async function(resolve, reject) {
+  //     try {
+  //       const api = await that.getApi();
+  //       const abi = new Abi(api.registry, marketContractAbi);
       
-        const value = 0;
-        const maxgas = 1000000000000;
+  //       const value = 0;
+  //       const maxgas = 1000000000000;
       
-        console.log(Object.keys(abi.messages));
+  //       console.log(Object.keys(abi.messages));
 
-        const injector = await web3FromAddress(ownerAddress);
-        api.setSigner(injector.signer);
+  //       const injector = await web3FromAddress(ownerAddress);
+  //       api.setSigner(injector.signer);
       
-        const unsub = await api.tx.contracts
-          .call(marketContractAddress, value, maxgas, abi.messages.cancel(collectionId, punkId))
-          .signAndSend(ownerAddress, (result) => {
-          console.log(`Cancel: Current tx status is ${result.status}`);
+  //       const unsub = await api.tx.contracts
+  //         .call(marketContractAddress, value, maxgas, abi.messages.cancel(collectionId, punkId))
+  //         .signAndSend(ownerAddress, (result) => {
+  //         console.log(`Cancel: Current tx status is ${result.status}`);
         
-          if (result.status.isInBlock) {
-            console.log(`Cancel: Transaction included at blockHash ${result.status.asInBlock}`);
-            resolve();
-            unsub();
-          } else if (result.status.isFinalized) {
-            console.log(`Cancel: Transaction finalized at blockHash ${result.status.asFinalized}`);
-            resolve();
-            unsub();
-          } else if (result.status.isUsurped) {
-            console.log(`Cancel: Something went wrong with transaction. Status: ${result.status}`);
-            reject();
-            unsub();
-          }
-        });
-      } catch (e) {
-        console.log("Error: ", e);
-        reject(e);
-      }
+  //         if (result.status.isInBlock) {
+  //           console.log(`Cancel: Transaction included at blockHash ${result.status.asInBlock}`);
+  //           resolve();
+  //           unsub();
+  //         } else if (result.status.isFinalized) {
+  //           console.log(`Cancel: Transaction finalized at blockHash ${result.status.asFinalized}`);
+  //           resolve();
+  //           unsub();
+  //         } else if (result.status.isUsurped) {
+  //           console.log(`Cancel: Something went wrong with transaction. Status: ${result.status}`);
+  //           reject();
+  //           unsub();
+  //         }
+  //       });
+  //     } catch (e) {
+  //       console.log("Error: ", e);
+  //       reject(e);
+  //     }
   
-    });
-  }
+  //   });
+  // }
 
-  buyAsync(punkId, ownerAddress) {
-    let that = this;
+  // buyAsync(punkId, ownerAddress) {
+  //   let that = this;
   
-    return new Promise(async function(resolve, reject) {
-      try {
-        const api = await that.getApi();
-        const abi = new Abi(api.registry, marketContractAbi);
+  //   return new Promise(async function(resolve, reject) {
+  //     try {
+  //       const api = await that.getApi();
+  //       const abi = new Abi(api.registry, marketContractAbi);
       
-        const value = 0;
-        const maxgas = 1000000000000;
+  //       const value = 0;
+  //       const maxgas = 1000000000000;
       
-        console.log(Object.keys(abi.messages));
+  //       console.log(Object.keys(abi.messages));
 
-        const injector = await web3FromAddress(ownerAddress);
-        api.setSigner(injector.signer);
+  //       const injector = await web3FromAddress(ownerAddress);
+  //       api.setSigner(injector.signer);
       
-        const unsub = await api.tx.contracts
-          .call(marketContractAddress, value, maxgas, abi.messages.buy(collectionId, punkId))
-          .signAndSend(ownerAddress, (result) => {
-          console.log(`Buy: Current tx status is ${result.status}`);
+  //       const unsub = await api.tx.contracts
+  //         .call(marketContractAddress, value, maxgas, abi.messages.buy(collectionId, punkId))
+  //         .signAndSend(ownerAddress, (result) => {
+  //         console.log(`Buy: Current tx status is ${result.status}`);
         
-          if (result.status.isInBlock) {
-            console.log(`Buy: Transaction included at blockHash ${result.status.asInBlock}`);
-            resolve();
-            unsub();
-          } else if (result.status.isFinalized) {
-            console.log(`Buy: Transaction finalized at blockHash ${result.status.asFinalized}`);
-            resolve();
-            unsub();
-          } else if (result.status.isUsurped) {
-            console.log(`Buy: Something went wrong with transaction. Status: ${result.status}`);
-            reject();
-            unsub();
-          }
-        });
-      } catch (e) {
-        console.log("Error: ", e);
-        reject(e);
-      }
+  //         if (result.status.isInBlock) {
+  //           console.log(`Buy: Transaction included at blockHash ${result.status.asInBlock}`);
+  //           resolve();
+  //           unsub();
+  //         } else if (result.status.isFinalized) {
+  //           console.log(`Buy: Transaction finalized at blockHash ${result.status.asFinalized}`);
+  //           resolve();
+  //           unsub();
+  //         } else if (result.status.isUsurped) {
+  //           console.log(`Buy: Something went wrong with transaction. Status: ${result.status}`);
+  //           reject();
+  //           unsub();
+  //         }
+  //       });
+  //     } catch (e) {
+  //       console.log("Error: ", e);
+  //       reject(e);
+  //     }
   
-    });
-  }
+  //   });
+  // }
 
-  withdrawAsync(amount, ownerAddress) {
+  // withdrawAsync(amount, ownerAddress) {
 
-    let that = this;
+  //   let that = this;
   
-    return new Promise(async function(resolve, reject) {
-      try {
-        const api = await that.getApi();
-        const abi = new Abi(api.registry, marketContractAbi);
+  //   return new Promise(async function(resolve, reject) {
+  //     try {
+  //       const api = await that.getApi();
+  //       const abi = new Abi(api.registry, marketContractAbi);
 
-        // Convert amount to "Weis"
-        let amountBN = new BigNumber((''+amount).replace(/,/g, '.'));
-        const ksmexp = BigNumber(10).pow(that.ksmDecimals);
-        amountBN = amountBN.multipliedBy(ksmexp);
+  //       // Convert amount to "Weis"
+  //       let amountBN = new BigNumber((''+amount).replace(/,/g, '.'));
+  //       const ksmexp = BigNumber(10).pow(that.ksmDecimals);
+  //       amountBN = amountBN.multipliedBy(ksmexp);
         
-        const value = 0;
-        const maxgas = 1000000000000;
+  //       const value = 0;
+  //       const maxgas = 1000000000000;
       
-        console.log(Object.keys(abi.messages));
+  //       console.log(Object.keys(abi.messages));
 
-        const injector = await web3FromAddress(ownerAddress);
-        api.setSigner(injector.signer);
+  //       const injector = await web3FromAddress(ownerAddress);
+  //       api.setSigner(injector.signer);
       
-        const unsub = await api.tx.contracts
-          .call(marketContractAddress, value, maxgas, abi.messages.withdraw(2, amountBN.toString()))
-          .signAndSend(ownerAddress, (result) => {
-          console.log(`Withdraw: Current tx status is ${result.status}`);
+  //       const unsub = await api.tx.contracts
+  //         .call(marketContractAddress, value, maxgas, abi.messages.withdraw(2, amountBN.toString()))
+  //         .signAndSend(ownerAddress, (result) => {
+  //         console.log(`Withdraw: Current tx status is ${result.status}`);
         
-          if (result.status.isInBlock) {
-            console.log(`Withdraw: Transaction included at blockHash ${result.status.asInBlock}`);
-            resolve();
-            unsub();
-          } else if (result.status.isFinalized) {
-            console.log(`Withdraw: Transaction finalized at blockHash ${result.status.asFinalized}`);
-            resolve();
-            unsub();
-          } else if (result.status.isUsurped) {
-            console.log(`Withdraw: Something went wrong with transaction. Status: ${result.status}`);
-            reject();
-            unsub();
-          }
-        });
-      } catch (e) {
-        console.log("Error: ", e);
-        reject(e);
-      }
+  //         if (result.status.isInBlock) {
+  //           console.log(`Withdraw: Transaction included at blockHash ${result.status.asInBlock}`);
+  //           resolve();
+  //           unsub();
+  //         } else if (result.status.isFinalized) {
+  //           console.log(`Withdraw: Transaction finalized at blockHash ${result.status.asFinalized}`);
+  //           resolve();
+  //           unsub();
+  //         } else if (result.status.isUsurped) {
+  //           console.log(`Withdraw: Something went wrong with transaction. Status: ${result.status}`);
+  //           reject();
+  //           unsub();
+  //         }
+  //       });
+  //     } catch (e) {
+  //       console.log("Error: ", e);
+  //       reject(e);
+  //     }
   
-    });
-  }
+  //   });
+  // }
 
   async getBalance(addr) {
     const api = await this.getApi();
@@ -392,8 +392,12 @@ async function test() {
 
   let market = new testMarket();
   
-  market.depositAsync(1, bob);
+  // market.depositAsync(1, bob);
 
+  // console.log(await market.getBalance("5HRNCWNetMaYZpSgoVTUawnGddiHRkvUrGcdKJryxSogUQYa"));
+ 
+  console.log(await market.getBalance("5Fj7qQR7f9uMNXTgj6bBJDKbaHbEnVb7c3tb881kchbDd82V"));
+  
 }
 
 test().catch(console.error).finally(() => process.exit());

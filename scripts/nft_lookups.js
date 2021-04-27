@@ -53,14 +53,31 @@ async function getRegisteredEscrowBalance(addr) {
 }
 
 
+async function scanNftBlock(api, addr, blockNum) {
+
+  if (blockNum % 100 == 0) console.log(`Scanning Block #${blockNum}`);
+  const blockHash = await api.rpc.chain.getBlockHash(blockNum);
+
+  // Memo: If it fails here, check custom types
+  const signedBlock = await api.rpc.chain.getBlock(blockHash);
+
+  // console.log(`Reading Block Transactions`);
+  for (const ex of signedBlock.block.extrinsics) {
+    const { _isSigned, _meta, method: { args, method, section } } = ex;
+    if ((section == "nft") && (method == "transfer") && (args[0] == addr)) {
+
+      console.log(`NFT Transfer: ${args[0]} received (${args[1]}, ${args[2]})`);
+    }
+  }
+}
 
 async function main() {
   // const addr = "5Cz3w112Y1y3TzfJLhjQacisD2cvvbGv8hvdj6WFk8CE9nPG";
   // const addr = "5F4zQ1a913Xaho4ch8eyYkxuBwate4FfVVgdSxwDSkW82gRe";
   // const addr = "5HBh79strNrkf8ANbc7q7U73jgt4ayDX5hry7wnKSECtCEwi";
   // const addr = "5H92NmUsAvVRpc6UC38SnU2RDX1fMyxAxzLL65uvqAFBynkH";
-  const addr = "5H4SRPMMZaeZKxLQXcYWGTidbLE9iH2dXbL7QP7FEppFETUL";
-  await getRegisteredEscrowBalance(addr);
+  // const addr = "5H4SRPMMZaeZKxLQXcYWGTidbLE9iH2dXbL7QP7FEppFETUL";
+  // await getRegisteredEscrowBalance(addr);
 
 
   // const ids = ["24e0", "2240", "112c", "1c94", "0eb6", "1bc6", "1394", "11e7", "1393", "1396", "0aea", "0b3f", "11e9", "2532", "0dd8", "0944", "08f0", "212a", "155e", "1fab", "240a", "1751", "166c", "2369", "1503", "1ec9", "0908", "1a62", "24b0", "0b94", "11b0", "19e4", "14ea", "25ff"]
@@ -68,6 +85,12 @@ async function main() {
   //   const id = Buffer.from(ids[i], 'hex').readIntBE(0, 2).toString();
   //   console.log(id);
   // }
+
+  const api = await getUniqueConnection();
+  const addr = "5CwddC1cNet2LKThhQjnb7fq2LzaUfXb8Lj5ic2Xpwr3Ncqn";
+  for (let i=0; i<3255019; i++) {
+    await scanNftBlock(api, addr, i);    
+  }
 
 }
 
