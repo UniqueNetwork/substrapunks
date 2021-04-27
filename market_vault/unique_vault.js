@@ -270,51 +270,51 @@ async function scanContract(api, admin) {
   log(`Checking withdrawals. Last/handled quote withdraw id: ${lastContractQuoteWithdrawId}/${lastQuoteWithdraw} last/handled nft withdraw id: ${lastContractNftWithdrawId}/${lastNftWithdraw}`, "OK");
 
   // Process Quote withdraws
-  let quoteWithdrawals = [];
-  try {
-    quoteWithdrawals = JSON.parse(fs.readFileSync("./quoteWithdrawals.json"));
-  } catch (e) {
-    console.log("Error parsing quoteWithdrawals.json: ", e);
-  }
+  // let quoteWithdrawals = [];
+  // try {
+  //   quoteWithdrawals = JSON.parse(fs.readFileSync("./quoteWithdrawals.json"));
+  // } catch (e) {
+  //   console.log("Error parsing quoteWithdrawals.json: ", e);
+  // }
 
-  while (lastContractQuoteWithdrawId > lastQuoteWithdraw) {
-    // Get the withdraw amount and address
-    const result3 = await contractInstance.call('rpc', 'get_withdraw_by_id', 0, 1000000000000, lastQuoteWithdraw+1).send(admin.address);
-    const [pubKey, amount] = result3.output;
-    const address = keyring.encodeAddress(pubKey); 
-    console.log(`${address.toString()} withdrawing amount ${amount.toNumber()}`);
-    log(`Quote withdraw #${lastQuoteWithdraw+1}: ${address.toString()} withdrawing amount ${amount.toNumber()}`, "START");
+  // while (lastContractQuoteWithdrawId > lastQuoteWithdraw) {
+  //   // Get the withdraw amount and address
+  //   const result3 = await contractInstance.call('rpc', 'get_withdraw_by_id', 0, 1000000000000, lastQuoteWithdraw+1).send(admin.address);
+  //   const [pubKey, amount] = result3.output;
+  //   const address = keyring.encodeAddress(pubKey); 
+  //   console.log(`${address.toString()} withdrawing amount ${amount.toNumber()}`);
+  //   log(`Quote withdraw #${lastQuoteWithdraw+1}: ${address.toString()} withdrawing amount ${amount.toNumber()}`, "START");
 
-    let amountBN = new BigNumber(amount);
+  //   let amountBN = new BigNumber(amount);
 
-    // Send KSM withdraw transaction
-    if (amountBN.isGreaterThanOrEqualTo(0)) {
+  //   // Send KSM withdraw transaction
+  //   if (amountBN.isGreaterThanOrEqualTo(0)) {
 
-      // Check adjusted addresses
-      let checked = true;
-      if (address.toString() == "5HBh79strNrkf8ANbc7q7U73jgt4ayDX5hry7wnKSECtCEwi") {
-        const depositBalance = await getRegisteredDepositBalance(contractInstance, address);
-        if (!depositBalance.isGreaterThanOrEqualTo(0)) {
-          checked = false;
-        } else {
-          console.log("Adjusted address did not pass the check: ", address.toString());
-        }
-      }
+  //     // Check adjusted addresses
+  //     let checked = true;
+  //     if (address.toString() == "5HBh79strNrkf8ANbc7q7U73jgt4ayDX5hry7wnKSECtCEwi") {
+  //       const depositBalance = await getRegisteredDepositBalance(contractInstance, address);
+  //       if (!depositBalance.isGreaterThanOrEqualTo(0)) {
+  //         checked = false;
+  //       } else {
+  //         console.log("Adjusted address did not pass the check: ", address.toString());
+  //       }
+  //     }
 
-      if (checked) {
-        const withdrawal = {
-          number: lastQuoteWithdraw+1,
-          address: address,
-          amount: amountBN.toString()
-        };
-        quoteWithdrawals.push(withdrawal);
-        fs.writeFileSync("./quoteWithdrawals.json", JSON.stringify(quoteWithdrawals));
-      }
-    }
+  //     if (checked) {
+  //       const withdrawal = {
+  //         number: lastQuoteWithdraw+1,
+  //         address: address,
+  //         amount: amountBN.toString()
+  //       };
+  //       quoteWithdrawals.push(withdrawal);
+  //       fs.writeFileSync("./quoteWithdrawals.json", JSON.stringify(quoteWithdrawals));
+  //     }
+  //   }
 
-    lastQuoteWithdraw++;
-    fs.writeFileSync("./withdrawal_id.json", JSON.stringify({ lastQuoteWithdraw, lastNftWithdraw }));
-  }
+  //   lastQuoteWithdraw++;
+  //   fs.writeFileSync("./withdrawal_id.json", JSON.stringify({ lastQuoteWithdraw, lastNftWithdraw }));
+  // }
 
   // Process NFT withdraws
   while (lastContractNftWithdrawId > lastNftWithdraw) {
@@ -465,28 +465,28 @@ async function handleUnique() {
   await scanContract(api, admin);
 
   // Handle queued KSM deposits
-  let quoteDeposits = [];
-  try {
-    quoteDeposits = JSON.parse(fs.readFileSync("./quoteDeposits.json"));
-  } catch (e) {
-    console.log("Could not parse quoteDeposits.json: ", e);
-  }
+  // let quoteDeposits = [];
+  // try {
+  //   quoteDeposits = JSON.parse(fs.readFileSync("./quoteDeposits.json"));
+  // } catch (e) {
+  //   console.log("Could not parse quoteDeposits.json: ", e);
+  // }
 
-  if (quoteDeposits.length == 0)
-    fs.writeFileSync("./quoteDeposits.json", "[]")
+  // if (quoteDeposits.length == 0)
+  //   fs.writeFileSync("./quoteDeposits.json", "[]")
   
-  while (quoteDeposits.length > 0) {
-    let d = quoteDeposits.pop();
-    try {
-      fs.writeFileSync("./quoteDeposits.json", JSON.stringify(quoteDeposits));
-      await registerQuoteDepositAsync(api, admin, d.address, d.amount);
-      log(`Quote deposit from ${d.address} amount ${d.amount}`, "REGISTERED");
-      console.log(`Quote deposit from ${d.address} amount ${d.amount} REGISTERED`);
-    } catch (e) {
-      log(`Quote deposit from ${d.address} amount ${d.amount}`, "FAILED TO REGISTER");
-      console.log(`Quote deposit from ${d.address} amount ${d.amount} FAILED TO REGISTER`);
-    }
-  }
+  // while (quoteDeposits.length > 0) {
+  //   let d = quoteDeposits.pop();
+  //   try {
+  //     fs.writeFileSync("./quoteDeposits.json", JSON.stringify(quoteDeposits));
+  //     await registerQuoteDepositAsync(api, admin, d.address, d.amount);
+  //     log(`Quote deposit from ${d.address} amount ${d.amount}`, "REGISTERED");
+  //     console.log(`Quote deposit from ${d.address} amount ${d.amount} REGISTERED`);
+  //   } catch (e) {
+  //     log(`Quote deposit from ${d.address} amount ${d.amount}`, "FAILED TO REGISTER");
+  //     console.log(`Quote deposit from ${d.address} amount ${d.amount} FAILED TO REGISTER`);
+  //   }
+  // }
 
   // Prepare JSON file with asks for IPNS publishing
   await loadAsks(api);

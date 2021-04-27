@@ -192,9 +192,9 @@ function showTradeSection() {
     document.getElementById("trading").style.display = "block";
     document.getElementById('trading').innerHTML = `
       <p>
-        <button onclick='expandTradeSectionAndStart();' class="btn">Sell</button>
+        <p>Trading is disabled</p>
+        <button onclick='window.location="my.html"' class="btn">My Punks</button>
       </p>
-      <p>Also you can use the <a href="https://uniqueapps.usetech.com/#/nft">NFT Wallet</a> to find SubstraPunks collection (search for Collection <b>#4</b> there) and transfer your character to someone else. By the way, the transfers for SubstraPunks collection are free!</p>
     `;
   } catch (e) {
     console.log('showTradeSection', e);
@@ -243,9 +243,8 @@ function showBuySection() {
     document.getElementById("walletselector").style.display = "block";
     document.getElementById('trading').innerHTML = `
     <br/>
-    <p>It's for sale for ${punk.price} KSM, yay!</p>
     <p>
-      <button onclick='startBuy();' class="btn">Buy - ${roundNum(parseFloat(punk.price) + fee)} KSM</button>
+      <p>This NFT is listed, but trading is disabled</p>
       <p>Fee: <b>${roundNum(fee)}</b>, Price: <b>${punk.price}</b></p>
     </p>
   `;
@@ -585,12 +584,6 @@ async function walletupdate() {
   try {
     let address = document.getElementById("newowner").value;
     setCookie("userSelectedAddress", address, 365);
-
-    // Show KSM deposit
-    const n = new nft();
-    document.getElementById("ksmBalance").innerHTML = `KSM Balance: ...`;
-    const balance = await n.getKusamaBalance(address);
-    document.getElementById("ksmBalance").innerHTML = `KSM Balance: ${balance}`;
   } catch (e) {
     console.log('walletupdate error', e);
     showError(e);

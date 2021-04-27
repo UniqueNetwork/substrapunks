@@ -5,6 +5,7 @@ import { IKeyringPair } from "@polkadot/types/types";
 import usingApi from "./substrate/substrate-api";
 import fs from "fs";
 import { Abi, BlueprintPromise as Blueprint, CodePromise, ContractPromise as Contract } from "@polkadot/api-contract";
+import config from "./config";
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
@@ -41,8 +42,7 @@ function instantiateContract(alice: IKeyringPair, blueprint: Blueprint) : Promis
 
 async function deployMatcherContract(api: ApiPromise): Promise<Contract> {
   const keyring = new Keyring({ type: 'sr25519' });
-  const deployer = keyring.addFromUri(`tunnel hair company air cage velvet egg crunch height fetch resource estate`);
-  // const deployer = keyring.addFromUri(`//Alice`);
+  const deployer = keyring.addFromUri(config.deploySeed);
 
   const bal = await api.query.system.account(deployer.address);
   console.log(deployer.address);

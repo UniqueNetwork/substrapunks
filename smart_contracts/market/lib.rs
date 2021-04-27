@@ -249,8 +249,8 @@ mod matchingengine {
             // Transfer token back to user through NFT Vault (Emit WithdrawNFT event)
             Self::env().emit_event(WithdrawNFT {
                 address: user,
-                collection_id: collection_id + 0x100000000,
-                token_id: token_id + 0x200000000,
+                collection_id: collection_id,
+                token_id: token_id,
             });
         }
 
@@ -278,8 +278,8 @@ mod matchingengine {
             // Transfer NFT token to buyer through NFT Vault (Emit WithdrawNFT event)
             Self::env().emit_event(WithdrawNFT {
                 address: self.env().caller().clone(),
-                collection_id: collection_id + 0x100000000,
-                token_id: token_id + 0x200000000,
+                collection_id: collection_id,
+                token_id: token_id,
             });
 
             // Start Quote withdraw from the vault for the seller
@@ -297,6 +297,24 @@ mod matchingengine {
             //     coll_token_id: ctid,
             //     price: price,
             // });
+        }
+
+        /// Clear deposited balance
+        #[ink(message)]
+        pub fn clear_balance(&mut self, quote_id: u64, user: AccountId) {
+            self.ensure_only_owner();
+
+            // Set or update quote balance
+            self.quote_balance.insert((quote_id, user.clone()), 0);
+        }
+
+        /// Clear deposited NFT
+        #[ink(message)]
+        pub fn clear_nft_deposit(&mut self, collection_id: u64, token_id: u64) {
+            self.ensure_only_owner();
+
+            // Remove a deposit
+            let _ = self.nft_deposits.take(&(collection_id, token_id));
         }
 
         /// Panic if the sender is not the contract owner
@@ -335,16 +353,16 @@ mod matchingengine {
                 WithdrawType::WithdrawMatched => {
                     Self::env().emit_event(WithdrawQuoteMatched {
                         address: *user,
-                        quote_id: 0x100000000 + quote_id,
-                        amount: 0x1000000000000000000000000000000 + withdraw_balance,
+                        quote_id: quote_id,
+                        amount: withdraw_balance,
                     });
                 }
 
                 WithdrawType::WithdrawUnused => {
                     Self::env().emit_event(WithdrawQuoteUnused {
                         address: *user,
-                        quote_id: 0x100000000 + quote_id,
-                        amount: 0x1000000000000000000000000000000 + withdraw_balance,
+                        quote_id: quote_id,
+                        amount: withdraw_balance,
                     });
                 }
             }
