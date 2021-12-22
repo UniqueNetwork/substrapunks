@@ -5,7 +5,7 @@ const outputFolder = "./generated_faces";
 const outputCharacterJSON = "./generated_faces/characters.json";
 const outputAttributesJS = "./generated_faces/attributes.json";
 
-const desiredCount = 10000;
+const desiredCount = 1000;
 const totalFaces = 89820;
 
 // const ext = ".png";
@@ -207,7 +207,7 @@ async function generateManually() {
 
   let punks = require("./generated_faces/characters.json");
   c = {
-    id: 10000,
+    id: 1000,
     gender: "Male",
     attributes: [3,7,13,21,29]
   };
