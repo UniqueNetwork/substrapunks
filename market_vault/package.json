@@ -8,7 +8,7 @@
   },
   "devDependencies": {
     "browserify": "^16.5.1",
-    "got": "^10.7.0",
+    "got": "^11.8.5",
     "web3": "^1.2.6"
   },
   "scripts": {
