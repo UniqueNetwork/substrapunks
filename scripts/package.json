@@ -23,7 +23,7 @@
     "bignumber.js": "^9.0.0",
     "body-parser": "^1.18.3",
     "delay": "^4.4.0",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "express-session": "^1.17.0",
     "fs": "^0.0.1-security",
     "merge-img": "^2.1.3",
