@@ -13,7 +13,7 @@ Attribute frequencies:  {
   'Round Eyes': 1952,
   'Left Earring': 2475,
   'Right Earring': 2440,
-  'Two Earrings': 2451,
+  'Two Earrings': 2451, 
   'Brown Beard': 738,
   'Mustache-Beard': 747,
   Mustache: 715,
